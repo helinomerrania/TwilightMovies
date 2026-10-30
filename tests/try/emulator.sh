@@ -56,7 +56,32 @@ PY
   adb shell input tap $at
 }
 
+# In the app's menu: down, until the button whose words match $1 has the remote; then OK on it.
+choose() {
+  local i
+  for i in $(seq 1 14); do
+    adb shell uiautomator dump /sdcard/ui.xml > /dev/null 2>&1
+    if adb shell cat /sdcard/ui.xml | python3 -c '
+import re, sys
+xml = sys.stdin.read()
+for node in re.findall(r"<node [^>]*>", xml):
+    if "focused=\"true\"" in node:
+        words = " ".join(w for w in re.findall(r"(?:text|content-desc)=\"([^\"]*)\"", node) if w)
+        sys.exit(0 if re.search(sys.argv[1], words, re.I) else 1)
+sys.exit(1)' "$1"; then
+      echo "choose $1"
+      key KEYCODE_DPAD_CENTER
+      return 0
+    fi
+    key KEYCODE_DPAD_DOWN
+  done
+  echo "nothing in the menu matches $1"
+  return 1
+}
+
 adb logcat -c
+adb logcat -v threadtime > "$OUT/$NAME-logcat.txt" 2> /dev/null &   # all of it: the box's buffer is too small
+logger=$!
 adb install -r "$APK" || exit 1
 {
   echo "Android $(adb shell getprop ro.build.version.release) (API $(adb shell getprop ro.build.version.sdk))"
@@ -89,6 +114,17 @@ shot later-still
 key KEYCODE_MENU
 sleep 3
 shot menu
+
+# The same film with the ad blocker off for the website (the menu's switch: the page loads again), to see whether
+# the blocker is what stops it
+choose '^Ad blocker: On|^بلۆکەر|^ڕێگر' && sleep 30
+shot no-blocker
+key KEYCODE_DPAD_CENTER
+sleep 40
+shot no-blocker-later
+key KEYCODE_MENU
+sleep 3
+choose '^Ad blocker: Off|^بلۆکەر|^ڕێگر' && sleep 10   # on again
 key KEYCODE_BACK
 sleep 2
 
@@ -100,8 +136,7 @@ server=$!
 sleep 2
 key KEYCODE_MENU
 sleep 3
-shot menu-again
-tap '^ناونیشانی ماڵپەڕ$|^Website address$' || true
+choose '^ناونیشانی ماڵپەڕ$|^Website address$'
 sleep 3
 adb shell input keyevent KEYCODE_MOVE_END
 # shellcheck disable=SC2046  # one key each
@@ -114,7 +149,8 @@ sleep 30
 shot turnstile
 kill "$server" 2> /dev/null
 
-adb logcat -d > "$OUT/$NAME-logcat.txt"
+kill "$logger" 2> /dev/null
+sleep 1
 grep -E "chromium|CONSOLE|AndroidRuntime|FATAL|twilightcafe|TwilightMovies|cr_|GeckoConsole|Gecko[A-Z]|libc" "$OUT/$NAME-logcat.txt" \
   | tail -n 600 > "$OUT/$NAME-log.txt"
 grep -m 3 "web engine:" "$OUT/$NAME-logcat.txt" | tee -a "$OUT/$NAME-device.txt"
