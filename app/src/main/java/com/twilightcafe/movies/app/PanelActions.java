@@ -85,6 +85,12 @@ final class PanelActions implements RemoteKeys.Actions, SitesPanel.Listener, Add
         return app.panels.anyShown() || app.errors.shown();
     }
 
+    /** A panel over the error screen first. */
+    @Override
+    public void panelFocus() {
+        if (!app.panels.keepFocus()) app.errors.keepFocus();
+    }
+
     @Override
     public void click(float x, float y) {
         app.blocking.click(x, y);

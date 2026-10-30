@@ -35,7 +35,7 @@ android {
     }
 
     packaging {
-        // Firefox's engine compressed inside the APK (an 85 MB download, not 160); the box unpacks it as it installs
+        // Firefox's engine compressed inside the APK (a 90 MB download, not 160); the box unpacks it as it installs
         jniLibs {
             useLegacyPackaging = true
         }

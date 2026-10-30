@@ -89,4 +89,9 @@ final class ErrorPanel extends Panel {
     void focus() {
         retry.requestFocus();
     }
+
+    @Override
+    protected View first() {
+        return retry;
+    }
 }

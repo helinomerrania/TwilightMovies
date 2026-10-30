@@ -168,6 +168,11 @@ public final class ErrorScreen {
         panel.focus();
     }
 
+    /** Up, it keeps the remote (if the page took the focus, it has it back); true if it's up. */
+    public boolean keepFocus() {
+        return panel.keepFocus();
+    }
+
     /** The internet is back: if the error screen is up, the next try is in a moment. */
     private void networkBack() {
         if (!panel.shown() || retrying) return;

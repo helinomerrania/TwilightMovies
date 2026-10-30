@@ -86,6 +86,11 @@ public final class GuidePanel extends Panel {
         close.requestFocus();
     }
 
+    @Override
+    protected View first() {
+        return close;
+    }
+
     /** On a new box: open is run once nothing else is on the screen (looked at every 4 seconds, 12 times at most). */
     public void firstTime(final Busy busy, final Runnable open) {
         screen.main.postDelayed(new Runnable() {

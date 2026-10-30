@@ -119,7 +119,7 @@ final class Extension implements WebExtension.MessageDelegate, WebExtension.Port
     }
 
     // From the background script (WebExtension.MessageDelegate): every address the page loads, and the ad-hiding
-    // script's questions. Answered on the ad blocker's threads.
+    // script's questions. Answered on the ad blocker's threads, as JSON text (the engine takes no JSONObject back).
 
     @Override
     public GeckoResult<Object> onMessage(String nativeApp, Object message, WebExtension.MessageSender sender) {
@@ -128,7 +128,16 @@ final class Extension implements WebExtension.MessageDelegate, WebExtension.Port
         final RequestFilter f = filter;
         final Bridge b = bridge;
         final GeckoResult<Object> answer = new GeckoResult<Object>();
-        WORK.execute(() -> answer.complete(m.has("check") ? check(f, m) : ask(b, m)));
+        WORK.execute(() -> {
+            JSONObject a;
+            try {
+                a = m.has("check") ? check(f, m) : ask(b, m);
+            } catch (RuntimeException e) {
+                Log.w(TAG, "the app couldn't answer its extension", e);
+                a = new JSONObject();   // it loads: a page never waits for an answer that can't come
+            }
+            answer.complete(a.toString());
+        });
         return answer;
     }
 

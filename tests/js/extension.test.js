@@ -11,15 +11,34 @@ const { ROOT } = require('./lib/scripts');
 const DIR = path.join(ROOT, 'app', 'src', 'main', 'assets', 'gecko');
 const read = (f) => fs.readFileSync(path.join(DIR, f), 'utf8');
 
-// A promise already kept (or broken): then() answers at once, as a promise would, only sooner.
-function now(value, broken) {
-  return {
-    then(yes, no) {
-      const next = broken ? (no ? no(value) : undefined) : (yes ? yes(value) : value);
-      return next && typeof next.then === 'function' ? next : now(next);
-    },
+// Promises that keep their word at once (so the checks run in order): what the stand-in engine gives, and the
+// Promise the scripts make themselves.
+function SyncPromise(executor) {
+  let done = false;
+  let value;
+  let broken = false;
+  const waiting = [];
+  const settle = (v, b) => {
+    if (done) return;
+    if (!b && v && typeof v.then === 'function') return v.then((x) => settle(x, false), (e) => settle(e, true));
+    done = true;
+    value = v;
+    broken = b;
+    waiting.splice(0).forEach((f) => f());
   };
+  this.then = (yes, no) => new SyncPromise((res, rej) => {
+    const run = () => {
+      const f = broken ? no : yes;
+      if (!f) return broken ? rej(value) : res(value);
+      try { res(f(value)); } catch (e) { rej(e); }
+    };
+    if (done) run(); else waiting.push(run);
+  });
+  try { executor((v) => settle(v, false), (e) => settle(e, true)); } catch (e) { settle(e, true); }
 }
+SyncPromise.resolve = (v) => new SyncPromise((r) => r(v));
+const now = (value, broken) => new SyncPromise((res, rej) => (broken ? rej(value) : res(value)));
+const NEVER = {};   // an app that never answers
 const valueOf = (p) => { let v; p.then((x) => { v = x; }); return v; };
 
 function background(app) {
@@ -34,7 +53,12 @@ function background(app) {
   };
   const browser = {
     runtime: {
-      sendNativeMessage: (name, m) => { asked.push([name, m]); const a = app(m); return a instanceof Error ? now(a, true) : now(a); },
+      sendNativeMessage: (name, m) => {
+        asked.push([name, m]);
+        const a = app(m);
+        if (a === NEVER) return new SyncPromise(() => {});
+        return a instanceof Error ? now(a, true) : now(JSON.stringify(a));
+      },
       connectNative: (name) => { b.nativeApp = name; return port; },
       onMessage: { addListener: (f) => { b.fromPage = f; } },
     },
@@ -42,7 +66,10 @@ function background(app) {
     tabs: { executeScript: (tab, d) => { ran.push([tab, d]); return b.script(d.code); } },
   };
   b.script = () => now(['ok']);
-  vm.runInContext(read('background.js'), vm.createContext({ browser, JSON, setTimeout: () => 1, Promise: { resolve: (v) => now(v) } }));
+  const timers = [];
+  b.timers = timers;
+  vm.runInContext(read('background.js'), vm.createContext({ browser, JSON, Promise: SyncPromise,
+    setTimeout: (f) => { timers.push(f); return timers.length; }, clearTimeout: (n) => { timers[n - 1] = null; } }));
   return Object.assign(b, { asked, posted, ran });
 }
 
@@ -63,6 +90,8 @@ check('the app installs it from this folder', (java.match(/"resource:\/\/android
 
 let x = background((m) => (m.check && m.check.includes('ads.example') ? { cancel: true } : {}));
 check('it connects to the app at once', x.nativeApp, javaName);
+ok('the app answers with JSON text, as the engine needs (a JSONObject never reaches the extension)',
+  /answer\.complete\(a\.toString\(\)\)/.test(java));
 check('every address of every page is held until the app answers', [x.filter.urls, x.extra], [['<all_urls>'], ['blocking']]);
 check('the page itself isn\'t asked about here (the app does as it opens)',
   [x.onRequest({ type: 'main_frame', url: 'https://ads.example/', tabId: 1, frameId: 0 }), x.asked.length], [{}, 0]);
@@ -79,6 +108,14 @@ check('...loaded, if the app says so', valueOf(r), {});
 x = background(() => new Error('the app is busy'));
 r = x.onRequest({ type: 'script', url: 'https://cdn.example/a.js', tabId: 3, frameId: 0, documentUrl: 'https://films.example/' });
 check('an app that can\'t answer: it loads (the page never hangs)', valueOf(r), {});
+x = background(() => ({ cancel: true }));
+r = x.onRequest({ type: 'script', url: 'https://cdn.example/b.js', tabId: 3, frameId: 0, documentUrl: 'https://films.example/' });
+check('an answer that comes: it\'s the one used (the wait is called off)', [valueOf(r), x.timers.filter(Boolean).length], [{ cancel: true }, 0]);
+x = background(() => NEVER);
+r = x.onRequest({ type: 'script', url: 'https://cdn.example/c.js', tabId: 3, frameId: 0, documentUrl: 'https://films.example/' });
+check('an answer that never comes: nothing yet...', valueOf(r), undefined);
+x.timers.filter(Boolean).forEach((f) => f());
+check('...then, after a while, it loads (a page never waits for ever)', valueOf(r), {});
 
 x = background((m) => (m.ask ? { value: '.ad{display:none!important}' } : {}));
 x.fromPort({ run: 1, code: '1' });

@@ -72,7 +72,7 @@ shot start
 key KEYCODE_DPAD_CENTER   # the remote guide shows once, at the first start: its Close button has the remote
 sleep 3
 shot guide-closed
-tap 'سۆرانی|sorani' || key KEYCODE_DPAD_DOWN KEYCODE_DPAD_CENTER
+tap 'سۆرانی|sorani' || key KEYCODE_DPAD_CENTER   # the website has Sorani chosen already
 sleep 20
 shot home
 tap "${FILM:-★}" || key KEYCODE_DPAD_CENTER   # a film (KurdFilm's posters say "★ 7.2")

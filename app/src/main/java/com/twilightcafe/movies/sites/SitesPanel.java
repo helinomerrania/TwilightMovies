@@ -23,6 +23,7 @@ public final class SitesPanel extends Panel {
     private final Screen screen;
     private final Sites sites;
     private final List<Button> buttons = new ArrayList<Button>();
+    private Button current;   // the website shown, when the panel opened
 
     public SitesPanel(Screen s, Sites sites, final Listener listener) {
         super(s.views.scrim(Palette.SHADE));
@@ -60,6 +61,12 @@ public final class SitesPanel extends Panel {
             if (site == sites.current()) focus = buttons.get(i);
         }
         view.setVisibility(View.VISIBLE);
+        current = focus;
         focus.requestFocus();
+    }
+
+    @Override
+    protected View first() {
+        return current;
     }
 }

@@ -8,8 +8,22 @@ var tab = -1;       // the page shown: the app has one
 var bridge = '';    // the name the ad-hiding script looks for the app under (page.js puts it there)
 var port = null;
 
-function ask(m) {
-  return browser.runtime.sendNativeMessage(APP, m);
+// The app answers with JSON text; if it can't answer within ms, {} (so a page never waits for ever)
+function ask(m, ms) {
+  return new Promise(function (resolve) {
+    var t = setTimeout(function () { resolve({}); }, ms || 8000);
+    browser.runtime.sendNativeMessage(APP, m).then(function (r) {
+      clearTimeout(t);
+      try {
+        resolve(typeof r === 'string' ? JSON.parse(r) : r || {});
+      } catch (e) {
+        resolve({});
+      }
+    }, function () {
+      clearTimeout(t);
+      resolve({});
+    });
+  });
 }
 
 // The page itself is asked about as it opens (GeckoNavigation); the engine's own (tab -1) isn't the website's

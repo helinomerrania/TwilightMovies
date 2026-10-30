@@ -27,6 +27,9 @@ public final class RemoteKeys {
 
         boolean panelOpen();
 
+        /** The panel shown keeps the remote: the focus back in it, if the page took it. */
+        void panelFocus();
+
         /** OK with the pointer: a click at x, y. */
         void click(float x, float y);
     }
@@ -89,7 +92,10 @@ public final class RemoteKeys {
             okLongFired = false;   // the release after a long press (the menu is already open)
             return true;
         }
-        if (actions.panelOpen()) return false;
+        if (actions.panelOpen()) {
+            actions.panelFocus();
+            return false;
+        }
         if (Keys.ok(code)) return ok(e);
         if (Keys.arrow(code)) return arrow(e);
         if (Keys.media(code)) return media(e);

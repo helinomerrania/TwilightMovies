@@ -139,6 +139,11 @@ public final class MenuPanel extends Panel {
         home.requestFocus();
     }
 
+    @Override
+    protected View first() {
+        return home;
+    }
+
     /** The update button's label again (a check just ended), open or not. */
     public void refreshUpdate() {
         update.setText(status.updateLabel());

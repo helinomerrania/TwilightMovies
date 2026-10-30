@@ -124,6 +124,11 @@ public final class AddressPanel extends Panel {
         }, 300);
     }
 
+    @Override
+    protected View first() {
+        return input;
+    }
+
     /** Whether someone is typing (the error screen waits). */
     public boolean typing() {
         return shown();

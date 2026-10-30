@@ -28,6 +28,14 @@ public final class Panels {
         return false;
     }
 
+    /** The one shown keeps the remote (Panel.keepFocus); false if none is shown. */
+    public boolean keepFocus() {
+        for (Panel p : all) {
+            if (p.keepFocus()) return true;
+        }
+        return false;
+    }
+
     /** Closes them all; the page gets the remote again if one was open. */
     public void close() {
         boolean was = anyShown();

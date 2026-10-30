@@ -72,7 +72,7 @@ It's built in and on from the start.
 
 ## New versions
 
-Every few hours the app looks for a newer build on GitHub and downloads it in the background (about 85 MB, as Firefox's engine comes inside it). It's never installed on its own: when one is waiting, the app says so once (never over a film), and the menu shows **Install the new version**. Choose it, then **Install** on Android's screen. The first time only, Android asks to allow Twilight Movies to install apps: switch it on and press Back, and the install carries on by itself.
+Every few hours the app looks for a newer build on GitHub and downloads it in the background (about 90 MB, as Firefox's engine comes inside it). It's never installed on its own: when one is waiting, the app says so once (never over a film), and the menu shows **Install the new version**. Choose it, then **Install** on Android's screen. The first time only, Android asks to allow Twilight Movies to install apps: switch it on and press Back, and the install carries on by itself.
 
 A new version keeps the website's sign-in and the app's settings. Installing with Downloader, as at the start, works too.
 
