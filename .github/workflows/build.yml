@@ -11,6 +11,12 @@ on:
 permissions:
   contents: write
 
+# One build at a time, in order: two at once could each publish the same app, since neither would
+# see the other's release yet
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-24.04   # a fixed build machine, so GitHub updates don't change the build
@@ -75,6 +81,7 @@ jobs:
         shell: bash
         run: |
           # Only when the app itself changed since the last release, or when run by hand
+          git fetch --quiet --tags --force origin || true   # releases made since this build started
           last=$(gh release view --json tagName --jq .tagName 2>/dev/null || true)
           if [ "${{ github.event_name }}" != workflow_dispatch ] && [ -n "$last" ] && git rev-parse -q --verify "refs/tags/$last" > /dev/null \
              && git diff --quiet "$last" HEAD -- app build.gradle settings.gradle gradle.properties gradle; then
