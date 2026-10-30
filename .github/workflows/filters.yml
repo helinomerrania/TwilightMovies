@@ -13,7 +13,7 @@ on:
     branches: [main]
     paths:
       - 'tools/filters/**'
-      - 'app/src/main/java/com/twilightcafe/movies/adblock/**'
+      - 'app/src/main/java/com/twilightcafe/movies/adblock/engine/**'
       - 'tests/java/**'
       - '.github/workflows/filters.yml'
   workflow_dispatch:
@@ -41,7 +41,7 @@ jobs:
       - name: Test the ad blocker
         shell: bash
         run: |
-          tools/filters/test.sh 2>&1 | tee tests.log
+          tests/java/run.sh 2>&1 | tee tests.log
           echo "::notice title=Tests::$(tail -n 1 tests.log)"
 
       - name: Make the filters

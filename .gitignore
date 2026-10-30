@@ -6,6 +6,7 @@ local.properties
 
 # Previews art/make_art.py leaves behind
 art/preview/
+__pycache__/
 
 # The ad blocker's filter file: made by tools/filters/build.sh with every build, never committed
 app/src/main/assets/filters.bin

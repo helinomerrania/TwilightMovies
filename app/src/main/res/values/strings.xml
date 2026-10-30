@@ -71,6 +71,10 @@
     <string name="error_try_again">Try again</string>
     <string name="error_change_address">Change address</string>
 
+    <!-- The app's websites (in the menu once there is more than one) -->
+    <string name="menu_sites">Websites: %1$s</string>
+    <string name="sites_title">Websites</string>
+
     <!-- Changing the website's address -->
     <string name="address_title">Website address</string>
     <string name="address_default">Default: %1$s</string>

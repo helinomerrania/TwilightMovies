@@ -1,6 +1,6 @@
 # Twilight Movies
 
-Twilight Movies opens KurdFilm's TV website, [app.kurdfilm.krd/tv](https://app.kurdfilm.krd/tv), full screen on an Android TV or TV box, and makes the remote work with it. It is a separate app from Twilight TV.
+Twilight Movies opens TV websites full screen on an Android TV or TV box, and makes the remote work with them: KurdFilm's, [app.kurdfilm.krd/tv](https://app.kurdfilm.krd/tv), first, and more can be added (see [Adding a website](ARCHITECTURE.md#adding-a-website)). It is a separate app from Twilight TV.
 
 It isn't made by KurdFilm or connected to them: it only shows their website, as a browser would.
 
@@ -28,17 +28,18 @@ Twilight Movies is then in the box's row of apps. On its first start it shows th
 
 While a film plays full screen, OK pauses and plays it, and Back leaves full screen. Each key goes to the website first: the app only does it itself when the website's player doesn't, so nothing happens twice.
 
-**Mouse pointer** (in the menu) is for anything on the website the arrows can't reach. The arrows then move a pointer, OK clicks where it points, and pushing it against the edge of the screen scrolls the page (or the row of films under it). The box remembers the choice.
+**Mouse pointer** (in the menu) is for anything on the website the arrows can't reach, and for websites without a TV interface of their own. The arrows then move a pointer, OK clicks where it points, and pushing it against the edge of the screen scrolls the page (or the row of films under it). The box remembers the choice for each website.
 
 ## The menu
 
 - **Home**: the website's first page.
+- **Websites**: once the app has more than one, the list of them, to open another. The one shown last opens at the next start.
 - **Reload**: the page again.
-- **Mouse pointer**: on or off.
+- **Mouse pointer**: on or off, for the website shown (the box remembers it for each website).
 - **Ad blocker**: on or off for the website shown (see [The ad blocker](#the-ad-blocker)), and **Allow ⟨site⟩** after it stopped a jump.
 - **Remote guide**: what each button does.
 - **Language**: Kurdish or English (see [Kurdish and English](#kurdish-and-english)).
-- **Website address**: if KurdFilm moves, type the new address here. **Use default** goes back to `app.kurdfilm.krd/tv`.
+- **Website address**: if the website moves, type its new address here. **Use default** goes back to its own (for KurdFilm, `app.kurdfilm.krd/tv`).
 - **Look for a new version**, or **Install the new version** when one is waiting.
 - **Exit**.
 
@@ -51,7 +52,7 @@ It's built in and on from the start.
 - **What it stops:** ads, trackers, pop-up and pop-under ad networks, and known harmful sites. Every address a page loads, in all its frames (the film players other sites put in the page too), is checked against about 320,000 rules: EasyList, EasyPrivacy, uBlock Origin's own lists, Liste AR (ads on Arabic-script sites, which Kurdish sites share) and HaGeZi's lists, with the app's own rules.
 - **Pages don't break for want of their ads:** a blocked script gets an empty one, a picture a see-through pixel, a frame a blank page, an ad's video a second of silent black, a player asking for its ads gets "no ads", and the best-known ad scripts (Google's ads, tags and analytics, Amazon's, ad-blocker detectors) get small stand-ins, so a page that waits for them goes on.
 - **Ad boxes are hidden** (about 42,000 hiding rules), also the ones that appear later.
-- **No jumping away to other sites:** a page can only go to the app's website. When a page tries to jump to another site (a favourite trick of ads), it's stopped, and a message says where it wanted to go. If it was a real link: hold OK, then **Allow ⟨site⟩**. The page opens, and that site is allowed from then on. Pop-ups to other sites are stopped too.
+- **No jumping away to other sites:** a page can only go to the app's websites. When a page tries to jump to another site (a favourite trick of ads), it's stopped, and a message says where it wanted to go. If it was a real link: hold OK, then **Allow ⟨site⟩**. The page opens, and that site is allowed from then on. Pop-ups to other sites are stopped too.
 - **Click traps:** with the mouse pointer, see-through layers over the page that catch the first click to open an ad are taken away before the click lands.
 - **If a website doesn't work right with it:** in the menu, choose **Ad blocker: On · N blocked here**. It goes off for that website (the box remembers), and the page loads again. Choose it again to switch it back on.
 - **Always up to date:** GitHub makes the filters again every day and publishes them as the release "filters". Each box looks twice a day and downloads the new ones (about 3 MB) once its own are two days old, or at once with **Look for a new version**. Every new version of the app brings that day's filters with it too.
@@ -64,7 +65,7 @@ It's built in and on from the start.
 
 - **The TV stays awake while a film plays**, inside the page or full screen, so the box's screensaver doesn't start in the middle of a film. When nothing has played for about 40 seconds, the TV may sleep as usual.
 - **When the website can't be reached**, the app says why (the box has no internet, the website didn't answer, or the secure connection failed) and keeps trying: after 10 seconds, then 20, 40, and every minute. When the box's internet comes back, it tries again at once. **Try again** and **Change address** are there too.
-- **Pop-ups** from the website are only followed when they stay on KurdFilm's own site; others (ads) are blocked, and so are links that try to open other apps.
+- **Pop-ups** from the website are only followed when they stay on the website (or go to another of the app's); others (ads) are blocked, and so are links that try to open other apps.
 - **Text size**: the box's own font-size setting is ignored, so the website's TV pages keep their layout.
 - If the website's pages need a newer web engine than the box has, the app says so once (see below).
 
@@ -90,19 +91,16 @@ The Kurdish texts are in `app/src/main/res/values-b+ckb/strings.xml` (translated
 
 Every change pushed to GitHub is built there (`.github/workflows/build.yml`): first the tests, then the APK. A change to the app on the main branch is published as the latest release, `twilight-movies.apk`, tagged `build-` and the build's number, which is also the app's version number. Changes to only the tests or the documents aren't published. The newest five builds are kept. If a build fails, the run's notes say what went wrong.
 
+How the app is made, part by part, is in [ARCHITECTURE.md](ARCHITECTURE.md): every folder and what it's for, how the parts fit together, the tests, and how to add a website. The files you're most likely to change:
+
 | File | What it is |
 |---|---|
-| `app/src/main/java/com/twilightcafe/movies/MainActivity.java` | The app: the website, the remote, the pointer, films full screen and the TV kept awake, the menu, the remote guide and the error screen. `DEFAULT_URL` is the website's address |
-| `app/src/main/java/com/twilightcafe/movies/Updater.java` | New versions from GitHub's releases (like Twilight TV's), and `InstallResult.java` shows Android's install question |
-| `app/src/main/java/com/twilightcafe/movies/AdBlocker.java` | The ad blocker in the app: every address a page loads, the stand-ins, the script that hides ad boxes, stopped jumps, the switch for each website, new filters from GitHub |
-| `app/src/main/java/com/twilightcafe/movies/adblock/` | The ad blocker's engine, plain Java: the rules (`FilterSet`), one network rule (`NetFilter`), the public suffix list, and the stand-ins (`Surrogates`) |
-| `tools/filters/` | Makes the filter file on GitHub: `lists.txt` (the lists), `twilight.txt` (the app's own rules), `checks.txt` (what must be blocked and what must work), `build.sh`, `test.sh`, and the compiler (`src/`) |
-| `tests/java/` | The ad blocker engine's tests (`tools/filters/test.sh`) |
-| `app/src/main/java/com/twilightcafe/movies/CursorView.java` | Draws the mouse pointer |
+| `app/src/main/assets/sites.json` | The app's websites: their names, addresses and domains (see [Adding a website](ARCHITECTURE.md#adding-a-website)) |
 | `app/src/main/res/values-b+ckb/strings.xml`, `app/src/main/res/values/strings.xml` | Every text the app shows, in Kurdish and in English (see [Kurdish and English](#kurdish-and-english)) |
-| `tests/scripts.test.js` | Tests the small scripts the app runs inside the website (scrolling, the video keys, whether a film plays) on stand-in pages, and that they stay plain enough for old web engines |
-| `tests/strings.test.js` | Tests the texts and any translation |
-| `art/make_art.py` | Draws the banner, the icon and the picture shown while the website loads, in Twilight TV's style |
+| `tools/filters/twilight.txt`, `checks.txt`, `lists.txt` | The ad blocker's own rules, what must be blocked and what must work, and the lists it's made from (see [The ad blocker](#the-ad-blocker)) |
+| `app/src/main/java/com/twilightcafe/movies/` | The app, a folder for each job (in ARCHITECTURE.md); no file longer than 250 lines |
+| `app/src/main/assets/scripts/` | The small scripts the app runs inside the websites (scrolling, the video keys, hiding ad boxes) |
+| `art/make_art.py` | Draws the banner, the icon and the picture shown while the website loads, in Twilight TV's style (`art/landscape.py` draws the landscape) |
 | `app/twilight-movies.keystore` | The key every build is signed with. Android only installs an update signed with the same key, so it stays as it is (in the repository on purpose, like Twilight TV's) |
 
-To run the tests: `node tests/scripts.test.js`, `node tests/strings.test.js` and `tools/filters/test.sh`. To build it on a computer: `tools/filters/build.sh app/src/main/assets` (the filters), then `./gradlew assembleRelease` (with Java 17 and the Android SDK). The APK is then in `app/build/outputs/apk/release/`; a build made there doesn't look for new versions.
+To run the tests: `node tests/js/run.js` and `tests/java/run.sh`. To build it on a computer: `tools/filters/build.sh app/src/main/assets` (the filters), then `./gradlew assembleRelease` (with Java 17 and the Android SDK). The APK is then in `app/build/outputs/apk/release/`; a build made there doesn't look for new versions.

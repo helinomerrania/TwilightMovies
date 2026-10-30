@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Makes the ad blocker's filter file: downloads the lists in tools/filters/lists.txt, compiles them
-# (FilterCompiler) into filters.bin and filters.json, and checks the result (tools/filters/checks.txt).
+# (adblock/compiler/FilterCompiler) into filters.bin and filters.json, and checks the result (tools/filters/checks.txt).
 # Usage: tools/filters/build.sh OUTPUT_FOLDER     (needs Java 17 or newer, and curl)
 set -euo pipefail
 cd "$(dirname "$0")/../.."
@@ -9,9 +9,9 @@ WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"' EXIT
 mkdir -p "$WORK/classes" "$WORK/lists" "$OUT"
 
+# the app's own engine (adblock/engine: how the file is written and read) and the compiler (tools/filters/src)
 javac -nowarn -encoding UTF-8 -d "$WORK/classes" \
-  app/src/main/java/com/twilightcafe/movies/adblock/*.java \
-  tools/filters/src/com/twilightcafe/movies/adblock/*.java
+  $(find app/src/main/java/com/twilightcafe/movies/adblock/engine tools/filters/src -name '*.java')
 
 args=()
 missing=()
@@ -45,5 +45,5 @@ if [[ ${#missing[@]} -gt 0 ]]; then
   exit 1
 fi
 
-java -Xmx2g -cp "$WORK/classes" com.twilightcafe.movies.adblock.FilterCompiler \
+java -Xmx2g -cp "$WORK/classes" com.twilightcafe.movies.adblock.compiler.FilterCompiler \
   --out "$OUT" --checks tools/filters/checks.txt "${args[@]}"
