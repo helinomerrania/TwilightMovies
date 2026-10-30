@@ -1,0 +1,12 @@
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+
+# Previews art/make_art.py leaves behind
+art/preview/
+
+# Logs a build or the tests leave behind
+build.log
+tests.log

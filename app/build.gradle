@@ -1,0 +1,52 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Each build on GitHub gets a higher version number, so a new APK installs over the old one
+// (and the box keeps the website's sign-in and the app's settings).
+def buildNumber = (System.getenv('GITHUB_RUN_NUMBER') ?: '1').toInteger()
+
+android {
+    namespace = 'com.twilightcafe.movies'
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 1                        // the same tools as Twilight TV
+        }
+    }
+
+    defaultConfig {
+        applicationId = 'com.twilightcafe.movies'
+        minSdk = 21                                  // Android TV 5.0 and newer
+        targetSdk = 35
+        versionCode = buildNumber
+        versionName = "1.${buildNumber}"
+    }
+
+    // The same key signs every build; Android only updates an app signed with the same key.
+    signingConfigs {
+        release {
+            storeFile = file('twilight-movies.keystore')
+            storeType = 'pkcs12'
+            storePassword = 'twilight-movies-key'
+            keyAlias = 'twilight-movies'
+            keyPassword = 'twilight-movies-key'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled = false
+            signingConfig = signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
+    }
+}

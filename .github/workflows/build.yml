@@ -1,0 +1,91 @@
+name: Build the app
+
+# Runs every time something in the project changes (or by hand from the Actions tab).
+# A change to the app on the main branch is published as the latest release (twilight-movies.apk);
+# a change to only the tests, the documents or the build's own steps isn't (the box would download
+# the same app again), and other branches are only built, as a test.
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04   # a fixed build machine, so GitHub updates don't change the build
+    steps:
+      - name: Get the project
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0    # the whole history, to see whether the app changed since the last release
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - name: Test the scripts the app runs inside the website
+        shell: bash
+        run: |
+          # If one fails, nothing is built or published
+          node tests/scripts.test.js 2>&1 | tee tests.log
+          echo "::notice title=Script tests::$(tail -n 1 tests.log)"
+
+      - name: Set up Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Build the APK
+        shell: bash
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleRelease 2>&1 | tee build.log
+          cp app/build/outputs/apk/release/app-release.apk twilight-movies.apk
+          ls -l twilight-movies.apk
+
+      - name: Show what went wrong
+        if: failure()
+        shell: bash
+        run: |
+          # Gradle's own explanation, any compile errors and any failed tests, as notes on the run
+          # ("|| true": a search that finds nothing mustn't end the step before the notes are written)
+          enc() { sed -e 's/%/%25/g' | awk '{ printf "%s%%0A", $0 }'; }
+          wrong=$(grep -A 12 "What went wrong" build.log 2>/dev/null | head -n 40 | enc || true)
+          errors=$(grep -E -A 2 "error:|\.java:[0-9]+:" build.log 2>/dev/null | head -n 60 | enc || true)
+          tests=$(grep "  FAIL " tests.log 2>/dev/null | head -n 40 | enc || true)
+          [ -n "$wrong" ] && echo "::error title=What went wrong::$wrong"
+          [ -n "$errors" ] && echo "::error title=Compile errors::$errors"
+          [ -n "$tests" ] && echo "::error title=Failed script tests::$tests"
+          true
+
+      - name: Keep the APK with this build
+        uses: actions/upload-artifact@v7
+        with:
+          name: twilight-movies
+          path: twilight-movies.apk
+
+      - name: Publish it as the latest release
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          # Only when the app itself changed since the last release, or when run by hand
+          last=$(gh release view --json tagName --jq .tagName 2>/dev/null || true)
+          if [ "${{ github.event_name }}" != workflow_dispatch ] && [ -n "$last" ] && git rev-parse -q --verify "refs/tags/$last" > /dev/null \
+             && git diff --quiet "$last" HEAD -- app build.gradle settings.gradle gradle.properties gradle; then
+            echo "::notice title=Not published::The app is the same as in $last (only tests, documents or the build's own steps changed): nothing new to install."
+            exit 0
+          fi
+          gh release create "build-${{ github.run_number }}-${{ github.run_attempt }}" twilight-movies.apk \
+            --target "${{ github.sha }}" \
+            --title "Twilight Movies, build ${{ github.run_number }}" \
+            --notes "Install twilight-movies.apk on the TV box. It installs over the previous build, and keeps the website's sign-in and the app's settings." \
+            --latest
+          # Only the newest five builds are kept
+          gh release list --limit 100 --json tagName,createdAt \
+            --jq '[.[] | select(.tagName | startswith("build-"))] | sort_by(.createdAt) | reverse | .[5:] | .[].tagName' |
+            while read -r old; do gh release delete "$old" --cleanup-tag --yes || true; done
