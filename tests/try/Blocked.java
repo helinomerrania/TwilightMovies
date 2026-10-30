@@ -36,8 +36,10 @@ public final class Blocked {
             String page = Request.hostOf(f[2]);
             Request r = new Request(url, page.isEmpty() ? host : page, type(f[1]));
             if (set.match(r)) {
-                blocked++;
-                System.out.println("BLOCKED       " + url + "  (" + f[1] + (r.redirect != null ? ", stand-in " + r.redirect : "") + ")");
+                boolean own = own(host, args);   // the app never blocks what the website's own domains serve
+                if (!own) blocked++;
+                System.out.println((own ? "OWN, LET BY   " : "BLOCKED       ") + url + "  (" + f[1]
+                        + (r.redirect != null ? ", stand-in " + r.redirect : "") + ")");
             }
         }
         System.out.println("\n" + blocked + " of " + lines.size() + " requests blocked (" + set.rules + " rules)");

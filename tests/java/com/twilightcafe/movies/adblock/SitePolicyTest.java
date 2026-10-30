@@ -29,6 +29,8 @@ public final class SitePolicyTest {
         eq("then by the public suffix list", p.site("www.example.co.uk"), "example.co.uk");
         ok("the app's own websites", p.ownOrAllowed("https://www.kurdfilm.krd/x") && p.ownOrAllowed("https://cdn.films.example/v.mp4"));
         ok("not another site", !p.ownOrAllowed("https://example.com/"));
+        ok("what the websites serve is their own (never blocked)", p.own("video.kurdfilm.krd") && p.own("img.films.example"));
+        ok("...not what other sites serve", !p.own("ads.example.com") && !p.own(""));
         eq("a jump within the website", p.checkJump("https://app.kurdfilm.krd/film/1", "app.kurdfilm.krd"), SitePolicy.GO);
         eq("a jump to another of the app's websites", p.checkJump("https://tv.films.example/", "app.kurdfilm.krd"), SitePolicy.GO);
         eq("a jump to an ad page", p.checkJump("https://popads.net/go", "app.kurdfilm.krd"), SitePolicy.AD);

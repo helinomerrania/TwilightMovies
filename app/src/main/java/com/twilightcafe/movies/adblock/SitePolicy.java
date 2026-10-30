@@ -79,11 +79,20 @@ public final class SitePolicy {
     /** Whether url is on one of the app's websites, or a site allowed from the menu. */
     public boolean ownOrAllowed(String url) {
         String s = site(Request.hostOf(url));
-        if (s.isEmpty()) return false;
+        return !s.isEmpty() && (isOwn(s) || allowed.contains(s));
+    }
+
+    /** Whether a host is one of the app's websites' own: nothing it serves is blocked (its films, its pictures). */
+    public boolean own(String host) {
+        String s = site(host);
+        return !s.isEmpty() && isOwn(s);
+    }
+
+    private boolean isOwn(String site) {
         for (String host : own) {
-            if (s.equals(site(host))) return true;
+            if (site.equals(site(host))) return true;
         }
-        return allowed.contains(s);
+        return false;
     }
 
     /** Whether a page of pageHost may go to url (a link, a script's jump, a redirect): GO, AD or JUMP. */

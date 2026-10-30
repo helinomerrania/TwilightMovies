@@ -3,7 +3,7 @@
 # closes the remote guide, goes into the website (its Sorani dialect), opens a film and presses play the way the
 # remote does, with a screenshot (and the screen's UI tree) at every step; then the app's menu, which shows the
 # web engine's version, and the log: the page's own errors, and any crash.
-# Usage: tests/try/emulator.sh APK OUT_DIR NAME
+# Usage: tests/try/emulator.sh APK OUT_DIR NAME     (FILM, PLAY: what to tap, as patterns, if not KurdFilm's)
 set -uo pipefail
 APK=$1
 OUT=$2
@@ -72,14 +72,17 @@ shot guide-closed
 tap 'سۆرانی|sorani' || key KEYCODE_DPAD_DOWN KEYCODE_DPAD_CENTER
 sleep 20
 shot home
-key KEYCODE_DPAD_CENTER   # what the website's TV interface has chosen first
-sleep 15
+tap "${FILM:-★}" || key KEYCODE_DPAD_CENTER   # a film (KurdFilm's posters say "★ 7.2")
+sleep 20
 shot film
-tap 'پەخش|سەیر|تەماشا|play|watch' || key KEYCODE_DPAD_CENTER
+tap "${PLAY:-پەخش|سەیرکردن|سەیربکە|تەماشا|بینین|play|watch|▶}" || key KEYCODE_DPAD_CENTER
 sleep 30
 shot play
+key KEYCODE_DPAD_CENTER   # OK on the player (play, if it's waiting for it)
 sleep 30
 shot later
+sleep 30
+shot later-still
 key KEYCODE_MENU
 sleep 3
 shot menu

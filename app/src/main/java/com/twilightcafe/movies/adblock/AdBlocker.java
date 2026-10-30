@@ -148,7 +148,7 @@ public final class AdBlocker {
             return response("text/html", BlockedPage.html(blockedTitle, blockedText, Request.hostOf(url), rtl).getBytes(UTF8));
         }
         String main = pageHost;
-        if (!sites.activeFor(main)) return null;
+        if (!sites.activeFor(main) || sites.own(Request.hostOf(url))) return null;   // the website's own: its films too
         FilterSet s = await();
         if (s == null) return null;
         Map<String, String> headers = req.getRequestHeaders();
