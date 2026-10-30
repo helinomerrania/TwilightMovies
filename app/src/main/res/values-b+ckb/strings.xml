@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Central Kurdish (Sorani): the app's texts, translated with Gemini from values/strings.xml (the same names).
+  To change a word, change it here; tests/strings.test.js checks the file before every build.
+-->
+<resources>
+    <string name="language_name">کوردی</string>
+    <string name="menu_home">سەرەتا</string>
+    <string name="menu_reload">تازەکردنەوە</string>
+    <string name="menu_pointer_on">ماوس: هەڵکراوە</string>
+    <string name="menu_pointer_off">ماوس: کوژاوەتەوە</string>
+    <string name="menu_guide">ڕێبەری کۆنتڕۆڵ</string>
+    <string name="menu_language">زمان</string>
+    <string name="menu_address">ناونیشانی ماڵپەڕ</string>
+    <string name="menu_check_update">گەڕان بۆ وەشانی نوێ</string>
+    <string name="menu_install_update">دابەزاندنی وەشانی نوێ (وەشانی %1$d)</string>
+    <string name="menu_exit">دەرچوون</string>
+    <string name="menu_hint">بۆ کردنەوەی ئەم لیستە، پەنجە لەسەر OK ڕابگرە یان Menu داگرە</string>
+    <string name="menu_build">وەشانی %1$d</string>
+    <string name="menu_engine">وێبگەڕی ناوخۆیی %1$d</string>
+    <string name="osd_back_again">بۆ دەرچوون جارێکی تر Back داگرە  ·  بۆ لیستەکە پەنجە لەسەر OK ڕابگرە</string>
+    <string name="osd_paused">ڕاگیراوە</string>
+    <string name="osd_playing">پەخش دەکرێت</string>
+    <string name="osd_forward">+%1$d چرکە</string>
+    <string name="osd_rewind">−%1$d چرکە</string>
+    <string name="osd_popup_blocked">پەنجەرەی لابەلا بلۆک کرا</string>
+    <string name="osd_pointer_on">ماوس هەڵکرا: ئاڕاستەکان دەیجووڵێنن و OK کرتە دەکات</string>
+    <string name="osd_pointer_off">ماوس کوژایەوە: ئاڕاستەکان لەنێوان بەشەکاندا دەچن</string>
+    <string name="osd_bad_address">ئەم ناونیشانە تەواو دیار نییە</string>
+    <string name="osd_opening">کردنەوەی %1$s</string>
+    <string name="osd_old_engine">وێبگەڕی ناوخۆیی ئەم ئامێرە (وەشانی %1$d) کۆنە، بۆیە لەوانەیە هەندێک بەشی ماڵپەڕەکە کار نەکات</string>
+    <string name="osd_checking">گەڕان بۆ وەشانی نوێ…</string>
+    <string name="osd_up_to_date">بەرنامەکە نوێترین وەشانە (وەشانی %1$d)</string>
+    <string name="osd_check_failed">نەتوانرا بۆ وەشانی نوێ بگەڕێت. سەیری ئینتەرنێتەکە بکە و هەوڵ بدەرەوە</string>
+    <string name="osd_update_ready">وەشانێکی نوێ ئامادەیە: پەنجە لەسەر OK ڕابگرە و «دابەزاندنی وەشانی نوێ» هەڵبژێرە</string>
+    <string name="osd_update_permission">تەنها بۆ یەکەم جار: ڕێگە بدە Twilight Movies بەرنامە دابەزێنێت، پاشان Back داگرە</string>
+    <string name="osd_update_started">لەو پەڕەیەی دەکرێتەوە، Install هەڵبژێرە</string>
+    <string name="osd_update_unsupported">ئەم ئامێرە ڕێگە نادات بەرنامە خۆی نوێ بکاتەوە. وەشانە نوێیەکە بە Downloader دابەزێنە</string>
+    <string name="osd_update_failed">نوێکردنەوەکە دەستی پێ نەکرد. بەرنامەکە دواتر خۆی هەوڵ دەداتەوە</string>
+    <string name="error_title">%1$s ناکرێتەوە</string>
+    <string name="error_no_internet">ئەم ئامێرە بە ئینتەرنێتەوە نەبەستراوە.</string>
+    <string name="error_no_answer">ماڵپەڕەکە وەڵامی نەبوو.</string>
+    <string name="error_secure">پەیوەندییە پارێزراوەکە سەرکەوتوو نەبوو. ئەگەر کات و بەرواری ئامێرەکە هەڵەیە، لە ڕێکخستنەکان چاکی بکە.</string>
+    <string name="error_advice">بەرنامەکە خۆی بەردەوام هەوڵ دەداتەوە. ئەگەر ناونیشانی ماڵپەڕەکە گۆڕاوە، «گۆڕینی ناونیشان» هەڵبژێرە.</string>
+    <string name="error_retry_in">هەوڵدانەوە لە %1$d چرکەی تر</string>
+    <string name="error_retrying">هەوڵ دەداتەوە…</string>
+    <string name="error_try_again">هەوڵ بدەرەوە</string>
+    <string name="error_change_address">گۆڕینی ناونیشان</string>
+    <string name="address_title">ناونیشانی ماڵپەڕ</string>
+    <string name="address_default">سەرەکی: %1$s</string>
+    <string name="address_open">کردنەوە</string>
+    <string name="address_use_default">گەڕانەوە بۆ سەرەکی</string>
+    <string name="address_cancel">پاشگەزبوونەوە</string>
+    <string name="guide_title">کۆنتڕۆڵەکەت</string>
+    <string name="guide_arrows_key">ئاڕاستەکان</string>
+    <string name="guide_arrows">هاتوچۆ بەناو ماڵپەڕەکەدا</string>
+    <string name="guide_ok_key">OK</string>
+    <string name="guide_ok">کردنەوەی ئەوەی دیاریت کردووە</string>
+    <string name="guide_back_key">Back</string>
+    <string name="guide_back">پەڕەی پێشوو. لە پەڕەی سەرەکیدا دوو جار دایگرە بۆ دەرچوون</string>
+    <string name="guide_menu_key">ڕاگرتنی OK، یان Menu</string>
+    <string name="guide_menu">لیستی ئەم بەرنامەیە</string>
+    <string name="guide_media_key">Play/Pause، بردنە پێش و دواوە</string>
+    <string name="guide_media">فیلمەکە: کارپێکردن و ڕاگرتن، ١٠ چرکە بۆ پێش یان دواوە</string>
+    <string name="guide_channel_key">گۆڕینی کەناڵ سەرەوە/خوارەوە</string>
+    <string name="guide_channel">هێنانەخوارەوە و سەرەوەی پەڕەکە</string>
+    <string name="guide_pointer">ئاڕاستەکان ناگەنە شتێک؟ لە لیستەکەدا «ماوس» هەڵبکە: ئاڕاستەکان تیرەی ماوسەکە دەجووڵێنن و OK کرتە دەکات.</string>
+    <string name="guide_close">تێگەیشتم</string>
+</resources>

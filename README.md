@@ -13,7 +13,7 @@ It isn't made by KurdFilm or connected to them: it only shows their website, as 
 
 You can also copy `twilight-movies.apk` to a USB stick and open it with the box's file manager.
 
-Twilight Movies is then in the box's row of apps. On its first start it shows the **remote guide** once (it's in the menu too). After that, new versions come by themselves: see [New versions](#new-versions).
+Twilight Movies is then in the box's row of apps. On its first start it shows the **remote guide** once (it's in the menu too), in Kurdish, with a button to switch the app to English. After that, new versions come by themselves: see [New versions](#new-versions).
 
 ## The remote
 
@@ -36,7 +36,7 @@ While a film plays full screen, OK pauses and plays it, and Back leaves full scr
 - **Reload**: the page again.
 - **Mouse pointer**: on or off.
 - **Remote guide**: what each button does.
-- **Language**: once the app's texts are translated into Kurdish (see [Kurdish](#kurdish)).
+- **Language**: Kurdish or English (see [Kurdish and English](#kurdish-and-english)).
 - **Website address**: if KurdFilm moves, type the new address here. **Use default** goes back to `app.kurdfilm.krd/tv`.
 - **Look for a new version**, or **Install the new version** when one is waiting.
 - **Exit**.
@@ -63,9 +63,11 @@ Twilight TV keeps the café's box in Twilight TV: any other app opened there is 
 
 The box's own web engine is from 2018 (Twilight TV's notes explain). Twilight Movies uses the box's engine. If KurdFilm's own scripts are too new for it, the app shows a message saying so, and the menu shows the engine's version. The fix then is to bring Firefox's engine inside the app, as Twilight TV does.
 
-## Kurdish
+## Kurdish and English
 
-Every text the app shows is in `app/src/main/res/values/strings.xml`. A Kurdish (Sorani) translation goes in `app/src/main/res/values-b+ckb/strings.xml`, with the same names. Once it's there, the menu shows a **Language** button that switches between English and Kurdish, and the app's screens turn right-to-left in Kurdish. The tests check a translation before it's built: the same names, every `%1$s` and `%1$d` kept, and apostrophes written as `\'`.
+The app's own screens (the menu, the messages, the remote guide and the error screen) are in Kurdish (Sorani), right to left. For English: **Language** in the menu, or the **English** button on the remote guide at the first start. The box remembers the choice. The website has its own language choice.
+
+The Kurdish texts are in `app/src/main/res/values-b+ckb/strings.xml` (translated with Gemini), and the English ones in `app/src/main/res/values/strings.xml`, with the same names. To change a Kurdish word, open that file on GitHub, press the pencil, change it, and commit. The build checks the file first (the same names, every `%1$s` and `%1$d` kept, apostrophes written as `\'`), then publishes a new version, which the box offers to install.
 
 ## How it's built
 
@@ -76,7 +78,7 @@ Every change pushed to GitHub is built there (`.github/workflows/build.yml`): fi
 | `app/src/main/java/com/twilightcafe/movies/MainActivity.java` | The app: the website, the remote, the pointer, films full screen and the TV kept awake, the menu, the remote guide and the error screen. `DEFAULT_URL` is the website's address |
 | `app/src/main/java/com/twilightcafe/movies/Updater.java` | New versions from GitHub's releases (like Twilight TV's), and `InstallResult.java` shows Android's install question |
 | `app/src/main/java/com/twilightcafe/movies/CursorView.java` | Draws the mouse pointer |
-| `app/src/main/res/values/strings.xml` | Every text the app shows (translations beside it, see [Kurdish](#kurdish)) |
+| `app/src/main/res/values-b+ckb/strings.xml`, `app/src/main/res/values/strings.xml` | Every text the app shows, in Kurdish and in English (see [Kurdish and English](#kurdish-and-english)) |
 | `tests/scripts.test.js` | Tests the small scripts the app runs inside the website (scrolling, the video keys, whether a film plays) on stand-in pages, and that they stay plain enough for old web engines |
 | `tests/strings.test.js` | Tests the texts and any translation |
 | `art/make_art.py` | Draws the banner, the icon and the picture shown while the website loads, in Twilight TV's style |

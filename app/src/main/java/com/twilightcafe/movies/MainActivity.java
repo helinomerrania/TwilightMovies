@@ -77,15 +77,16 @@ import java.util.regex.Pattern;
  *  - Hold OK, hold BACK, or press MENU for the app menu.
  *
  * Also: the TV stays awake while a film plays, the app keeps trying when the website can't be reached
- * (and at once when the internet comes back), new versions come from GitHub (Updater), the remote guide
- * shows once, and every text is in res/values/strings.xml: with a translation in res/values-b+ckb
- * (Central Kurdish), the menu offers that language by itself.
+ * (and at once when the internet comes back), new versions come from GitHub (Updater), and the remote
+ * guide shows once. The app's own screens are in Kurdish (res/values-b+ckb) unless English is chosen
+ * (res/values): Language in the menu, or the button on the remote guide.
  */
 public class MainActivity extends Activity {
 
     static final String DEFAULT_URL = "https://app.kurdfilm.krd/tv";
     static final int ACCENT = 0xFFFFB07A;   // the sunset in Twilight's pictures
     static final String KURDISH = "ckb";    // Central Kurdish (Sorani): res/values-b+ckb/strings.xml
+    static final String ENGLISH = "en";     // res/values/strings.xml
 
     private static final String PREFS = "settings";
     private static final String KEY_URL = "home_url";
@@ -448,7 +449,8 @@ public class MainActivity extends Activity {
 
     private void setupTexts() {
         kurdishReady = kurdishAvailable();
-        kurdish = kurdishReady && KURDISH.equals(prefs.getString(KEY_LANGUAGE, ""));
+        // Kurdish unless English was chosen: the language of the café, and of the website
+        kurdish = kurdishReady && !ENGLISH.equals(prefs.getString(KEY_LANGUAGE, ""));
         texts = kurdish ? localized(KURDISH) : getResources();
     }
 
@@ -462,10 +464,15 @@ public class MainActivity extends Activity {
     private boolean kurdishAvailable() {
         try {
             return !localized(KURDISH).getString(R.string.language_name)
-                    .equals(localized("en").getString(R.string.language_name));
+                    .equals(localized(ENGLISH).getString(R.string.language_name));
         } catch (RuntimeException e) {
             return false;
         }
+    }
+
+    /** The other language, by its own name ("English" in Kurdish, "کوردی" in English). */
+    private String otherLanguageName() {
+        return localized(kurdish ? ENGLISH : KURDISH).getString(R.string.language_name);
     }
 
     private String t(int id) {
@@ -477,12 +484,11 @@ public class MainActivity extends Activity {
     }
 
     private String languageLabel() {
-        String other = localized(kurdish ? "en" : KURDISH).getString(R.string.language_name);
-        return t(R.string.menu_language) + ": " + t(R.string.language_name) + "  ·  " + other;
+        return t(R.string.menu_language) + ": " + t(R.string.language_name) + "  ·  " + otherLanguageName();
     }
 
     private void toggleLanguage() {
-        prefs.edit().putString(KEY_LANGUAGE, kurdish ? "" : KURDISH).apply();
+        prefs.edit().putString(KEY_LANGUAGE, kurdish ? ENGLISH : KURDISH).apply();
         closePanels();
         recreate();   // every panel again in the other language; the page reloads where it was
     }
@@ -1709,7 +1715,7 @@ public class MainActivity extends Activity {
         menuSubtitle = label("", 14, 0xFFA8A4BC, false);
         menuSubtitle.setSingleLine(true);
         menuSubtitle.setEllipsize(TextUtils.TruncateAt.MIDDLE);
-        menuSubtitle.setTextDirection(View.TEXT_DIRECTION_LTR);
+        menuSubtitle.setTextDirection(kurdish ? View.TEXT_DIRECTION_RTL : View.TEXT_DIRECTION_LTR);
         LinearLayout.LayoutParams sub = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         sub.topMargin = dp(2);
@@ -1812,7 +1818,7 @@ public class MainActivity extends Activity {
             row.setOrientation(LinearLayout.HORIZONTAL);
             TextView key = label(t(line[0]), 16, ACCENT, true);
             TextView what = label(t(line[1]), 16, 0xFFEAE6F2, false);
-            LinearLayout.LayoutParams kp = new LinearLayout.LayoutParams(dp(190), ViewGroup.LayoutParams.WRAP_CONTENT);
+            LinearLayout.LayoutParams kp = new LinearLayout.LayoutParams(dp(220), ViewGroup.LayoutParams.WRAP_CONTENT);
             kp.setMarginEnd(dp(14));
             row.addView(key, kp);
             row.addView(what, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
@@ -1841,7 +1847,27 @@ public class MainActivity extends Activity {
             }
         });
         guideClose.setGravity(Gravity.CENTER);
-        card.addView(guideClose, rowParams(18));
+        LinearLayout buttons = new LinearLayout(this);
+        buttons.setOrientation(LinearLayout.HORIZONTAL);
+        buttons.addView(guideClose, new LinearLayout.LayoutParams(0, dp(50), 1f));
+        if (kurdishReady) {
+            // The other language, by its own name: on the first start, this is where it's chosen
+            Button other = tvButton(otherLanguageName(), new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    prefs.edit().putBoolean(KEY_GUIDE, false).apply();   // the guide again, in that language
+                    toggleLanguage();
+                }
+            });
+            other.setGravity(Gravity.CENTER);
+            LinearLayout.LayoutParams op = new LinearLayout.LayoutParams(0, dp(50), 1f);
+            op.setMarginStart(dp(12));
+            buttons.addView(other, op);
+        }
+        LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        bp.topMargin = dp(18);
+        card.addView(buttons, bp);
 
         scrim.addView(card, cardParams(dp(660)));
         return scrim;
@@ -1925,7 +1951,7 @@ public class MainActivity extends Activity {
         rp.topMargin = dp(18);
         card.addView(row, rp);
 
-        scrim.addView(card, cardParams(dp(600)));
+        scrim.addView(card, cardParams(dp(680)));   // room for the Kurdish labels, even with the box's text set larger
         return scrim;
     }
 
