@@ -1,0 +1,43 @@
+# Checks on every filter file GitHub makes: if one fails, that file isn't used (the build says which line).
+# "block" or "allow", what it is (script, image, stylesheet, xhr, frame, media, font, page, other, unknown),
+# the address, and the site of the page it's on (else the address's own site).
+# Add a line when an ad gets through, or when something that must work was blocked.
+
+# Ads and trackers that must be blocked
+block script  https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js        app.kurdfilm.krd
+block script  https://securepubads.g.doubleclick.net/tag/js/gpt.js                  app.kurdfilm.krd
+block frame   https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-1         app.kurdfilm.krd
+block script  https://www.googletagmanager.com/gtag/js?id=G-ABC123                  app.kurdfilm.krd
+block script  https://www.google-analytics.com/analytics.js                         app.kurdfilm.krd
+block image   https://www.facebook.com/tr?id=123&ev=PageView                        app.kurdfilm.krd
+block script  https://connect.facebook.net/en_US/fbevents.js                        app.kurdfilm.krd
+block script  https://c.amazon-adsystem.com/aax2/apstag.js                          app.kurdfilm.krd
+block script  https://cdn.taboola.com/libtrc/site/loader.js                         app.kurdfilm.krd
+block script  https://widgets.outbrain.com/outbrain.js                              app.kurdfilm.krd
+block script  https://imasdk.googleapis.com/js/sdkloader/ima3.js                    app.kurdfilm.krd
+# pop-up and pop-under networks, the plague of film sites
+block script  https://c1.popads.net/pop.js                                          app.kurdfilm.krd
+block script  https://cdn.popcash.net/show.js                                       app.kurdfilm.krd
+block script  https://a.exoclick.com/tag_gen.js                                     app.kurdfilm.krd
+block script  https://syndication.exdynsrv.com/splash.php                           app.kurdfilm.krd
+block page    https://www.popads.net/
+
+# What must keep working
+allow page    https://app.kurdfilm.krd/tv
+allow image   https://app.kurdfilm.krd/assets/tv/logo.png                           app.kurdfilm.krd
+allow script  https://app.kurdfilm.krd/assets/app.js                                app.kurdfilm.krd
+allow frame   https://www.youtube.com/embed/dQw4w9WgXcQ                             app.kurdfilm.krd
+allow script  https://www.youtube.com/iframe_api                                    app.kurdfilm.krd
+allow image   https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg                      app.kurdfilm.krd
+allow media   https://rr1---sn-abc.googlevideo.com/videoplayback?id=1               www.youtube.com
+allow script  https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js     app.kurdfilm.krd
+allow script  https://cdn.jsdelivr.net/npm/hls.js@1.5.0/dist/hls.min.js             app.kurdfilm.krd
+allow script  https://unpkg.com/video.js@8.10.0/dist/video.min.js                   app.kurdfilm.krd
+allow stylesheet https://fonts.googleapis.com/css2?family=Vazirmatn                 app.kurdfilm.krd
+allow font    https://fonts.gstatic.com/s/vazirmatn/v13/Dxx78j6PP2D_kU2muijPEe1n2vVbfJRklWgzORc.woff2  app.kurdfilm.krd
+allow script  https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js      app.kurdfilm.krd
+allow script  https://www.gstatic.com/cv/js/sender/v1/cast_sender.js                app.kurdfilm.krd
+allow script  https://cdn.jwplayer.com/libraries/abcd1234.js                        app.kurdfilm.krd
+allow media   https://cdn.example-videos.com/hls/movie/index.m3u8                   app.kurdfilm.krd
+allow xhr     https://api.github.com/repos/helinomerrania/TwilightMovies/releases/latest  app.kurdfilm.krd
+allow page    https://github.com/helinomerrania/TwilightMovies

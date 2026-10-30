@@ -46,6 +46,20 @@
     <string name="osd_update_unsupported">This TV box doesn\'t let apps update themselves. Install the new version with Downloader</string>
     <string name="osd_update_failed">The update couldn\'t start. The app tries again later</string>
 
+    <!-- The ad blocker: in the menu, short messages, and the page shown instead of an ad page -->
+    <string name="menu_adblock_on">Ad blocker: On  ·  %1$d blocked here</string>
+    <string name="menu_adblock_off">Ad blocker: Off for this website</string>
+    <string name="menu_allow_jump">Allow %1$s</string>
+    <string name="menu_filters">Ad blocker: %1$s rules, from %2$s</string>
+    <string name="osd_jump_blocked">The ad blocker stopped a jump to %1$s. To allow it: hold OK, then Allow</string>
+    <string name="osd_ad_page_blocked">The ad blocker stopped an ad page (%1$s)</string>
+    <string name="osd_adblock_on">Ad blocker on for %1$s</string>
+    <string name="osd_adblock_off">Ad blocker off for %1$s</string>
+    <string name="osd_jump_allowed">%1$s is allowed from now on</string>
+    <string name="osd_filters_updated">The ad blocker has new rules: %1$s</string>
+    <string name="page_blocked_title">This page is an ad</string>
+    <string name="page_blocked_text">The ad blocker stopped it. Press Back to go back.</string>
+
     <!-- When the website can't be reached -->
     <string name="error_title">Can\'t open %1$s</string>
     <string name="error_no_internet">This TV box isn\'t connected to the internet.</string>

@@ -35,13 +35,30 @@ While a film plays full screen, OK pauses and plays it, and Back leaves full scr
 - **Home**: the website's first page.
 - **Reload**: the page again.
 - **Mouse pointer**: on or off.
+- **Ad blocker**: on or off for the website shown (see [The ad blocker](#the-ad-blocker)), and **Allow ⟨site⟩** after it stopped a jump.
 - **Remote guide**: what each button does.
 - **Language**: Kurdish or English (see [Kurdish and English](#kurdish-and-english)).
 - **Website address**: if KurdFilm moves, type the new address here. **Use default** goes back to `app.kurdfilm.krd/tv`.
 - **Look for a new version**, or **Install the new version** when one is waiting.
 - **Exit**.
 
-Under the app's name, the menu shows the page, the app's build number and the box's web engine version: useful when something needs fixing.
+Under the app's name, the menu shows the page, the app's build number and the box's web engine version (useful when something needs fixing), and how many rules the ad blocker has and from when.
+
+## The ad blocker
+
+It's built in and on from the start.
+
+- **What it stops:** ads, trackers, pop-up and pop-under ad networks, and known harmful sites. Every address a page loads, in all its frames (the film players other sites put in the page too), is checked against about 320,000 rules: EasyList, EasyPrivacy, uBlock Origin's own lists, Liste AR (ads on Arabic-script sites, which Kurdish sites share) and HaGeZi's lists, with the app's own rules.
+- **Pages don't break for want of their ads:** a blocked script gets an empty one, a picture a see-through pixel, a frame a blank page, an ad's video a second of silent black, a player asking for its ads gets "no ads", and the best-known ad scripts (Google's ads, tags and analytics, Amazon's, ad-blocker detectors) get small stand-ins, so a page that waits for them goes on.
+- **Ad boxes are hidden** (about 42,000 hiding rules), also the ones that appear later.
+- **No jumping away to other sites:** a page can only go to the app's website. When a page tries to jump to another site (a favourite trick of ads), it's stopped, and a message says where it wanted to go. If it was a real link: hold OK, then **Allow ⟨site⟩**. The page opens, and that site is allowed from then on. Pop-ups to other sites are stopped too.
+- **Click traps:** with the mouse pointer, see-through layers over the page that catch the first click to open an ad are taken away before the click lands.
+- **If a website doesn't work right with it:** in the menu, choose **Ad blocker: On · N blocked here**. It goes off for that website (the box remembers), and the page loads again. Choose it again to switch it back on.
+- **Always up to date:** GitHub makes the filters again every day and publishes them as the release "filters". Each box looks twice a day and downloads the new ones (about 3 MB) once its own are two days old, or at once with **Look for a new version**. Every new version of the app brings that day's filters with it too.
+
+**Your own rules** go in `tools/filters/twilight.txt`. On GitHub: open it, press the pencil, add a rule (the file has examples), and commit. GitHub makes the filters again within minutes, and the boxes get them within a day, or at once with **Look for a new version**. When an ad gets through, or something that must work is blocked, add a line to `tools/filters/checks.txt` as well. Every filter file is checked against it before it's published, so the mistake can't come back.
+
+**More lists** go in `tools/filters/lists.txt`, one line each. HaGeZi's list of harmful sites (about 190,000 more) is there already, behind a `#`: take the `#` away to add it, at about 1.2 MB more for each box to download.
 
 ## By itself
 
@@ -77,6 +94,10 @@ Every change pushed to GitHub is built there (`.github/workflows/build.yml`): fi
 |---|---|
 | `app/src/main/java/com/twilightcafe/movies/MainActivity.java` | The app: the website, the remote, the pointer, films full screen and the TV kept awake, the menu, the remote guide and the error screen. `DEFAULT_URL` is the website's address |
 | `app/src/main/java/com/twilightcafe/movies/Updater.java` | New versions from GitHub's releases (like Twilight TV's), and `InstallResult.java` shows Android's install question |
+| `app/src/main/java/com/twilightcafe/movies/AdBlocker.java` | The ad blocker in the app: every address a page loads, the stand-ins, the script that hides ad boxes, stopped jumps, the switch for each website, new filters from GitHub |
+| `app/src/main/java/com/twilightcafe/movies/adblock/` | The ad blocker's engine, plain Java: the rules (`FilterSet`), one network rule (`NetFilter`), the public suffix list, and the stand-ins (`Surrogates`) |
+| `tools/filters/` | Makes the filter file on GitHub: `lists.txt` (the lists), `twilight.txt` (the app's own rules), `checks.txt` (what must be blocked and what must work), `build.sh`, `test.sh`, and the compiler (`src/`) |
+| `tests/java/` | The ad blocker engine's tests (`tools/filters/test.sh`) |
 | `app/src/main/java/com/twilightcafe/movies/CursorView.java` | Draws the mouse pointer |
 | `app/src/main/res/values-b+ckb/strings.xml`, `app/src/main/res/values/strings.xml` | Every text the app shows, in Kurdish and in English (see [Kurdish and English](#kurdish-and-english)) |
 | `tests/scripts.test.js` | Tests the small scripts the app runs inside the website (scrolling, the video keys, whether a film plays) on stand-in pages, and that they stay plain enough for old web engines |
@@ -84,4 +105,4 @@ Every change pushed to GitHub is built there (`.github/workflows/build.yml`): fi
 | `art/make_art.py` | Draws the banner, the icon and the picture shown while the website loads, in Twilight TV's style |
 | `app/twilight-movies.keystore` | The key every build is signed with. Android only installs an update signed with the same key, so it stays as it is (in the repository on purpose, like Twilight TV's) |
 
-To run the tests: `node tests/scripts.test.js` and `node tests/strings.test.js`. To build it on a computer: `./gradlew assembleRelease` (with Java 17 and the Android SDK). The APK is then in `app/build/outputs/apk/release/`; a build made there doesn't look for new versions.
+To run the tests: `node tests/scripts.test.js`, `node tests/strings.test.js` and `tools/filters/test.sh`. To build it on a computer: `tools/filters/build.sh app/src/main/assets` (the filters), then `./gradlew assembleRelease` (with Java 17 and the Android SDK). The APK is then in `app/build/outputs/apk/release/`; a build made there doesn't look for new versions.

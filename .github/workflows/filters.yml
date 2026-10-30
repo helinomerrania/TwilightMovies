@@ -1,0 +1,76 @@
+name: Update the ad blocker's filters
+
+# Every day the filter lists (tools/filters/lists.txt) are made into the app's filter file, checked
+# (tools/filters/checks.txt) and published as the release "filters". Each TV box looks at it twice a day and
+# downloads it once its own is two days old (at once with "Look for a new version" in the menu). Also when
+# the lists, the app's own rules (tools/filters/twilight.txt) or the checks change, and by hand from the
+# Actions tab. "filters" is a pre-release, never the latest release: the app's own updates and the
+# Downloader address don't see it.
+on:
+  schedule:
+    - cron: '17 1 * * *'    # 04:17 in Ranya
+  push:
+    branches: [main]
+    paths:
+      - 'tools/filters/**'
+      - 'app/src/main/java/com/twilightcafe/movies/adblock/**'
+      - 'tests/java/**'
+      - '.github/workflows/filters.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: filters
+  cancel-in-progress: false
+
+jobs:
+  filters:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Get the project
+        uses: actions/checkout@v7
+
+      - name: Set up Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Test the ad blocker
+        shell: bash
+        run: |
+          tools/filters/test.sh 2>&1 | tee tests.log
+          echo "::notice title=Tests::$(tail -n 1 tests.log)"
+
+      - name: Make the filters
+        shell: bash
+        run: |
+          tools/filters/build.sh out 2>&1 | tee filters.log
+          echo "::notice title=Filters::$(grep -h 'filters.bin:' filters.log | sed 's/^ *//')"
+
+      - name: Show what went wrong
+        if: failure()
+        shell: bash
+        run: |
+          enc() { sed -e 's/%/%25/g' | awk '{ printf "%s%%0A", $0 }'; }
+          tests=$(grep "  FAIL " tests.log 2>/dev/null | head -n 40 | enc || true)
+          filters=$(grep -E -A 30 "CHECKS FAILED|Couldn't download|Exception|error:" filters.log 2>/dev/null | head -n 40 | enc || true)
+          [ -n "$tests" ] && echo "::error title=Failed tests::$tests"
+          [ -n "$filters" ] && echo "::error title=Filters::$filters"
+          true
+
+      - name: Publish them
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view filters > /dev/null 2>&1; then
+            gh release create filters --prerelease --latest=false --target "${{ github.sha }}" \
+              --title "Ad blocker filters" \
+              --notes "The ad blocker's rules, made every day from the filter lists in tools/filters/lists.txt. Twilight Movies downloads filters.bin by itself: there is nothing to install by hand."
+          fi
+          # the file first, then its description (a box that reads a new description gets the new file)
+          gh release upload filters out/filters.bin --clobber
+          gh release upload filters out/filters.json --clobber

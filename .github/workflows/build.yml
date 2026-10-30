@@ -45,6 +45,27 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Test the ad blocker and make its filters
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The engine's tests (tests/java), then the filter lists (tools/filters/lists.txt) made into the file
+          # that goes inside the app, and checked (tools/filters/checks.txt). If a list can't be downloaded
+          # today or a check fails, the filters published last (the release "filters") go in instead.
+          tools/filters/test.sh 2>&1 | tee -a tests.log
+          echo "::notice title=Ad blocker tests::$(tail -n 1 tests.log)"
+          mkdir -p app/src/main/assets
+          if tools/filters/build.sh "$RUNNER_TEMP/filters" 2>&1 | tee filters.log; then
+            cp "$RUNNER_TEMP/filters/filters.bin" app/src/main/assets/filters.bin
+            echo "::notice title=Ad blocker filters::$(grep -h 'filters.bin:' filters.log | sed 's/^ *//')"
+          elif gh release download filters -p filters.bin -D app/src/main/assets --clobber; then
+            echo "::warning title=Ad blocker filters::Today's lists couldn't be made into filters (the log says why): the ones published last went in"
+          else
+            echo "::error title=Ad blocker filters::The lists couldn't be made into filters, and none were published yet"
+            exit 1
+          fi
+
       - name: Build the APK
         shell: bash
         run: |
@@ -63,9 +84,11 @@ jobs:
           wrong=$(grep -A 12 "What went wrong" build.log 2>/dev/null | head -n 40 | enc || true)
           errors=$(grep -E -A 2 "error:|\.java:[0-9]+:" build.log 2>/dev/null | head -n 60 | enc || true)
           tests=$(grep "  FAIL " tests.log 2>/dev/null | head -n 40 | enc || true)
+          filters=$(grep -E -A 30 "CHECKS FAILED|Couldn't download|Exception|error:" filters.log 2>/dev/null | head -n 40 | enc || true)
           [ -n "$wrong" ] && echo "::error title=What went wrong::$wrong"
           [ -n "$errors" ] && echo "::error title=Compile errors::$errors"
           [ -n "$tests" ] && echo "::error title=Failed tests::$tests"
+          [ -n "$filters" ] && echo "::error title=Ad blocker filters::$filters"
           true
 
       - name: Keep the APK with this build

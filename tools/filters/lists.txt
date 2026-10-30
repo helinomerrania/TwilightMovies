@@ -1,0 +1,30 @@
+# The filter lists the ad blocker is made from (tools/filters/build.sh, on GitHub every day and with every
+# build). One list a line: its name, its format (adblock, hosts or psl), then its addresses: the first one
+# that answers is used, the others are copies of the same list elsewhere. A "#" starts a comment.
+
+# The public suffix list: which part of a host anyone can register (needed, not rules)
+psl              psl      https://raw.githubusercontent.com/publicsuffix/list/main/public_suffix_list.dat https://publicsuffix.org/list/public_suffix_list.dat https://cdn.jsdelivr.net/gh/publicsuffix/list@main/public_suffix_list.dat
+
+# EasyList: ads, the world's main list; EasyPrivacy: trackers
+easylist         adblock  https://raw.githubusercontent.com/uBlockOrigin/uAssetsCDN/main/thirdparties/easylist.txt https://cdn.jsdelivr.net/gh/uBlockOrigin/uAssetsCDN@main/thirdparties/easylist.txt https://easylist.to/easylist/easylist.txt
+easyprivacy      adblock  https://raw.githubusercontent.com/uBlockOrigin/uAssetsCDN/main/thirdparties/easyprivacy.txt https://cdn.jsdelivr.net/gh/uBlockOrigin/uAssetsCDN@main/thirdparties/easyprivacy.txt https://easylist.to/easylist/easyprivacy.txt
+
+# uBlock Origin's own lists: ads, harmful sites, privacy, fixes for sites the other lists break
+ubo-filters      adblock  https://raw.githubusercontent.com/uBlockOrigin/uAssetsCDN/main/filters/filters.min.txt https://cdn.jsdelivr.net/gh/uBlockOrigin/uAssetsCDN@main/filters/filters.min.txt https://ublockorigin.github.io/uAssetsCDN/filters/filters.min.txt
+ubo-badware      adblock  https://raw.githubusercontent.com/uBlockOrigin/uAssetsCDN/main/filters/badware.min.txt https://cdn.jsdelivr.net/gh/uBlockOrigin/uAssetsCDN@main/filters/badware.min.txt https://ublockorigin.github.io/uAssetsCDN/filters/badware.min.txt
+ubo-privacy      adblock  https://raw.githubusercontent.com/uBlockOrigin/uAssetsCDN/main/filters/privacy.min.txt https://cdn.jsdelivr.net/gh/uBlockOrigin/uAssetsCDN@main/filters/privacy.min.txt https://ublockorigin.github.io/uAssetsCDN/filters/privacy.min.txt
+ubo-unbreak      adblock  https://raw.githubusercontent.com/uBlockOrigin/uAssetsCDN/main/filters/unbreak.min.txt https://cdn.jsdelivr.net/gh/uBlockOrigin/uAssetsCDN@main/filters/unbreak.min.txt https://ublockorigin.github.io/uAssetsCDN/filters/unbreak.min.txt
+ubo-quick-fixes  adblock  https://raw.githubusercontent.com/uBlockOrigin/uAssetsCDN/main/filters/quick-fixes.min.txt https://cdn.jsdelivr.net/gh/uBlockOrigin/uAssetsCDN@main/filters/quick-fixes.min.txt https://ublockorigin.github.io/uAssetsCDN/filters/quick-fixes.min.txt
+
+# Liste AR: ads on Arabic-script sites (Kurdish sites use the same ad networks)
+liste-ar         adblock  https://raw.githubusercontent.com/easylist/listear/master/Liste_AR.txt https://easylist-downloads.adblockplus.org/Liste_AR.txt
+
+# HaGeZi: a very big list of ad, tracker and harmful hosts, and one of pop-up and pop-under ad networks
+hagezi-pro       adblock  https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/pro.txt https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@main/adblock/pro.txt https://gitlab.com/hagezi/mirror/-/raw/main/dns-blocklists/adblock/pro.txt
+hagezi-popupads  adblock  https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/popupads.txt https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@main/adblock/popupads.txt https://gitlab.com/hagezi/mirror/-/raw/main/dns-blocklists/adblock/popupads.txt
+# Harmful sites (malware, scams, phishing): another ~190,000 hosts, about 1.2 MB more for each box to download.
+# Take the "#" away to add it.
+#hagezi-tif-mini adblock  https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/tif.mini.txt https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@main/adblock/tif.mini.txt
+
+# The app's own rules (tools/filters/twilight.txt): for the sites it shows
+twilight         adblock  file:tools/filters/twilight.txt

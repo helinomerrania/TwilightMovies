@@ -50,6 +50,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebHistoryItem;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -62,6 +63,11 @@ import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.twilightcafe.movies.adblock.FilterSet;
+
+import java.text.DateFormat;
+import java.text.NumberFormat;
+import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -75,6 +81,9 @@ import java.util.regex.Pattern;
  *    pushing against the screen edge scrolls.
  *  - BACK goes back; BACK twice on the first page exits.
  *  - Hold OK, hold BACK, or press MENU for the app menu.
+ *
+ * The ad blocker (AdBlocker, adblock/) sees every address a page loads, stops jumps to other sites, and
+ * hides ad boxes; it can be switched off for one website in the menu.
  *
  * Also: the TV stays awake while a film plays, the app keeps trying when the website can't be reached
  * (and at once when the internet comes back), new versions come from GitHub (Updater), and the remote
@@ -208,6 +217,9 @@ public class MainActivity extends Activity {
     private Button pointerButton;
     private Button languageButton;
     private Button updateButton;
+    private Button adblockButton;
+    private Button allowButton;
+    private TextView menuFilters;
     private Button guideClose;
     private EditText addressInput;
 
@@ -224,6 +236,11 @@ public class MainActivity extends Activity {
     private boolean engineHintShown;
     private boolean updateAnnounced;
     private boolean awaitingInstallPermission;
+
+    private AdBlocker adBlocker;
+    private boolean cosmeticsAsked;
+    private String lastJump;          // the last jump to another site the ad blocker stopped (the menu can allow it)
+    private long lastBlockNoteAt;
 
     private int retryDelay = RETRY_FIRST_S;
     private long retryAt;
@@ -269,6 +286,10 @@ public class MainActivity extends Activity {
         myBuild = BuildConfig.VERSION_CODE;
         engineMajor = engineVersion();
         updater = new Updater(this, BuildConfig.REPO, myBuild);
+        adBlocker = new AdBlocker(this, BuildConfig.REPO);
+        adBlocker.setSites(homeUrl);
+        adBlocker.setTexts(t(R.string.page_blocked_title), t(R.string.page_blocked_text), kurdish);
+        adBlocker.start();   // the rules load while the splash shows; the first page waits for them
 
         root = new FrameLayout(this);
         root.setBackgroundColor(Color.BLACK);
@@ -359,6 +380,7 @@ public class MainActivity extends Activity {
         web.setFocusableInTouchMode(true);
         web.setWebViewClient(new PageClient());
         web.setWebChromeClient(new ChromeClient());
+        web.addJavascriptInterface(adBlocker.bridge(), adBlocker.bridgeName);   // for hiding ad boxes (CSS only)
     }
 
     @Override
@@ -552,7 +574,7 @@ public class MainActivity extends Activity {
 
         boolean full = customView != null;
         if (pointerMode && (!full || cursor.isPointerVisible())) {
-            if (cursor.isPointerVisible()) clickAt(cursor.tipX(), cursor.tipY(), true);
+            if (cursor.isPointerVisible()) pointerClick(cursor.tipX(), cursor.tipY());
             showPointer();
             return true;
         }
@@ -1292,7 +1314,7 @@ public class MainActivity extends Activity {
             private void take(String url) {
                 if (done[0] || url == null || url.startsWith("about:")) return;
                 done[0] = true;
-                if (web != null && isWebScheme(url) && sameSite(url)) {
+                if (web != null && isWebScheme(url) && (sameSite(url) || adBlocker.isOwnOrAllowed(url))) {
                     loadPage(url);
                 } else {
                     showOsd(t(R.string.osd_popup_blocked), 1500);
@@ -1368,28 +1390,40 @@ public class MainActivity extends Activity {
     private final class PageClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            return !isWebScheme(url);   // block intent:, market:, etc. (ads love them)
+            if (!isWebScheme(url)) return true;   // block intent:, market:, etc. (ads love them)
+            return !allowJump(url);               // Android 5 and 6: the page itself only
         }
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-            return !isWebScheme(request.getUrl().toString());
+            String url = request.getUrl().toString();
+            if (!isWebScheme(url)) return true;
+            return request.isForMainFrame() && !allowJump(url);
+        }
+
+        @Override
+        public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+            return adBlocker.intercept(request);   // every address of the page and its frames (on the engine's threads)
         }
 
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             progress.setVisibility(View.VISIBLE);
+            cosmeticsAsked = false;
+            adBlocker.setPage(url);
         }
 
         @Override
         public void onPageCommitVisible(WebView view, String url) {
             hideSplashSoon();
+            injectCosmetics();
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
             progress.setVisibility(View.GONE);
             hideSplashSoon();
+            injectCosmetics();
             if (retrying) {
                 retrying = false;
                 if (failedAttempt != attempt) hideError();   // the automatic retry worked
@@ -1442,6 +1476,10 @@ public class MainActivity extends Activity {
             progress.setProgress(newProgress);
             progress.setVisibility(newProgress < 100 ? View.VISIBLE : View.GONE);
             if (newProgress >= 70) hideSplashSoon();
+            if (newProgress >= 30 && !cosmeticsAsked) {
+                cosmeticsAsked = true;   // early, so ad boxes don't flash (again when it's shown and when it's done)
+                injectCosmetics();
+            }
         }
 
         @Override
@@ -1504,6 +1542,7 @@ public class MainActivity extends Activity {
     private final Runnable updateCheck = new Runnable() {
         @Override
         public void run() {
+            adBlocker.checkForUpdate(false, null);   // the ad filters: looked at twice a day, downloaded every two days
             if (updater == null || !updater.enabled()) return;
             long since = System.currentTimeMillis() - updater.lastCheck();
             if (since < 0 || since >= UPDATE_MIN_GAP_MS) {
@@ -1559,6 +1598,19 @@ public class MainActivity extends Activity {
                 onUpdateResult(result, true);
             }
         });
+        adBlocker.checkForUpdate(true, new AdBlocker.Done() {   // and the ad filters, whatever their age
+            @Override
+            public void updated(boolean newer) {
+                if (!newer) return;
+                ui.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        FilterSet f = adBlocker.filters();
+                        if (f != null && !isFinishing()) showOsd(t(R.string.osd_filters_updated, formatCount(f.rules)), 4000);
+                    }
+                }, 4500);   // after the app's own answer
+            }
+        });
     }
 
     private void installUpdate() {
@@ -1600,11 +1652,107 @@ public class MainActivity extends Activity {
         String sub = shortUrl(url != null ? url : homeUrl) + "  ·  " + t(R.string.menu_build, myBuild);
         if (engineMajor > 0) sub += "  ·  " + t(R.string.menu_engine, engineMajor);
         menuSubtitle.setText(sub);
+        FilterSet f = adBlocker.filters();
+        menuFilters.setText(f != null ? t(R.string.menu_filters, formatCount(f.rules), formatDate(f.created)) : "");
+        menuFilters.setVisibility(f != null ? View.VISIBLE : View.GONE);
         pointerButton.setText(pointerLabel());
+        adblockButton.setText(adblockLabel());
+        allowButton.setText(lastJump != null ? t(R.string.menu_allow_jump, adBlocker.site(hostOf(lastJump))) : "");
+        allowButton.setVisibility(lastJump != null ? View.VISIBLE : View.GONE);
         updateButton.setText(updateLabel());
         cursor.setPointerVisible(false);
         menuPanel.setVisibility(View.VISIBLE);
         homeButton.requestFocus();
+    }
+
+    // ------------------------------------------------------------------ the ad blocker
+
+    private String adblockLabel() {
+        return adBlocker.activeFor(adBlocker.pageHost())
+                ? t(R.string.menu_adblock_on, adBlocker.blockedOnPage()) : t(R.string.menu_adblock_off);
+    }
+
+    /** On or off for the website now shown (remembered for it), then the page again. */
+    private void toggleAdBlocker() {
+        String host = adBlocker.pageHost();
+        if (host.isEmpty()) host = hostOf(homeUrl);
+        boolean on = !adBlocker.activeFor(host);
+        adBlocker.setActive(host, on);
+        closePanels();
+        showOsd(t(on ? R.string.osd_adblock_on : R.string.osd_adblock_off, adBlocker.site(host)), 3000);
+        if (web != null) web.reload();
+    }
+
+    /** Lets the page go where the ad blocker stopped it last, and to that site from then on. */
+    private void allowLastJump() {
+        String url = lastJump;
+        lastJump = null;
+        closePanels();
+        if (url == null || web == null) return;
+        String host = hostOf(url);
+        adBlocker.allowSite(host);
+        showOsd(t(R.string.osd_jump_allowed, adBlocker.site(host)), 3000);
+        web.loadUrl(url);
+    }
+
+    /** Whether the page may go to url (a link, a script's jump, a redirect); says so on screen if not. */
+    private boolean allowJump(String url) {
+        int verdict = adBlocker.checkJump(url);
+        if (verdict == AdBlocker.GO) return true;
+        String host = adBlocker.site(hostOf(url));
+        long now = SystemClock.uptimeMillis();
+        boolean say = now - lastBlockNoteAt > 3000;   // ad scripts try again and again: said once
+        if (verdict == AdBlocker.JUMP) lastJump = url;
+        if (say) {
+            lastBlockNoteAt = now;
+            showOsd(verdict == AdBlocker.AD ? t(R.string.osd_ad_page_blocked, host) : t(R.string.osd_jump_blocked, host), 5000);
+        }
+        return false;
+    }
+
+    /** The ad-hiding script, into the page now shown (it runs once a page, however often it's put in). */
+    private void injectCosmetics() {
+        if (web == null || adBlocker.filters() == null || !adBlocker.activeFor(adBlocker.pageHost())) return;
+        web.evaluateJavascript(adBlocker.cosmeticScript(), null);
+    }
+
+    /** A click with the mouse pointer, after taking away see-through ad layers over the page there. */
+    private void pointerClick(final float x, final float y) {
+        if (web == null || customView != null || !adBlocker.activeFor(adBlocker.pageHost())) {
+            clickAt(x, y, true);
+            return;
+        }
+        final boolean[] done = {false};
+        final Runnable click = new Runnable() {
+            @Override
+            public void run() {
+                if (done[0]) return;
+                done[0] = true;
+                clickAt(x, y, true);
+            }
+        };
+        ui.postDelayed(click, 250);   // if the page doesn't answer at once, click anyway
+        float w = Math.max(1, root.getWidth());
+        float h = Math.max(1, root.getHeight());
+        web.evaluateJavascript(AdBlocker.OVERLAY_JS + "(" + num(x / w) + "," + num(y / h) + ")", new ValueCallback<String>() {
+            @Override
+            public void onReceiveValue(String removed) {
+                ui.removeCallbacks(click);
+                click.run();
+            }
+        });
+    }
+
+    private String formatCount(int n) {
+        return NumberFormat.getIntegerInstance(textLocale()).format(n);
+    }
+
+    private String formatDate(long millis) {
+        return DateFormat.getDateInstance(DateFormat.MEDIUM, textLocale()).format(new Date(millis));
+    }
+
+    private Locale textLocale() {
+        return kurdish ? new Locale(KURDISH) : Locale.getDefault();
     }
 
     private void closePanels() {
@@ -1697,6 +1845,7 @@ public class MainActivity extends Activity {
     private void setHome(String url) {
         homeUrl = url;
         prefs.edit().putString(KEY_URL, url).apply();
+        adBlocker.setSites(url);
         closePanels();
         leaveFullscreen();
         loadPage(url);
@@ -1719,8 +1868,15 @@ public class MainActivity extends Activity {
         LinearLayout.LayoutParams sub = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         sub.topMargin = dp(2);
-        sub.bottomMargin = dp(10);
         card.addView(menuSubtitle, sub);
+        menuFilters = label("", 13, 0xFF8E8AA5, false);   // the ad blocker's rules: how many, and from when
+        menuFilters.setSingleLine(true);
+        menuFilters.setEllipsize(TextUtils.TruncateAt.END);
+        LinearLayout.LayoutParams fl = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        fl.topMargin = dp(2);
+        fl.bottomMargin = dp(10);
+        card.addView(menuFilters, fl);
 
         LinearLayout list = new LinearLayout(this);
         list.setOrientation(LinearLayout.VERTICAL);
@@ -1746,6 +1902,21 @@ public class MainActivity extends Activity {
             }
         });
         list.addView(pointerButton, rowParams(8));
+        adblockButton = tvButton(t(R.string.menu_adblock_off), new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleAdBlocker();
+            }
+        });
+        list.addView(adblockButton, rowParams(8));
+        allowButton = tvButton("", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                allowLastJump();
+            }
+        });
+        allowButton.setVisibility(View.GONE);
+        list.addView(allowButton, rowParams(8));
         list.addView(tvButton(t(R.string.menu_guide), new View.OnClickListener() {
             @Override
             public void onClick(View v) {

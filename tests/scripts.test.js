@@ -7,12 +7,16 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const SOURCE = path.join(__dirname, '..', 'app', 'src', 'main', 'java', 'com', 'twilightcafe', 'movies', 'MainActivity.java');
+const DIR = path.join(__dirname, '..', 'app', 'src', 'main', 'java', 'com', 'twilightcafe', 'movies');
+const SOURCES = ['MainActivity.java', 'AdBlocker.java'].map((f) => fs.readFileSync(path.join(DIR, f), 'utf8'));
 
 function javaString(name) {
-  const src = fs.readFileSync(SOURCE, 'utf8');
-  const m = src.match(new RegExp('static final String ' + name + '\\s*=([\\s\\S]*?);\\n'));
-  if (!m) throw new Error(name + ' not found in MainActivity.java');
+  let m = null;
+  for (const src of SOURCES) {
+    m = src.match(new RegExp('static final String ' + name + '\\s*=([\\s\\S]*?);\\n'));
+    if (m) break;
+  }
+  if (!m) throw new Error(name + ' not found in MainActivity.java or AdBlocker.java');
   let out = '';
   const lit = /"((?:[^"\\]|\\.)*)"/g;
   let l;
@@ -28,6 +32,8 @@ const S = {
   MEDIA_JS: javaString('MEDIA_JS'),
   PAUSE_ALL_JS: javaString('PAUSE_ALL_JS'),
   PLAYING_JS: javaString('PLAYING_JS'),
+  COSMETIC_JS: javaString('COSMETIC_JS'),
+  OVERLAY_JS: javaString('OVERLAY_JS'),
 };
 let pass = 0;
 let fail = 0;
@@ -180,6 +186,89 @@ check('...by a fifth of the screen', r.win, [[0, 144]]);
 SC(c, [0.5, 0.5, 0, 0.5]);
 check('a zoomed page: the pointer is found in what is shown', r.at, [420, 230]);
 check('...and scrolls by what is shown', r.win, [[0, 180]]);
+
+// ---------- the ad blocker: hiding ad boxes ----------
+function el(tag, id, classes, children) {
+  const e = { nodeType: 1, tagName: tag, id: id || '', classList: classes || [], children: children || [], parentElement: null };
+  e.getElementsByTagName = () => {
+    const out = [];
+    (function walk(n) { for (const c of n.children) { out.push(c); walk(c); } })(e);
+    return out;
+  };
+  for (const c of e.children) c.parentElement = e;
+  return e;
+}
+function cosmeticPage(tree) {
+  const styles = [];
+  const calls = { page: [], generic: [] };
+  let observer = null;
+  const head = { appendChild: (s) => styles.push(s.textContent) };
+  const doc = { documentElement: tree, head, createElement: () => ({ textContent: '' }) };
+  const bridge = {
+    page: (h) => { calls.page.push(h); return '.from-page{display:none!important}\n'; },
+    generic: (h, keys) => { calls.generic.push(keys); return keys.split(' ').filter((k) => k === '.ad').map((k) => k + '{display:none!important}\n').join(''); },
+  };
+  const win = { _bridge: bridge };
+  win.MutationObserver = function (cb) { observer = cb; this.observe = function () {}; };
+  const ctx = vm.createContext({ window: win, document: doc, location: { hostname: 'films.example' }, setTimeout: (f) => { f(); return 1; } });
+  return { ctx, styles, calls, fire: (records) => observer && observer(records), win };
+}
+const C = (p) => vm.runInContext(S.COSMETIC_JS + "('_bridge')", p.ctx);
+let page = cosmeticPage(el('HTML', '', [], [el('BODY', '', [], [el('DIV', 'top', ['ad', 'box']), el('DIV', '', ['film'])])]));
+C(page);
+check('the page\'s own CSS goes in first', page.styles[0], '.from-page{display:none!important}\n');
+check('asked for the site', page.calls.page, ['films.example']);
+check('the classes and ids on the page are asked about', page.calls.generic[0].split(' ').sort(), ['#top', '.ad', '.box', '.film']);
+check('the generic answer goes in', page.styles[1], '.ad{display:none!important}\n');
+C(page);
+check('a second time on the same page does nothing', page.calls.page.length, 1);
+page.fire([{ type: 'childList', addedNodes: [el('SECTION', 'more', ['ad', 'promo'])] }]);
+check('new elements: only new names are asked about', page.calls.generic[1].split(' ').sort(), ['#more', '.promo']);
+page.fire([{ type: 'attributes', target: el('DIV', '', ['film', 'late-ad']), addedNodes: [] }]);
+check('a changed class is asked about', page.calls.generic[2], '.late-ad');
+page.fire([{ type: 'childList', addedNodes: [{ nodeType: 3 }] }]);
+check('text changes ask nothing', page.calls.generic.length, 3);
+page = cosmeticPage(el('HTML'));
+delete page.win._bridge;
+let threw = false;
+try { C(page); } catch (e) { threw = true; }
+check('without the app\'s bridge, nothing happens (and nothing breaks)', [threw, page.styles.length], [false, 0]);
+
+// ---------- the ad blocker: see-through layers that catch the pointer's click ----------
+function layer(o) {
+  return Object.assign({
+    tagName: 'DIV', textContent: '', parentElement: null, w: 1280, h: 720, style: {},
+    getBoundingClientRect() { return { width: this.w, height: this.h }; },
+    querySelector() { return null; },
+  }, o);
+}
+function overlayPage(stack) {
+  const body = { tagName: 'BODY' };
+  const removed = [];
+  for (const e of stack) {
+    if (!e.parentElement) e.parentElement = body;
+    e.parentNode = { removeChild: (x) => { removed.push(x); stack.splice(stack.indexOf(x), 1); } };
+  }
+  const doc = { body, documentElement: { tagName: 'HTML' }, elementFromPoint: () => stack[0] || body };
+  const win = { innerWidth: 1280, innerHeight: 720, getComputedStyle: (e) => e.style };
+  return { ctx: vm.createContext({ document: doc, window: win }), removed };
+}
+const O = (p) => vm.runInContext(S.OVERLAY_JS + '(0.5,0.5)', p.ctx);
+const clear = { position: 'fixed', opacity: '1', backgroundColor: 'rgba(0, 0, 0, 0)', backgroundImage: 'none' };
+let content = layer({ tagName: 'DIV', style: { position: 'static' } });
+let trap = layer({ tagName: 'A', style: clear });
+let p2 = overlayPage([trap, content]);
+check('a see-through layer over the page is taken away', [O(p2), p2.removed[0] === trap], [1, true]);
+p2 = overlayPage([layer({ style: clear }), layer({ style: Object.assign({}, clear, { opacity: '0' }) }), content]);
+check('two, one over the other', O(p2), 2);
+check('a video is never taken away', O(overlayPage([layer({ tagName: 'VIDEO', style: clear })])), 0);
+check('nor a frame', O(overlayPage([layer({ tagName: 'IFRAME', style: clear })])), 0);
+check('nor a small layer', O(overlayPage([layer({ style: clear, w: 300, h: 250 })])), 0);
+check('nor one with words', O(overlayPage([layer({ style: clear, textContent: 'Play' })])), 0);
+check('nor one that can be seen', O(overlayPage([layer({ style: Object.assign({}, clear, { backgroundColor: 'rgb(0, 0, 0)' }) })])), 0);
+check('nor one in its place on the page', O(overlayPage([layer({ style: Object.assign({}, clear, { position: 'static' }) })])), 0);
+const player = { tagName: 'DIV', querySelector: (s) => (s === 'video' ? {} : null), parentElement: { tagName: 'BODY' } };
+check('nor a layer in a video player', O(overlayPage([layer({ style: clear, parentElement: player })])), 0);
 
 console.log('The script tests: ' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);
