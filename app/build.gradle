@@ -20,6 +20,13 @@ android {
         targetSdk = 35
         versionCode = buildNumber
         versionName = "1.${buildNumber}"
+        // The GitHub repository the app is built from: new versions come from its releases
+        // (empty on a computer, so a build made there never updates itself)
+        buildConfigField "String", "REPO", "\"" + (System.getenv('GITHUB_REPOSITORY') ?: '') + "\""
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     // The same key signs every build; Android only updates an app signed with the same key.

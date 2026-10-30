@@ -13,7 +13,7 @@ It isn't made by KurdFilm or connected to them: it only shows their website, as 
 
 You can also copy `twilight-movies.apk` to a USB stick and open it with the box's file manager.
 
-Twilight Movies is then in the box's row of apps. A newer build installs over the old one the same way, and keeps the website's sign-in and the app's settings.
+Twilight Movies is then in the box's row of apps. On its first start it shows the **remote guide** once (it's in the menu too). After that, new versions come by themselves: see [New versions](#new-versions).
 
 ## The remote
 
@@ -35,16 +35,37 @@ While a film plays full screen, OK pauses and plays it, and Back leaves full scr
 - **Home**: the website's first page.
 - **Reload**: the page again.
 - **Mouse pointer**: on or off.
+- **Remote guide**: what each button does.
+- **Language**: once the app's texts are translated into Kurdish (see [Kurdish](#kurdish)).
 - **Website address**: if KurdFilm moves, type the new address here. **Use default** goes back to `app.kurdfilm.krd/tv`.
+- **Look for a new version**, or **Install the new version** when one is waiting.
 - **Exit**.
 
-If the website can't be reached, the app says so, with **Try again** and **Change address**. Pop-ups from the website are only followed when they stay on KurdFilm's own site; other pop-ups (ads) are blocked.
+Under the app's name, the menu shows the page, the app's build number and the box's web engine version: useful when something needs fixing.
+
+## By itself
+
+- **The TV stays awake while a film plays**, inside the page or full screen, so the box's screensaver doesn't start in the middle of a film. When nothing has played for about 40 seconds, the TV may sleep as usual.
+- **When the website can't be reached**, the app says why (the box has no internet, the website didn't answer, or the secure connection failed) and keeps trying: after 10 seconds, then 20, 40, and every minute. When the box's internet comes back, it tries again at once. **Try again** and **Change address** are there too.
+- **Pop-ups** from the website are only followed when they stay on KurdFilm's own site; others (ads) are blocked, and so are links that try to open other apps.
+- **Text size**: the box's own font-size setting is ignored, so the website's TV pages keep their layout.
+- If the website's pages need a newer web engine than the box has, the app says so once (see below).
+
+## New versions
+
+Every few hours the app looks for a newer build on GitHub and downloads it in the background (it's about 1 MB). It's never installed on its own: when one is waiting, the app says so once (never over a film), and the menu shows **Install the new version**. Choose it, then **Install** on Android's screen. The first time only, Android asks to allow Twilight Movies to install apps: switch it on and press Back, and the install carries on by itself.
+
+A new version keeps the website's sign-in and the app's settings. Installing with Downloader, as at the start, works too.
 
 ## On the café's box
 
 Twilight TV keeps the café's box in Twilight TV: any other app opened there is sent away after 10 seconds, except the one other app allowed (My TV Plus). For Twilight Movies to stay open there, it has to be that one app: on Twilight TV's phone page, Settings, **This TV box**, set **The one other app allowed** to `Twilight Movies`. Holding Back for 2 seconds in Twilight TV then opens it. (Unlocking the box for 15 minutes, by holding Back for 10 seconds, is too short for a film.)
 
-The box's own web engine is from 2018 (Twilight TV's notes explain). Twilight Movies uses the box's engine, so if KurdFilm's pages come up blank or broken on that box, the fix is to bring Firefox's engine inside the app, as Twilight TV does.
+The box's own web engine is from 2018 (Twilight TV's notes explain). Twilight Movies uses the box's engine. If KurdFilm's own scripts are too new for it, the app shows a message saying so, and the menu shows the engine's version. The fix then is to bring Firefox's engine inside the app, as Twilight TV does.
+
+## Kurdish
+
+Every text the app shows is in `app/src/main/res/values/strings.xml`. A Kurdish (Sorani) translation goes in `app/src/main/res/values-b+ckb/strings.xml`, with the same names. Once it's there, the menu shows a **Language** button that switches between English and Kurdish, and the app's screens turn right-to-left in Kurdish. The tests check a translation before it's built: the same names, every `%1$s` and `%1$d` kept, and apostrophes written as `\'`.
 
 ## How it's built
 
@@ -52,10 +73,13 @@ Every change pushed to GitHub is built there (`.github/workflows/build.yml`): fi
 
 | File | What it is |
 |---|---|
-| `app/src/main/java/com/twilightcafe/movies/MainActivity.java` | The whole app: the website, the remote, the pointer, full-screen video, the menu and the error screen. `DEFAULT_URL` is the website's address |
+| `app/src/main/java/com/twilightcafe/movies/MainActivity.java` | The app: the website, the remote, the pointer, films full screen and the TV kept awake, the menu, the remote guide and the error screen. `DEFAULT_URL` is the website's address |
+| `app/src/main/java/com/twilightcafe/movies/Updater.java` | New versions from GitHub's releases (like Twilight TV's), and `InstallResult.java` shows Android's install question |
 | `app/src/main/java/com/twilightcafe/movies/CursorView.java` | Draws the mouse pointer |
-| `tests/scripts.test.js` | Tests the small scripts the app runs inside the website (scrolling, and the video keys) on stand-in pages, and that they stay plain enough for old web engines. `node tests/scripts.test.js` |
+| `app/src/main/res/values/strings.xml` | Every text the app shows (translations beside it, see [Kurdish](#kurdish)) |
+| `tests/scripts.test.js` | Tests the small scripts the app runs inside the website (scrolling, the video keys, whether a film plays) on stand-in pages, and that they stay plain enough for old web engines |
+| `tests/strings.test.js` | Tests the texts and any translation |
 | `art/make_art.py` | Draws the banner, the icon and the picture shown while the website loads, in Twilight TV's style |
 | `app/twilight-movies.keystore` | The key every build is signed with. Android only installs an update signed with the same key, so it stays as it is (in the repository on purpose, like Twilight TV's) |
 
-To build it on a computer: `./gradlew assembleRelease` (with Java 17 and the Android SDK). The APK is then in `app/build/outputs/apk/release/`.
+To run the tests: `node tests/scripts.test.js` and `node tests/strings.test.js`. To build it on a computer: `./gradlew assembleRelease` (with Java 17 and the Android SDK). The APK is then in `app/build/outputs/apk/release/`; a build made there doesn't look for new versions.

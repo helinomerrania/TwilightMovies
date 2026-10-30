@@ -1,4 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Every text the app shows. A translation goes in res/values-b+ckb/strings.xml (Central Kurdish, Sorani)
+  with the same names; the menu then offers the language by itself. %1$s and %1$d are filled in by the
+  app (a website address, a number) and must stay exactly as they are.
+-->
 <resources>
-    <string name="app_name">Twilight Movies</string>
+    <string name="app_name" translatable="false">Twilight Movies</string>
+
+    <!-- The name of this language, written in it (in the menu's Language button) -->
+    <string name="language_name">English</string>
+
+    <!-- The menu (hold OK on the remote, or press Menu) -->
+    <string name="menu_home">Home</string>
+    <string name="menu_reload">Reload</string>
+    <string name="menu_pointer_on">Mouse pointer: On</string>
+    <string name="menu_pointer_off">Mouse pointer: Off</string>
+    <string name="menu_guide">Remote guide</string>
+    <string name="menu_language">Language</string>
+    <string name="menu_address">Website address</string>
+    <string name="menu_check_update">Look for a new version</string>
+    <string name="menu_install_update">Install the new version (build %1$d)</string>
+    <string name="menu_exit">Exit</string>
+    <string name="menu_hint">Hold OK or press Menu to open this menu</string>
+    <string name="menu_build">build %1$d</string>
+    <string name="menu_engine">web engine %1$d</string>
+
+    <!-- Short messages at the top of the screen -->
+    <string name="osd_back_again">Press Back again to leave  ·  Hold OK for the menu</string>
+    <string name="osd_paused">Paused</string>
+    <string name="osd_playing">Playing</string>
+    <string name="osd_forward">+%1$d seconds</string>
+    <string name="osd_rewind">−%1$d seconds</string>
+    <string name="osd_popup_blocked">Pop-up blocked</string>
+    <string name="osd_pointer_on">Mouse pointer on: the arrows move it, OK clicks</string>
+    <string name="osd_pointer_off">Mouse pointer off: the arrows move between items</string>
+    <string name="osd_bad_address">That address doesn\'t look right</string>
+    <string name="osd_opening">Opening %1$s</string>
+    <string name="osd_old_engine">This TV box\'s web engine (version %1$d) is too old for parts of this website, so some pages may not work</string>
+    <string name="osd_checking">Looking for a new version…</string>
+    <string name="osd_up_to_date">The app is up to date (build %1$d)</string>
+    <string name="osd_check_failed">Couldn\'t look for a new version. Check the internet and try again</string>
+    <string name="osd_update_ready">A new version of the app is ready: hold OK, then choose Install the new version</string>
+    <string name="osd_update_permission">First time only: allow Twilight Movies to install apps, then press Back</string>
+    <string name="osd_update_started">Choose Install on the screen that opens</string>
+    <string name="osd_update_unsupported">This TV box doesn\'t let apps update themselves. Install the new version with Downloader</string>
+    <string name="osd_update_failed">The update couldn\'t start. The app tries again later</string>
+
+    <!-- When the website can't be reached -->
+    <string name="error_title">Can\'t open %1$s</string>
+    <string name="error_no_internet">This TV box isn\'t connected to the internet.</string>
+    <string name="error_no_answer">The website didn\'t answer.</string>
+    <string name="error_secure">The secure connection to the website failed. If the TV box\'s date or time is wrong, correct it in the box\'s settings.</string>
+    <string name="error_advice">The app keeps trying by itself. If the website has moved, choose Change address.</string>
+    <string name="error_retry_in">Trying again in %1$d seconds</string>
+    <string name="error_retrying">Trying again…</string>
+    <string name="error_try_again">Try again</string>
+    <string name="error_change_address">Change address</string>
+
+    <!-- Changing the website's address -->
+    <string name="address_title">Website address</string>
+    <string name="address_default">Default: %1$s</string>
+    <string name="address_open">Open</string>
+    <string name="address_use_default">Use default</string>
+    <string name="address_cancel">Cancel</string>
+
+    <!-- The remote guide (shown once, and from the menu) -->
+    <string name="guide_title">Your remote</string>
+    <string name="guide_arrows_key">Arrows</string>
+    <string name="guide_arrows">Move around the website</string>
+    <string name="guide_ok_key">OK</string>
+    <string name="guide_ok">Open what\'s chosen</string>
+    <string name="guide_back_key">Back</string>
+    <string name="guide_back">The page before. On the first page, press it twice to leave</string>
+    <string name="guide_menu_key">Hold OK, or Menu</string>
+    <string name="guide_menu">This app\'s menu</string>
+    <string name="guide_media_key">Play/Pause, Rewind, Forward</string>
+    <string name="guide_media">The film: play and pause, 10 seconds back or on</string>
+    <string name="guide_channel_key">Channel up/down</string>
+    <string name="guide_channel">Scroll the page</string>
+    <string name="guide_pointer">Something the arrows can\'t reach? In the menu, turn on Mouse pointer: the arrows then move a pointer, and OK clicks.</string>
+    <string name="guide_close">Got it</string>
 </resources>

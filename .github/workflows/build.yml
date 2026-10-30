@@ -25,12 +25,13 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Test the scripts the app runs inside the website
+      - name: Test the app's scripts and texts
         shell: bash
         run: |
+          # The scripts the app runs inside the website, and its texts (with any translation).
           # If one fails, nothing is built or published
-          node tests/scripts.test.js 2>&1 | tee tests.log
-          echo "::notice title=Script tests::$(tail -n 1 tests.log)"
+          { node tests/scripts.test.js && node tests/strings.test.js; } 2>&1 | tee tests.log
+          echo "::notice title=Tests::$(grep -h '^The ' tests.log | tr '\n' ' ')"
 
       - name: Set up Java
         uses: actions/setup-java@v6
@@ -58,7 +59,7 @@ jobs:
           tests=$(grep "  FAIL " tests.log 2>/dev/null | head -n 40 | enc || true)
           [ -n "$wrong" ] && echo "::error title=What went wrong::$wrong"
           [ -n "$errors" ] && echo "::error title=Compile errors::$errors"
-          [ -n "$tests" ] && echo "::error title=Failed script tests::$tests"
+          [ -n "$tests" ] && echo "::error title=Failed tests::$tests"
           true
 
       - name: Keep the APK with this build

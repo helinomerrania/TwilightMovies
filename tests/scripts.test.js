@@ -23,7 +23,12 @@ function javaString(name) {
   return out;
 }
 
-const S = { SCROLL_JS: javaString('SCROLL_JS'), MEDIA_JS: javaString('MEDIA_JS'), PAUSE_ALL_JS: javaString('PAUSE_ALL_JS') };
+const S = {
+  SCROLL_JS: javaString('SCROLL_JS'),
+  MEDIA_JS: javaString('MEDIA_JS'),
+  PAUSE_ALL_JS: javaString('PAUSE_ALL_JS'),
+  PLAYING_JS: javaString('PLAYING_JS'),
+};
 let pass = 0;
 let fail = 0;
 function check(name, got, want) {
@@ -108,6 +113,15 @@ check('nothing happens without a note first', M(c, 't', 0, 0), 'none');
 const paused = [video({ paused: false }), video({ paused: false })];
 c = mediaPage(paused); vm.runInContext(S.PAUSE_ALL_JS, c);
 check('leaving the app pauses every video', paused.map((x) => x.paused), [true, true]);
+
+// ---------- keeping the TV awake while a film plays ----------
+const P = (videos) => vm.runInContext(S.PLAYING_JS, mediaPage(videos));
+check('no video: the TV may sleep', P([]), 0);
+check('a playing film keeps the TV awake', P([video({ paused: false, readyState: 4 })]), 1);
+check('a paused film lets it sleep', P([video({ paused: true, readyState: 4 })]), 0);
+check('a film that has ended lets it sleep', P([video({ paused: false, ended: true, readyState: 4 })]), 0);
+check('a film still loading (not playing yet) lets it sleep', P([video({ paused: false, readyState: 1 })]), 0);
+check('one playing among paused ones keeps it awake', P([video({ readyState: 4 }), video({ paused: false, readyState: 3 })]), 1);
 
 // ---------- scrolling under the pointer ----------
 function box(o) {

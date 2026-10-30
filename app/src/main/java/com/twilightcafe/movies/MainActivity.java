@@ -4,13 +4,22 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
+import android.media.AudioManager;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
+import android.net.NetworkRequest;
 import android.net.Uri;
 import android.net.http.SslError;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -29,6 +38,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.ConsoleMessage;
 import android.webkit.CookieManager;
 import android.webkit.GeolocationPermissions;
 import android.webkit.PermissionRequest;
@@ -49,9 +59,12 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Twilight Movies: KurdFilm's TV website (app.kurdfilm.krd/tv) full screen, driven by the TV remote.
@@ -62,16 +75,23 @@ import java.util.Locale;
  *    pushing against the screen edge scrolls.
  *  - BACK goes back; BACK twice on the first page exits.
  *  - Hold OK, hold BACK, or press MENU for the app menu.
+ *
+ * Also: the TV stays awake while a film plays, the app keeps trying when the website can't be reached
+ * (and at once when the internet comes back), new versions come from GitHub (Updater), the remote guide
+ * shows once, and every text is in res/values/strings.xml: with a translation in res/values-b+ckb
+ * (Central Kurdish), the menu offers that language by itself.
  */
 public class MainActivity extends Activity {
 
     static final String DEFAULT_URL = "https://app.kurdfilm.krd/tv";
     static final int ACCENT = 0xFFFFB07A;   // the sunset in Twilight's pictures
+    static final String KURDISH = "ckb";    // Central Kurdish (Sorani): res/values-b+ckb/strings.xml
 
     private static final String PREFS = "settings";
     private static final String KEY_URL = "home_url";
     private static final String KEY_POINTER = "pointer_mode";
-    private static final String KEY_TIP = "tip_shown";
+    private static final String KEY_GUIDE = "guide_shown";
+    private static final String KEY_LANGUAGE = "language";
     private static final String STATE_URL = "resume_url";
 
     private static final long OK_LONG_PRESS_MS = 650;
@@ -82,6 +102,12 @@ public class MainActivity extends Activity {
     private static final float NUDGE_DP = 7f;         // a single short press
     private static final int ROUTE_PAGE = 1;
     private static final int ROUTE_POINTER = 2;
+    private static final long AWAKE_CHECK_MS = 20000;                 // how often to look whether a film plays
+    private static final int RETRY_FIRST_S = 10;                      // automatic retries: 10 s, 20, 40, then every 60
+    private static final int RETRY_MAX_S = 60;
+    private static final long UPDATE_FIRST_MS = 20000;                // the first look for a new version, after start
+    private static final long UPDATE_EVERY_MS = 6L * 3600 * 1000;     // then this often while the app is open
+    private static final long UPDATE_MIN_GAP_MS = 3L * 3600 * 1000;   // and never more often than this
 
     /**
      * Scrolls whatever is under the pointer: the innermost scrollable box first, then the page.
@@ -141,12 +167,24 @@ public class MainActivity extends Activity {
             "(function(){var v=document.getElementsByTagName('video');"
             + "for(var i=0;i<v.length;i++){try{v[i].pause();}catch(e){}}})()";
 
+    /** 1 while a video on the page is playing (to keep the TV awake), else 0. */
+    static final String PLAYING_JS =
+            "(function(){var v=document.getElementsByTagName('video');"
+            + "for(var i=0;i<v.length;i++){var x=v[i];if(!x.paused&&!x.ended&&x.readyState>2)return 1;}"
+            + "return 0;})()";
+
     private static long lastRendererCrashAt;
 
     private final Handler ui = new Handler(Looper.getMainLooper());
     private final SparseIntArray keyRoutes = new SparseIntArray();
     private SharedPreferences prefs;
     private float density;
+    private Resources texts;
+    private boolean kurdish;
+    private boolean kurdishReady;
+    private Updater updater;
+    private int myBuild;
+    private int engineMajor;
 
     private FrameLayout root;
     private FrameLayout fullscreenHolder;
@@ -158,12 +196,18 @@ public class MainActivity extends Activity {
     private View errorPanel;
     private View menuPanel;
     private View addressPanel;
+    private View guidePanel;
     private TextView errorTitle;
     private TextView errorDetail;
+    private TextView errorStatus;
+    private TextView errorCode;
     private TextView menuSubtitle;
     private Button retryButton;
     private Button homeButton;
     private Button pointerButton;
+    private Button languageButton;
+    private Button updateButton;
+    private Button guideClose;
     private EditText addressInput;
 
     private View customView;
@@ -176,6 +220,19 @@ public class MainActivity extends Activity {
     private String resumeUrl;
     private long lastBackAt;
     private boolean splashHiding;
+    private boolean engineHintShown;
+    private boolean updateAnnounced;
+    private boolean awaitingInstallPermission;
+
+    private int retryDelay = RETRY_FIRST_S;
+    private long retryAt;
+    private int attempt;
+    private int failedAttempt = -1;
+    private boolean retrying;
+    private ConnectivityManager.NetworkCallback netCallback;
+
+    private boolean keepAwake;
+    private int quietChecks;
 
     private KeyEvent okDown;
     private KeyEvent mediaDown;
@@ -207,6 +264,10 @@ public class MainActivity extends Activity {
         prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
         homeUrl = prefs.getString(KEY_URL, DEFAULT_URL);
         pointerMode = prefs.getBoolean(KEY_POINTER, false);
+        setupTexts();
+        myBuild = BuildConfig.VERSION_CODE;
+        engineMajor = engineVersion();
+        updater = new Updater(this, BuildConfig.REPO, myBuild);
 
         root = new FrameLayout(this);
         root.setBackgroundColor(Color.BLACK);
@@ -239,6 +300,8 @@ public class MainActivity extends Activity {
         root.addView(menuPanel, matchParent());
         addressPanel = buildAddressPanel();
         root.addView(addressPanel, matchParent());
+        guidePanel = buildGuidePanel();
+        root.addView(guidePanel, matchParent());
 
         osd = new TextView(this);
         osd.setTextColor(Color.WHITE);
@@ -258,21 +321,14 @@ public class MainActivity extends Activity {
         root.addView(cursor, matchParent());
 
         setupWebView();
+        watchNetwork();
 
         String resume = state != null ? state.getString(STATE_URL) : null;
         loadPage(resume != null ? resume : homeUrl);
         web.requestFocus();
 
         ui.postDelayed(hideSplash, 8000);
-        if (!prefs.getBoolean(KEY_TIP, false)) {
-            prefs.edit().putBoolean(KEY_TIP, true).apply();
-            ui.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    showOsd("Tip: hold OK (or press MENU) to open the menu", 6000);
-                }
-            }, 3500);
-        }
+        if (!prefs.getBoolean(KEY_GUIDE, false)) ui.postDelayed(firstGuide, 3000);
     }
 
     private void setupWebView() {
@@ -285,6 +341,7 @@ public class MainActivity extends Activity {
         s.setSupportZoom(false);
         s.setBuiltInZoomControls(false);
         s.setDisplayZoomControls(false);
+        s.setTextZoom(100);   // the box's own font-size setting would otherwise enlarge text and break TV layouts
         s.setJavaScriptCanOpenWindowsAutomatically(false);
         s.setSupportMultipleWindows(true);
         s.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
@@ -296,6 +353,7 @@ public class MainActivity extends Activity {
         cookies.setAcceptThirdPartyCookies(web, true);
 
         web.setBackgroundColor(Color.BLACK);
+        web.setOverScrollMode(View.OVER_SCROLL_NEVER);
         web.setFocusable(true);
         web.setFocusableInTouchMode(true);
         web.setWebViewClient(new PageClient());
@@ -309,11 +367,30 @@ public class MainActivity extends Activity {
             web.onResume();
             web.resumeTimers();
         }
+        ui.removeCallbacks(awakeCheck);
+        ui.postDelayed(awakeCheck, 5000);
+        ui.removeCallbacks(updateCheck);
+        ui.postDelayed(updateCheck, UPDATE_FIRST_MS);
+        if (awaitingInstallPermission) {
+            // back from "allow this app to install apps": carry on with the update by itself
+            awaitingInstallPermission = false;
+            if (updater.readyBuild() > myBuild && updater.canInstall(this)) {
+                ui.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        installUpdate();
+                    }
+                }, 700);
+            }
+        }
     }
 
     @Override
     protected void onPause() {
         stopPointer();
+        ui.removeCallbacks(awakeCheck);
+        ui.removeCallbacks(updateCheck);
+        setKeepAwake(false);
         if (web != null) {
             web.evaluateJavascript(PAUSE_ALL_JS, null);
             web.onPause();
@@ -335,6 +412,15 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
         stopPointer();
         ui.removeCallbacksAndMessages(null);
+        if (netCallback != null) {
+            try {
+                ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+                if (cm != null) cm.unregisterNetworkCallback(netCallback);
+            } catch (RuntimeException ignored) {
+                // already gone
+            }
+            netCallback = null;
+        }
         if (web != null) {
             root.removeView(web);
             web.stopLoading();
@@ -356,6 +442,49 @@ public class MainActivity extends Activity {
             mediaDown = null;
             backTracking = false;
         }
+    }
+
+    // ------------------------------------------------------------------ texts and language
+
+    private void setupTexts() {
+        kurdishReady = kurdishAvailable();
+        kurdish = kurdishReady && KURDISH.equals(prefs.getString(KEY_LANGUAGE, ""));
+        texts = kurdish ? localized(KURDISH) : getResources();
+    }
+
+    private Resources localized(String language) {
+        Configuration c = new Configuration(getResources().getConfiguration());
+        c.setLocale(new Locale(language));
+        return createConfigurationContext(c).getResources();
+    }
+
+    /** True once a Kurdish translation is in the app (res/values-b+ckb/strings.xml). */
+    private boolean kurdishAvailable() {
+        try {
+            return !localized(KURDISH).getString(R.string.language_name)
+                    .equals(localized("en").getString(R.string.language_name));
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
+
+    private String t(int id) {
+        return texts.getString(id);
+    }
+
+    private String t(int id, Object... args) {
+        return texts.getString(id, args);
+    }
+
+    private String languageLabel() {
+        String other = localized(kurdish ? "en" : KURDISH).getString(R.string.language_name);
+        return t(R.string.menu_language) + ": " + t(R.string.language_name) + "  ·  " + other;
+    }
+
+    private void toggleLanguage() {
+        prefs.edit().putString(KEY_LANGUAGE, kurdish ? "" : KURDISH).apply();
+        closePanels();
+        recreate();   // every panel again in the other language; the page reloads where it was
     }
 
     // ------------------------------------------------------------------ remote keys
@@ -616,18 +745,18 @@ public class MainActivity extends Activity {
             public void onReceiveValue(String r) {
                 if (r == null) return;
                 if (r.contains("seeked")) {
-                    showOsd(secs > 0 ? "+" + secs + " s" : "−" + (-secs) + " s", 900);
+                    showOsd(secs > 0 ? t(R.string.osd_forward, secs) : t(R.string.osd_rewind, -secs), 900);
                 } else if (r.contains("paused") && !"p".equals(action)) {
-                    showOsd("Paused", 900);
+                    showOsd(t(R.string.osd_paused), 900);
                 } else if (r.contains("playing") && !"z".equals(action)) {
-                    showOsd("Playing", 900);
+                    showOsd(t(R.string.osd_playing), 900);
                 }
             }
         });
     }
 
     private void goBack() {
-        if (isVisible(addressPanel) || isVisible(menuPanel)) {
+        if (isVisible(addressPanel) || isVisible(menuPanel) || isVisible(guidePanel)) {
             closePanels();
             return;
         }
@@ -642,7 +771,7 @@ public class MainActivity extends Activity {
             return;
         }
         lastBackAt = now;
-        showOsd("Press BACK again to exit  ·  Hold OK for the menu", 2500);
+        showOsd(t(R.string.osd_back_again), 2500);
     }
 
     /** Goes to the previous page, skipping entries that are the same address (redirects). */
@@ -896,7 +1025,7 @@ public class MainActivity extends Activity {
         }
     };
 
-    // ------------------------------------------------------------------ full-screen video
+    // ------------------------------------------------------------------ films: full screen, and the TV awake
 
     private void enterFullscreen(View view, WebChromeClient.CustomViewCallback callback) {
         if (customView != null) {
@@ -910,7 +1039,8 @@ public class MainActivity extends Activity {
         if (view.getParent() instanceof ViewGroup) ((ViewGroup) view.getParent()).removeView(view);
         fullscreenHolder.addView(view, matchParent());
         fullscreenHolder.setVisibility(View.VISIBLE);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        quietChecks = 0;
+        setKeepAwake(true);
         view.setFocusable(true);
         view.setFocusableInTouchMode(true);
         view.requestFocus();
@@ -926,7 +1056,6 @@ public class MainActivity extends Activity {
         cursor.setPointerVisible(false);
         fullscreenHolder.removeView(view);
         fullscreenHolder.setVisibility(View.GONE);
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (callback != null) {
             try {
                 callback.onCustomViewHidden();
@@ -937,7 +1066,43 @@ public class MainActivity extends Activity {
         if (!panelOpen()) focusContent();
     }
 
-    // ------------------------------------------------------------------ pages
+    /**
+     * Keeps the TV from dimming, sleeping or starting its screensaver while a film plays, inside the page
+     * or full screen. Sound counts too, for players the page's own script can't see (in a frame of
+     * another site). Two quiet looks in a row (40 seconds) and the TV may sleep again.
+     */
+    private final Runnable awakeCheck = new Runnable() {
+        @Override
+        public void run() {
+            if (web == null) return;
+            AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            final boolean sound = am != null && am.isMusicActive();
+            web.evaluateJavascript(PLAYING_JS, new ValueCallback<String>() {
+                @Override
+                public void onReceiveValue(String r) {
+                    if (sound || "1".equals(r)) {
+                        quietChecks = 0;
+                        setKeepAwake(true);
+                    } else if (++quietChecks >= 2) {
+                        setKeepAwake(false);
+                    }
+                }
+            });
+            ui.postDelayed(this, AWAKE_CHECK_MS);
+        }
+    };
+
+    private void setKeepAwake(boolean on) {
+        if (on == keepAwake) return;
+        keepAwake = on;
+        if (on) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } else {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+    }
+
+    // ------------------------------------------------------------------ pages, and when they can't load
 
     private void loadPage(String url) {
         hideError();
@@ -948,33 +1113,78 @@ public class MainActivity extends Activity {
         closePanels();
         leaveFullscreen();
         if (web == null) return;
-        if (isVisible(errorPanel) && errorUrl != null) {
-            loadPage(errorUrl);
+        if (isVisible(errorPanel)) {
+            retryDelay = RETRY_FIRST_S;
+            retryNow();
         } else {
             web.reload();
         }
     }
 
-    private void showError(String url, String why) {
+    private void showError(String url, String why, boolean secure) {
         errorUrl = url;
-        errorTitle.setText("Can't open " + hostOf(url != null ? url : homeUrl));
-        errorDetail.setText((why != null ? why : "") + "\n\nCheck the TV's internet connection and try again."
-                + " If the website has moved, choose Change address.");
+        failedAttempt = attempt;
+        errorTitle.setText(t(R.string.error_title, hostOf(url != null ? url : homeUrl)));
+        String reason = secure ? t(R.string.error_secure)
+                : !isOnline() ? t(R.string.error_no_internet)
+                : t(R.string.error_no_answer);
+        errorDetail.setText(reason + "\n\n" + t(R.string.error_advice));
+        errorCode.setText(why != null ? why : "");   // the engine's own words, small, for whoever fixes it
         splash.setVisibility(View.GONE);
         progress.setVisibility(View.GONE);
         if (customView != null) leaveFullscreen();
         stopPointer();
         cursor.setPointerVisible(false);
+        boolean wasShown = isVisible(errorPanel);
         errorPanel.setVisibility(View.VISIBLE);
-        if (!isVisible(menuPanel) && !isVisible(addressPanel)) retryButton.requestFocus();
+        if (!wasShown && !isVisible(menuPanel) && !isVisible(addressPanel) && !isVisible(guidePanel)) {
+            retryButton.requestFocus();
+        }
+        scheduleRetry();
+    }
+
+    private void scheduleRetry() {
+        retryAt = SystemClock.uptimeMillis() + retryDelay * 1000L;
+        retryDelay = Math.min(RETRY_MAX_S, retryDelay * 2);
+        ui.removeCallbacks(retryTick);
+        ui.post(retryTick);
+    }
+
+    /** The countdown on the error screen; at zero the page is tried again, with the screen still up. */
+    private final Runnable retryTick = new Runnable() {
+        @Override
+        public void run() {
+            if (!isVisible(errorPanel) || web == null) return;
+            long now = SystemClock.uptimeMillis();
+            if (isVisible(addressPanel)) retryAt = Math.max(retryAt, now + 5000);   // someone is typing an address
+            long left = retryAt - now;
+            if (left <= 0) {
+                retryNow();
+                return;
+            }
+            errorStatus.setText(t(R.string.error_retry_in, (int) ((left + 999) / 1000)));
+            ui.postDelayed(this, Math.min(1000, left));
+        }
+    };
+
+    private void retryNow() {
+        if (web == null) return;
+        ui.removeCallbacks(retryTick);
+        attempt++;
+        retrying = true;
+        errorStatus.setText(t(R.string.error_retrying));
+        web.loadUrl(errorUrl != null ? errorUrl : homeUrl);
     }
 
     private void hideError() {
+        ui.removeCallbacks(retryTick);
         errorUrl = null;
         sslErrorUrl = null;
+        retrying = false;
+        retryDelay = RETRY_FIRST_S;
         if (isVisible(errorPanel)) {
             errorPanel.setVisibility(View.GONE);
-            if (!isVisible(menuPanel) && !isVisible(addressPanel)) focusContent();
+            if (!isVisible(menuPanel) && !isVisible(addressPanel) && !isVisible(guidePanel)) focusContent();
         }
     }
 
@@ -985,6 +1195,55 @@ public class MainActivity extends Activity {
         }
         View t = target();
         if (t != null) t.requestFocus();
+    }
+
+    private void watchNetwork() {
+        try {
+            ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (cm == null) return;
+            ConnectivityManager.NetworkCallback cb = new ConnectivityManager.NetworkCallback() {
+                @Override
+                public void onAvailable(Network network) {
+                    ui.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            onNetworkBack();
+                        }
+                    });
+                }
+            };
+            cm.registerNetworkCallback(new NetworkRequest.Builder()
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build(), cb);
+            netCallback = cb;
+        } catch (RuntimeException e) {
+            netCallback = null;   // some boxes refuse; the countdown still retries
+        }
+    }
+
+    /** The internet is back: if the error screen is up, try again in a moment instead of waiting. */
+    private void onNetworkBack() {
+        if (!isVisible(errorPanel) || retrying) return;
+        retryDelay = RETRY_FIRST_S;
+        retryAt = SystemClock.uptimeMillis() + 1500;
+        ui.removeCallbacks(retryTick);
+        ui.post(retryTick);
+    }
+
+    @SuppressWarnings("deprecation")
+    private boolean isOnline() {
+        try {
+            ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (cm == null) return true;
+            if (Build.VERSION.SDK_INT >= 23) {
+                Network n = cm.getActiveNetwork();
+                NetworkCapabilities c = n != null ? cm.getNetworkCapabilities(n) : null;
+                return c != null && c.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+            }
+            NetworkInfo info = cm.getActiveNetworkInfo();
+            return info != null && info.isConnected();
+        } catch (RuntimeException e) {
+            return true;
+        }
     }
 
     private final Runnable hideSplash = new Runnable() {
@@ -1030,7 +1289,7 @@ public class MainActivity extends Activity {
                 if (web != null && isWebScheme(url) && sameSite(url)) {
                     loadPage(url);
                 } else {
-                    showOsd("Pop-up blocked", 1500);
+                    showOsd(t(R.string.osd_popup_blocked), 1500);
                 }
                 ui.post(dispose);
             }
@@ -1041,6 +1300,7 @@ public class MainActivity extends Activity {
                 return true;
             }
 
+            @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 take(request.getUrl().toString());
                 return true;
@@ -1051,6 +1311,7 @@ public class MainActivity extends Activity {
                 take(url);
             }
 
+            @Override
             public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
                 if (!done[0]) {
                     done[0] = true;
@@ -1085,8 +1346,8 @@ public class MainActivity extends Activity {
             fullscreenHolder.setVisibility(View.GONE);
             customView = null;
             customViewCallback = null;
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
+        setKeepAwake(false);
         root.removeView(view);
         view.destroy();
         web = null;
@@ -1104,7 +1365,7 @@ public class MainActivity extends Activity {
             return !isWebScheme(url);   // block intent:, market:, etc. (ads love them)
         }
 
-        // Called on Android 7.0+; not marked @Override because this is compiled against API 23.
+        @Override
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
             return !isWebScheme(request.getUrl().toString());
         }
@@ -1123,12 +1384,17 @@ public class MainActivity extends Activity {
         public void onPageFinished(WebView view, String url) {
             progress.setVisibility(View.GONE);
             hideSplashSoon();
-            if (errorUrl == null || (url != null && !url.equals(errorUrl))) hideError();
+            if (retrying) {
+                retrying = false;
+                if (failedAttempt != attempt) hideError();   // the automatic retry worked
+            } else if (errorUrl == null || (url != null && !url.equals(errorUrl))) {
+                hideError();
+            }
         }
 
         @Override
         public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-            showError(failingUrl, description);   // Android 5.x
+            showError(failingUrl, description, false);   // Android 5.x
         }
 
         @Override
@@ -1137,7 +1403,7 @@ public class MainActivity extends Activity {
             String url = request.getUrl().toString();
             if (url.equals(sslErrorUrl)) return;
             CharSequence d = error.getDescription();
-            showError(url, d != null ? d.toString() : "Error " + error.getErrorCode());
+            showError(url, d != null ? d.toString() : "error " + error.getErrorCode(), false);
         }
 
         @Override
@@ -1147,8 +1413,7 @@ public class MainActivity extends Activity {
             String page = view.getUrl() != null ? view.getUrl() : homeUrl;
             if (url != null && (sameHost(url, page) || sameHost(url, homeUrl))) {
                 sslErrorUrl = url;
-                showError(url, "The secure connection failed. If the TV's date or time is wrong,"
-                        + " correct it in the TV's Settings and try again.");
+                showError(url, "SSL error " + error.getPrimaryError(), true);
             }
         }
 
@@ -1158,6 +1423,7 @@ public class MainActivity extends Activity {
             onKeyNotUsedByPage(event);
         }
 
+        @Override
         public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
             onRendererGone(view);
             return true;
@@ -1212,9 +1478,108 @@ public class MainActivity extends Activity {
         public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
             callback.invoke(origin, false, false);
         }
+
+        @Override
+        public boolean onConsoleMessage(ConsoleMessage m) {
+            // A script of the website's own that this box's engine can't even read: the engine is too old.
+            if (!engineHintShown && engineMajor > 0 && engineMajor < 80 && m != null
+                    && m.messageLevel() == ConsoleMessage.MessageLevel.ERROR
+                    && m.message() != null && m.message().contains("SyntaxError")
+                    && (m.sourceId() == null || m.sourceId().isEmpty() || sameSite(m.sourceId()))) {
+                engineHintShown = true;
+                showOsd(t(R.string.osd_old_engine, engineMajor), 10000);
+            }
+            return false;
+        }
     }
 
-    // ------------------------------------------------------------------ menu & address panels
+    // ------------------------------------------------------------------ new versions
+
+    private final Runnable updateCheck = new Runnable() {
+        @Override
+        public void run() {
+            if (updater == null || !updater.enabled()) return;
+            long since = System.currentTimeMillis() - updater.lastCheck();
+            if (since < 0 || since >= UPDATE_MIN_GAP_MS) {
+                updater.checkInBackground(ui, new Updater.Listener() {
+                    @Override
+                    public void onUpdateChecked(int result, int readyBuild) {
+                        onUpdateResult(result, false);
+                    }
+                });
+            } else if (updater.readyBuild() > myBuild) {
+                onUpdateResult(Updater.READY, false);
+            }
+            ui.postDelayed(this, UPDATE_EVERY_MS);
+        }
+    };
+
+    private void onUpdateResult(int result, boolean asked) {
+        if (updateButton != null) updateButton.setText(updateLabel());
+        if (isFinishing() || web == null) return;
+        boolean ready = result == Updater.READY && updater.readyBuild() > myBuild;
+        if (asked) {
+            ui.removeCallbacks(hideOsd);
+            osd.setVisibility(View.GONE);
+            if (ready) {
+                // someone asked and there is one: the menu, with "Install the new version" chosen
+                showMenu();
+                updateButton.requestFocus();
+            } else {
+                showOsd(result == Updater.UP_TO_DATE ? t(R.string.osd_up_to_date, myBuild) : t(R.string.osd_check_failed), 4000);
+            }
+        } else if (ready && !updateAnnounced && !keepAwake && customView == null) {
+            // found by itself: said once, and never over a film (the menu shows it anyway)
+            updateAnnounced = true;
+            showOsd(t(R.string.osd_update_ready), 7000);
+        }
+    }
+
+    private String updateLabel() {
+        int ready = updater.readyBuild();
+        return ready > myBuild ? t(R.string.menu_install_update, ready) : t(R.string.menu_check_update);
+    }
+
+    private void onUpdateButton() {
+        if (updater.readyBuild() > myBuild) {
+            installUpdate();
+            return;
+        }
+        closePanels();
+        showOsd(t(R.string.osd_checking), 20000);
+        updater.checkInBackground(ui, new Updater.Listener() {
+            @Override
+            public void onUpdateChecked(int result, int readyBuild) {
+                onUpdateResult(result, true);
+            }
+        });
+    }
+
+    private void installUpdate() {
+        closePanels();
+        int r = updater.install(this);
+        if (updateButton != null) updateButton.setText(updateLabel());
+        switch (r) {
+            case Updater.STARTED:
+                showOsd(t(R.string.osd_update_started), 6000);
+                break;
+            case Updater.NEED_PERMISSION:
+                awaitingInstallPermission = true;
+                showOsd(t(R.string.osd_update_permission), 10000);
+                break;
+            case Updater.UNSUPPORTED:
+                showOsd(t(R.string.osd_update_unsupported), 8000);
+                break;
+            case Updater.NOTHING_WAITING:
+                onUpdateButton();   // the download is gone: look again
+                break;
+            default:
+                showOsd(t(R.string.osd_update_failed), 5000);
+                break;
+        }
+    }
+
+    // ------------------------------------------------------------------ menu, guide & address panels
 
     private void showMenu() {
         if (web == null) return;
@@ -1224,26 +1589,31 @@ public class MainActivity extends Activity {
             hideKeyboard();
             addressPanel.setVisibility(View.GONE);
         }
+        guidePanel.setVisibility(View.GONE);
         String url = web.getUrl();
-        menuSubtitle.setText(shortUrl(url != null ? url : homeUrl));
+        String sub = shortUrl(url != null ? url : homeUrl) + "  ·  " + t(R.string.menu_build, myBuild);
+        if (engineMajor > 0) sub += "  ·  " + t(R.string.menu_engine, engineMajor);
+        menuSubtitle.setText(sub);
         pointerButton.setText(pointerLabel());
+        updateButton.setText(updateLabel());
         cursor.setPointerVisible(false);
         menuPanel.setVisibility(View.VISIBLE);
         homeButton.requestFocus();
     }
 
     private void closePanels() {
-        boolean wasOpen = isVisible(menuPanel) || isVisible(addressPanel);
+        boolean wasOpen = isVisible(menuPanel) || isVisible(addressPanel) || isVisible(guidePanel);
         if (isVisible(addressPanel)) {
             hideKeyboard();
             addressPanel.setVisibility(View.GONE);
         }
         menuPanel.setVisibility(View.GONE);
+        guidePanel.setVisibility(View.GONE);
         if (wasOpen) focusContent();
     }
 
     private boolean panelOpen() {
-        return isVisible(menuPanel) || isVisible(addressPanel) || isVisible(errorPanel);
+        return isVisible(menuPanel) || isVisible(addressPanel) || isVisible(errorPanel) || isVisible(guidePanel);
     }
 
     private void togglePointer() {
@@ -1253,19 +1623,46 @@ public class MainActivity extends Activity {
         closePanels();
         if (pointerMode) {
             showPointer();
-            showOsd("Mouse pointer on: arrows move it, OK clicks", 3500);
+            showOsd(t(R.string.osd_pointer_on), 3500);
         } else {
             cursor.setPointerVisible(false);
-            showOsd("Mouse pointer off: arrows move between items", 3500);
+            showOsd(t(R.string.osd_pointer_off), 3500);
         }
     }
 
     private String pointerLabel() {
-        return pointerMode ? "Mouse pointer: On" : "Mouse pointer: Off";
+        return pointerMode ? t(R.string.menu_pointer_on) : t(R.string.menu_pointer_off);
     }
+
+    private void showGuide() {
+        if (web == null) return;
+        stopPointer();
+        okDown = null;
+        menuPanel.setVisibility(View.GONE);
+        cursor.setPointerVisible(false);
+        guidePanel.setVisibility(View.VISIBLE);
+        guideClose.requestFocus();
+    }
+
+    /** The remote guide, once, on the first start: when the page is up and nothing else is on screen. */
+    private final Runnable firstGuide = new Runnable() {
+        private int tries;
+
+        @Override
+        public void run() {
+            if (web == null) return;
+            if (panelOpen() || customView != null || isVisible(splash)) {
+                if (++tries < 12) ui.postDelayed(this, 4000);
+                return;
+            }
+            prefs.edit().putBoolean(KEY_GUIDE, true).apply();
+            showGuide();
+        }
+    };
 
     private void showAddress() {
         menuPanel.setVisibility(View.GONE);
+        guidePanel.setVisibility(View.GONE);
         stopPointer();
         cursor.setPointerVisible(false);
         addressInput.setText(homeUrl);
@@ -1285,7 +1682,7 @@ public class MainActivity extends Activity {
     private void submitAddress() {
         String url = normalizeUrl(addressInput.getText().toString());
         if (url == null) {
-            showOsd("That address doesn't look right", 2500);
+            showOsd(t(R.string.osd_bad_address), 2500);
             return;
         }
         setHome(url);
@@ -1297,7 +1694,7 @@ public class MainActivity extends Activity {
         closePanels();
         leaveFullscreen();
         loadPage(url);
-        showOsd("Opening " + shortUrl(url), 2000);
+        showOsd(t(R.string.osd_opening, shortUrl(url)), 2000);
     }
 
     private void hideKeyboard() {
@@ -1309,16 +1706,19 @@ public class MainActivity extends Activity {
         FrameLayout scrim = scrim(0xB3000000);
         LinearLayout card = card();
         card.addView(label(getString(R.string.app_name), 24, Color.WHITE, true));
-        menuSubtitle = label("", 14, 0xFFA8A8B3, false);
+        menuSubtitle = label("", 14, 0xFFA8A4BC, false);
         menuSubtitle.setSingleLine(true);
         menuSubtitle.setEllipsize(TextUtils.TruncateAt.MIDDLE);
+        menuSubtitle.setTextDirection(View.TEXT_DIRECTION_LTR);
         LinearLayout.LayoutParams sub = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         sub.topMargin = dp(2);
         sub.bottomMargin = dp(10);
         card.addView(menuSubtitle, sub);
 
-        homeButton = tvButton("Home", new View.OnClickListener() {
+        LinearLayout list = new LinearLayout(this);
+        list.setOrientation(LinearLayout.VERTICAL);
+        homeButton = tvButton(t(R.string.menu_home), new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 closePanels();
@@ -1326,8 +1726,8 @@ public class MainActivity extends Activity {
                 loadPage(homeUrl);
             }
         });
-        card.addView(homeButton, rowParams(4));
-        card.addView(tvButton("Reload", new View.OnClickListener() {
+        list.addView(homeButton, rowParams(4));
+        list.addView(tvButton(t(R.string.menu_reload), new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 reload();
@@ -1339,44 +1739,130 @@ public class MainActivity extends Activity {
                 togglePointer();
             }
         });
-        card.addView(pointerButton, rowParams(8));
-        card.addView(tvButton("Website address", new View.OnClickListener() {
+        list.addView(pointerButton, rowParams(8));
+        list.addView(tvButton(t(R.string.menu_guide), new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showGuide();
+            }
+        }), rowParams(8));
+        languageButton = tvButton(kurdishReady ? languageLabel() : "", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleLanguage();
+            }
+        });
+        languageButton.setVisibility(kurdishReady ? View.VISIBLE : View.GONE);
+        list.addView(languageButton, rowParams(8));
+        list.addView(tvButton(t(R.string.menu_address), new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showAddress();
             }
         }), rowParams(8));
-        card.addView(tvButton("Exit", new View.OnClickListener() {
+        updateButton = tvButton(updateLabel(), new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onUpdateButton();
+            }
+        });
+        updateButton.setVisibility(updater.enabled() ? View.VISIBLE : View.GONE);
+        list.addView(updateButton, rowParams(8));
+        list.addView(tvButton(t(R.string.menu_exit), new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
             }
         }), rowParams(8));
 
-        TextView hint = label("Hold OK or press MENU to open this menu", 13, 0xFF8A8A95, false);
+        ScrollView scroll = new ScrollView(this);
+        scroll.setVerticalScrollBarEnabled(false);
+        scroll.setClipToPadding(false);
+        scroll.addView(list);
+        card.addView(scroll, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        TextView hint = label(t(R.string.menu_hint), 13, 0xFF8E8AA5, false);
         LinearLayout.LayoutParams hp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         hp.topMargin = dp(14);
         card.addView(hint, hp);
 
-        scrim.addView(card, new FrameLayout.LayoutParams(dp(400), ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+        scrim.addView(card, cardParams(dp(440)));
+        return scrim;
+    }
+
+    private View buildGuidePanel() {
+        FrameLayout scrim = scrim(0xD9000000);
+        LinearLayout card = card();
+        card.addView(label(t(R.string.guide_title), 24, Color.WHITE, true));
+
+        LinearLayout rows = new LinearLayout(this);
+        rows.setOrientation(LinearLayout.VERTICAL);
+        int[][] lines = {
+                {R.string.guide_arrows_key, R.string.guide_arrows},
+                {R.string.guide_ok_key, R.string.guide_ok},
+                {R.string.guide_back_key, R.string.guide_back},
+                {R.string.guide_menu_key, R.string.guide_menu},
+                {R.string.guide_media_key, R.string.guide_media},
+                {R.string.guide_channel_key, R.string.guide_channel},
+        };
+        for (int[] line : lines) {
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            TextView key = label(t(line[0]), 16, ACCENT, true);
+            TextView what = label(t(line[1]), 16, 0xFFEAE6F2, false);
+            LinearLayout.LayoutParams kp = new LinearLayout.LayoutParams(dp(190), ViewGroup.LayoutParams.WRAP_CONTENT);
+            kp.setMarginEnd(dp(14));
+            row.addView(key, kp);
+            row.addView(what, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+            LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            rp.topMargin = dp(12);
+            rows.addView(row, rp);
+        }
+        TextView tip = label(t(R.string.guide_pointer), 15, 0xFFB9B4CF, false);
+        tip.setLineSpacing(0f, 1.15f);
+        LinearLayout.LayoutParams tp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        tp.topMargin = dp(18);
+        rows.addView(tip, tp);
+
+        ScrollView scroll = new ScrollView(this);
+        scroll.setFocusable(true);   // on a small screen: arrows scroll it
+        scroll.addView(rows);
+        card.addView(scroll, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        guideClose = tvButton(t(R.string.guide_close), new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                closePanels();
+            }
+        });
+        guideClose.setGravity(Gravity.CENTER);
+        card.addView(guideClose, rowParams(18));
+
+        scrim.addView(card, cardParams(dp(660)));
         return scrim;
     }
 
     private View buildAddressPanel() {
         FrameLayout scrim = scrim(0xD9000000);
         LinearLayout card = card();
-        card.addView(label("Website address", 22, Color.WHITE, true));
+        card.addView(label(t(R.string.address_title), 22, Color.WHITE, true));
 
         addressInput = new EditText(this);
         addressInput.setSingleLine(true);
         addressInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
         addressInput.setImeOptions(EditorInfo.IME_ACTION_GO);
         addressInput.setTextColor(Color.WHITE);
-        addressInput.setHintTextColor(0xFF77777F);
+        addressInput.setHintTextColor(0xFF77737F);
         addressInput.setHint("https://");
         addressInput.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
         addressInput.setPadding(dp(14), dp(10), dp(14), dp(10));
+        addressInput.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);   // addresses read left to right
+        addressInput.setTextDirection(View.TEXT_DIRECTION_LTR);
         StateListDrawable field = new StateListDrawable();
         GradientDrawable fieldOn = rounded(0xFF0B0E2D, dp(10));
         fieldOn.setStroke(dp(2), ACCENT);
@@ -1401,7 +1887,7 @@ public class MainActivity extends Activity {
         ip.topMargin = dp(14);
         card.addView(addressInput, ip);
 
-        TextView def = label("Default: " + shortUrl(DEFAULT_URL), 13, 0xFF8A8A95, false);
+        TextView def = label(t(R.string.address_default, shortUrl(DEFAULT_URL)), 13, 0xFF8E8AA5, false);
         LinearLayout.LayoutParams dp8 = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         dp8.topMargin = dp(8);
@@ -1409,19 +1895,19 @@ public class MainActivity extends Activity {
 
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
-        Button open = tvButton("Open", new View.OnClickListener() {
+        Button open = tvButton(t(R.string.address_open), new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 submitAddress();
             }
         });
-        Button reset = tvButton("Use default", new View.OnClickListener() {
+        Button reset = tvButton(t(R.string.address_use_default), new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 setHome(DEFAULT_URL);
             }
         });
-        Button cancel = tvButton("Cancel", new View.OnClickListener() {
+        Button cancel = tvButton(t(R.string.address_cancel), new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 closePanels();
@@ -1431,7 +1917,7 @@ public class MainActivity extends Activity {
         for (int i = 0; i < buttons.length; i++) {
             buttons[i].setGravity(Gravity.CENTER);
             LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(0, dp(50), 1f);
-            if (i > 0) bp.leftMargin = dp(10);
+            if (i > 0) bp.setMarginStart(dp(10));
             row.addView(buttons[i], bp);
         }
         LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(
@@ -1439,7 +1925,7 @@ public class MainActivity extends Activity {
         rp.topMargin = dp(18);
         card.addView(row, rp);
 
-        scrim.addView(card, new FrameLayout.LayoutParams(dp(580), ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+        scrim.addView(card, cardParams(dp(600)));
         return scrim;
     }
 
@@ -1454,7 +1940,7 @@ public class MainActivity extends Activity {
         box.addView(errorTitle, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-        errorDetail = label("", 16, 0xFFB4B4BE, false);
+        errorDetail = label("", 16, 0xFFB9B4CF, false);
         errorDetail.setGravity(Gravity.CENTER);
         errorDetail.setMaxWidth(dp(640));
         errorDetail.setLineSpacing(0f, 1.15f);
@@ -1463,31 +1949,46 @@ public class MainActivity extends Activity {
         dl.topMargin = dp(12);
         box.addView(errorDetail, dl);
 
+        errorStatus = label("", 16, ACCENT, true);
+        errorStatus.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams sl = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        sl.topMargin = dp(16);
+        box.addView(errorStatus, sl);
+
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
-        retryButton = tvButton("Try again", new View.OnClickListener() {
+        retryButton = tvButton(t(R.string.error_try_again), new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String url = errorUrl != null ? errorUrl : homeUrl;
-                loadPage(url);
+                retryDelay = RETRY_FIRST_S;
+                retryNow();
             }
         });
         retryButton.setGravity(Gravity.CENTER);
-        row.addView(retryButton, new LinearLayout.LayoutParams(dp(210), dp(52)));
-        Button change = tvButton("Change address", new View.OnClickListener() {
+        row.addView(retryButton, new LinearLayout.LayoutParams(dp(220), dp(52)));
+        Button change = tvButton(t(R.string.error_change_address), new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showAddress();
             }
         });
         change.setGravity(Gravity.CENTER);
-        LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(dp(210), dp(52));
-        cp.leftMargin = dp(14);
+        LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(dp(220), dp(52));
+        cp.setMarginStart(dp(14));
         row.addView(change, cp);
         LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        rp.topMargin = dp(26);
+        rp.topMargin = dp(22);
         box.addView(row, rp);
+
+        errorCode = label("", 12, 0xFF5E5A72, false);
+        errorCode.setGravity(Gravity.CENTER);
+        errorCode.setTextDirection(View.TEXT_DIRECTION_LTR);
+        LinearLayout.LayoutParams ec = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        ec.topMargin = dp(18);
+        box.addView(errorCode, ec);
 
         scrim.addView(box, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
@@ -1526,6 +2027,8 @@ public class MainActivity extends Activity {
         b.setPadding(dp(20), 0, dp(20), 0);
         b.setMinHeight(0);
         b.setMinimumHeight(0);
+        b.setSingleLine(true);
+        b.setEllipsize(TextUtils.TruncateAt.END);
         StateListDrawable bg = new StateListDrawable();
         bg.addState(new int[]{android.R.attr.state_focused}, rounded(ACCENT, dp(10)));
         bg.addState(new int[]{android.R.attr.state_pressed}, rounded(ACCENT, dp(10)));
@@ -1546,6 +2049,7 @@ public class MainActivity extends Activity {
         s.setClickable(true);       // blocks touches/mouse to the page underneath
         s.setFocusable(false);      // ...but never takes remote focus (Android 8+ makes clickable views focusable)
         s.setVisibility(View.GONE);
+        if (kurdish) s.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         return s;
     }
 
@@ -1555,6 +2059,13 @@ public class MainActivity extends Activity {
         c.setPadding(dp(26), dp(22), dp(26), dp(22));
         c.setBackground(rounded(0xF2161433, dp(18)));
         return c;
+    }
+
+    private FrameLayout.LayoutParams cardParams(int width) {
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(width, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
+        lp.topMargin = dp(20);
+        lp.bottomMargin = dp(20);
+        return lp;
     }
 
     private TextView label(CharSequence text, float sp, int color, boolean bold) {
@@ -1673,6 +2184,16 @@ public class MainActivity extends Activity {
         String[] parts = home.split("\\.");
         String base = parts.length >= 2 ? parts[parts.length - 2] + "." + parts[parts.length - 1] : home;
         return h.equals(home) || h.equals(base) || h.endsWith("." + base);
+    }
+
+    /** The box's own web engine's main version (Chrome 66 -> 66), 0 if unknown. */
+    private int engineVersion() {
+        try {
+            Matcher m = Pattern.compile("Chrome/(\\d+)").matcher(WebSettings.getDefaultUserAgent(this));
+            return m.find() ? Integer.parseInt(m.group(1)) : 0;
+        } catch (RuntimeException e) {
+            return 0;
+        }
     }
 
     private static String num(float v) {
