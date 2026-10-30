@@ -16,6 +16,7 @@ final class GeckoEvents implements GeckoSession.ProgressDelegate, GeckoSession.C
     private final PageListener l;
     private String started;   // the address the page now loading started with
     private int loads;        // pages started, so a late "finished" is never for a newer one
+    private boolean blank;    // it's the engine's own empty page (about:blank), not one to tell the app about
 
     GeckoEvents(GeckoPage page, PageListener l) {
         this.page = page;
@@ -26,6 +27,8 @@ final class GeckoEvents implements GeckoSession.ProgressDelegate, GeckoSession.C
 
     @Override
     public void onPageStart(GeckoSession s, String url) {
+        blank = url == null || url.startsWith("about:");
+        if (blank) return;
         started = url;
         loads++;
         l.started(url);
@@ -34,6 +37,7 @@ final class GeckoEvents implements GeckoSession.ProgressDelegate, GeckoSession.C
     /** A page that failed is finished after its error comes (GeckoNavigation.onLoadError), as in Android's WebView. */
     @Override
     public void onPageStop(GeckoSession s, boolean success) {
+        if (blank) return;
         if (success) {
             l.finished(page.location);
             return;
@@ -50,14 +54,14 @@ final class GeckoEvents implements GeckoSession.ProgressDelegate, GeckoSession.C
 
     @Override
     public void onProgressChange(GeckoSession s, int progress) {
-        l.progress(progress);
+        if (!blank) l.progress(progress);
     }
 
     // ContentDelegate
 
     @Override
     public void onFirstContentfulPaint(GeckoSession s) {
-        l.shown(page.location);
+        if (!blank) l.shown(page.location);
     }
 
     /** The page's own view shows the video full screen; the app only takes the remote for it. */

@@ -32,7 +32,7 @@ final class PageClient extends WebViewClient {
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
         if (!Urls.isWebScheme(url)) return true;   // intent:, market: and the like: never (ads love them)
-        return !l.mayGo(url);                      // Android 5 and 6: the page itself only
+        return !l.mayGo(url);                      // Android 6: the page itself only
     }
 
     @Override
@@ -67,11 +67,6 @@ final class PageClient extends WebViewClient {
     @Override
     public void onPageFinished(WebView view, String url) {
         l.finished(url);
-    }
-
-    @Override
-    public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-        l.failed(failingUrl, description);   // Android 5.x
     }
 
     @Override

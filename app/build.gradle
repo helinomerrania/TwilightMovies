@@ -22,7 +22,7 @@ android {
 
     defaultConfig {
         applicationId = 'com.twilightcafe.movies'
-        minSdk = 21                                  // Android TV 5.0 and newer (Firefox's engine: 8.0 and newer)
+        minSdk = 23                                  // Android 6.0 and newer, as AndroidX (Firefox's engine: 8.0)
         targetSdk = 35
         versionCode = buildNumber
         versionName = "1.${buildNumber}"

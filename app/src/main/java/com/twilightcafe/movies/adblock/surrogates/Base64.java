@@ -1,6 +1,6 @@
 package com.twilightcafe.movies.adblock.surrogates;
 
-/** Base64 to bytes (java.util.Base64 needs Android 8.0; this app runs on 5.0). */
+/** Base64 to bytes (java.util.Base64 needs Android 8.0; this app runs on 6.0). */
 final class Base64 {
     private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 

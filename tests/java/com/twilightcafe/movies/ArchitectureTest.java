@@ -22,7 +22,7 @@ import static com.twilightcafe.movies.test.Sources.ROOT;
 /**
  * The project keeps to the rules in ARCHITECTURE.md: small files; only what Android starts by name in the top
  * folder; only MainActivity makes the app; the ground floor never reaches up; only app/ knows the two web
- * engines; the plain-Java parts use nothing of Android; nothing newer than Android 5.0 in the app; every folder
+ * engines; the plain-Java parts use nothing of Android; nothing newer than Android 6.0 in the app; every folder
  * documented, every class saying what it does, and every test run.
  */
 public final class ArchitectureTest {
@@ -52,7 +52,7 @@ public final class ArchitectureTest {
     /** The web engines: only app/ (Engines) chooses and makes one; everything else knows only web/'s Page. */
     static final Set<String> ENGINES = set("web/webview", "web/gecko");
 
-    /** Library calls Android 5.0 doesn't have (the café's box is older than they are). */
+    /** Library calls Android 6.0 doesn't have (the oldest boxes the app runs on are older than they are). */
     static final Pattern NEWER = Pattern.compile("java\\.util\\.(function|stream)|java\\.time\\.|import java\\.util\\.Base64"
             + "|String\\.join\\(|\\.(computeIfAbsent|computeIfPresent|removeIf|forEach|getOrDefault|putIfAbsent|replaceAll|merge)\\("
             + "|\\.stream\\(\\)|\\b(Map|List|Set)\\.(of|copyOf)\\(|Optional<|\\.readAllBytes\\(|\\.isBlank\\(|\\.strip\\(|\\.repeat\\("
@@ -163,7 +163,7 @@ public final class ArchitectureTest {
                 if (NEWER.matcher(code).find()) found.add(Sources.relative(p) + ":" + (i + 1) + "  " + lines[i].trim());
             }
         }
-        ok("the app uses nothing Android 5.0 doesn't have", found.isEmpty(), found);
+        ok("the app uses nothing Android 6.0 doesn't have", found.isEmpty(), found);
     }
 
     static void documented() {

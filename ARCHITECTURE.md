@@ -87,7 +87,7 @@ The compiler that makes the filter file is in `tools/filters/src` (package `adbl
 - **The ground floor never reaches up.** `util/` uses nothing else of the app; `adblock/engine/` nothing at all (the compiler shares it, on GitHub); `adblock/surrogates/` only the engine; `adblock/` only those two and `util/`; `settings/` only `util/`; `text/` only the texts; `ui/` only `text/` and `util/`; `update/` only `util/` (and `InstallResult`); `web/` only `util/`; `web/webview/` and `web/gecko/` only `web/` and `util/`, and only `app/` uses them. The features (`sites/`, `remote/`, `pointer/`, `video/`, `loading/`, `menu/` and `app/`) use the ground floor and each other. `ArchitectureTest` checks this on every build, and that every folder is in this file.
 - **The rules are plain Java, beside the Android code that uses them**, so they're tested on a computer: `SitePolicy`, `RequestKind` and `BlockedPage` beside `AdBlocker`, `Site` beside `Sites`, `Backoff` beside `ErrorScreen`, `Release` beside `Updater`, `History` beside the engines, `Urls`, `Streams` and `Http`, and all of `adblock/engine/` and `adblock/surrogates/`. Such a class says "Plain Java." at its top, and `tests/java/run.sh` compiles it with the tests.
 - **Small files.** No file of code is longer than 250 lines. `ArchitectureTest` checks every one.
-- **Android 5.0 and newer.** The café's box is old: the app uses no Java library call Android 5 doesn't have (`ArchitectureTest` looks), and the page scripts are plain old JavaScript (`tests/js` looks).
+- **Android 6.0 and newer** (the oldest AndroidX supports; Firefox's engine needs 8.0, so older boxes use their own). TV boxes are old: the app uses no Java library call Android 6 doesn't have (`ArchitectureTest` looks), and the page scripts are plain old JavaScript, for the boxes' own engines from 2018 (`tests/js` looks).
 - **Threads.** Anything that touches the screen runs on the main thread (`Screen.main`). The ad blocker answers Android's WebView on the WebView's own threads and Firefox's engine on three of the app's (`web/gecko/Extension`), and loads and downloads filters on threads of its own; `Updater` checks and downloads on its own.
 
 ## Adding a website
@@ -142,7 +142,7 @@ There are two sets, and GitHub runs both on every push before anything is built.
 
 | Test | What it checks |
 |---|---|
-| `ArchitectureTest` | The rules above: small files, the folders' rules, only `app/` knowing the engines, plain Java, Android 5, every folder and class described, every test run |
+| `ArchitectureTest` | The rules above: small files, the folders' rules, only `app/` knowing the engines, plain Java, Android 6, every folder and class described, every test run |
 | `PublicSuffixTest`, `NetworkRulesTest`, `OptionsTest`, `CosmeticRulesTest` | The ad blocker's rules: small lists made into a filter file and read back as the app reads its own, then asked about addresses and pages |
 | `CompilerTest` | Reading the lists (`!#if`, `$badfilter`), the file itself (the same lists make the same bytes; a damaged file is refused), checks.txt |
 | `SurrogatesTest` | The stand-ins for what's blocked |
