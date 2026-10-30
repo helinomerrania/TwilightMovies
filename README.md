@@ -6,10 +6,12 @@ It isn't made by KurdFilm or connected to them: it only shows their website, as 
 
 ## Put it on a TV box
 
-1. On the box, install **Downloader** from the box's app store, and open it.
-2. Type this address and choose **Go**:
+1. On the TV box, open Google Play and install **Downloader** (by AFTVnews).
+2. Open Downloader and type this address:
    `https://github.com/helinomerrania/TwilightMovies/releases/latest/download/twilight-movies.apk`
 3. When the box asks, allow Downloader to install apps. Then choose **Install**, then **Open**.
+
+You can also copy `twilight-movies.apk` to a USB stick and open it with the box's file manager.
 
 Twilight Movies is then in the box's row of apps. A newer build installs over the old one the same way, and keeps the website's sign-in and the app's settings.
 
