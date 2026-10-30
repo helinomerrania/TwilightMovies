@@ -3,11 +3,10 @@ package com.twilightcafe.movies.video;
 import android.content.Context;
 import android.media.AudioManager;
 import android.view.WindowManager;
-import android.webkit.ValueCallback;
 
 import com.twilightcafe.movies.ui.Screen;
+import com.twilightcafe.movies.web.Page;
 import com.twilightcafe.movies.web.PageScripts;
-import com.twilightcafe.movies.web.PageView;
 
 /**
  * Keeps the TV from dimming, sleeping or starting its screensaver while a film plays, in the page or full
@@ -18,7 +17,7 @@ public final class KeepAwake {
     private static final long LOOK_EVERY_MS = 20000;
 
     private final Screen screen;
-    private final PageView page;
+    private final Page page;
     private final PageScripts scripts;
     private boolean on;
     private int quiet;
@@ -29,22 +28,19 @@ public final class KeepAwake {
             if (!page.alive()) return;
             AudioManager am = (AudioManager) screen.activity.getSystemService(Context.AUDIO_SERVICE);
             final boolean sound = am != null && am.isMusicActive();
-            page.run(scripts.call(PageScripts.PLAYING), new ValueCallback<String>() {
-                @Override
-                public void onReceiveValue(String playing) {
-                    if (sound || "1".equals(playing)) {
-                        quiet = 0;
-                        set(true);
-                    } else if (++quiet >= 2) {
-                        set(false);
-                    }
+            page.run(scripts.call(PageScripts.PLAYING), playing -> {
+                if (sound || "1".equals(playing)) {
+                    quiet = 0;
+                    set(true);
+                } else if (++quiet >= 2) {
+                    set(false);
                 }
             });
             screen.main.postDelayed(this, LOOK_EVERY_MS);
         }
     };
 
-    public KeepAwake(Screen screen, PageView page, PageScripts scripts) {
+    public KeepAwake(Screen screen, Page page, PageScripts scripts) {
         this.screen = screen;
         this.page = page;
         this.scripts = scripts;

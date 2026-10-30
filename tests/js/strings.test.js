@@ -46,7 +46,7 @@ for (const [name, s] of base.out) {
 
 const code = javaFiles(JAVA).map((f) => fs.readFileSync(f, 'utf8')).join('\n')
   + fs.readFileSync(path.join(ROOT, 'app', 'src', 'main', 'AndroidManifest.xml'), 'utf8');
-const used = new Set((code.match(/R\.string\.(\w+)|@string\/(\w+)/g) || []).map((x) => x.replace(/^R\.string\.|^@string\//, '')));
+const used = new Set((code.match(/(?<!android\.)R\.string\.(\w+)|@string\/(\w+)/g) || []).map((x) => x.replace(/^R\.string\.|^@string\//, '')));
 const missing = [...used].filter((n) => !base.out.has(n));
 ok('every text the app asks for is in strings.xml', missing.length === 0, missing.join(', '));
 const unused = [...base.out.keys()].filter((n) => !used.has(n));

@@ -26,12 +26,12 @@ public final class Surrogates {
         public final String mime;
         public final byte[] data;
 
-        Body(String mime, byte[] data) {
+        public Body(String mime, byte[] data) {
             this.mime = mime;
             this.data = data;
         }
 
-        Body(String mime, String text) {
+        public Body(String mime, String text) {
             this(mime, text.getBytes(UTF8));
         }
     }

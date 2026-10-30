@@ -1,7 +1,6 @@
 package com.twilightcafe.movies.app;
 
 import android.os.SystemClock;
-import android.webkit.WebView;
 
 import com.twilightcafe.movies.R;
 import com.twilightcafe.movies.loading.ErrorScreen;
@@ -109,12 +108,12 @@ final class Navigation implements ErrorScreen.Host, Fullscreen.Listener {
     }
 
     /** The page's engine crashed (often low memory on TV boxes): the app starts again, at the same page. */
-    void crashed(WebView view) {
-        if (!app.page.is(view)) return;
+    void crashed() {
+        if (!app.page.alive()) return;
         long now = SystemClock.uptimeMillis();
         boolean again = lastCrashAt != 0 && now - lastCrashAt < 20000;   // twice in a row: at the website's start
         lastCrashAt = now;
-        resumeUrl = again ? app.sites.address() : view.getUrl();
+        resumeUrl = again ? app.sites.address() : app.page.url();
         app.fullscreen.drop();
         app.awake.set(false);
         app.page.drop();

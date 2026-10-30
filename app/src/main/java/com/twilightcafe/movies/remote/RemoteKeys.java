@@ -98,7 +98,7 @@ public final class RemoteKeys {
                 if (action == KeyEvent.ACTION_DOWN && e.getRepeatCount() % 4 == 0) pointer.scrollHere(Keys.up(code) ? -0.8f : 0.8f);
                 return true;
             }
-            target.send(e);
+            target.send(target.reportsUnusedKeys() ? e : Keys.asPage(e));   // Firefox's engine scrolls by page keys
             return true;
         }
         return false;
@@ -194,10 +194,7 @@ public final class RemoteKeys {
         if (code == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE) media.press(down, up, "t", 0, 0);
         else if (code == KeyEvent.KEYCODE_MEDIA_FAST_FORWARD) media.press(down, up, "s", 10, 0);
         else if (code == KeyEvent.KEYCODE_MEDIA_REWIND) media.press(down, up, "s", -10, 0);
-        else {
-            target.send(down);   // play, pause, stop, next, previous: the page first (MediaKeys.notUsed after)
-            target.send(up);
-        }
+        else media.other(down, up);   // play, pause, stop, next, previous
         return true;
     }
 }

@@ -37,4 +37,13 @@ final class Keys {
     static boolean up(int c) {
         return c == KeyEvent.KEYCODE_PAGE_UP || c == KeyEvent.KEYCODE_CHANNEL_UP;
     }
+
+    /** A channel key as the page key it does (the same key if it's one already). */
+    static KeyEvent asPage(KeyEvent e) {
+        int c = e.getKeyCode();
+        if (c != KeyEvent.KEYCODE_CHANNEL_UP && c != KeyEvent.KEYCODE_CHANNEL_DOWN) return e;
+        return new KeyEvent(e.getDownTime(), e.getEventTime(), e.getAction(), up(c) ? KeyEvent.KEYCODE_PAGE_UP
+                : KeyEvent.KEYCODE_PAGE_DOWN, e.getRepeatCount(), e.getMetaState(), e.getDeviceId(), e.getScanCode(),
+                e.getFlags(), e.getSource());
+    }
 }

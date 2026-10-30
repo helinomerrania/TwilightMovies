@@ -26,16 +26,15 @@ import com.twilightcafe.movies.update.Updater;
 import com.twilightcafe.movies.video.Fullscreen;
 import com.twilightcafe.movies.video.KeepAwake;
 import com.twilightcafe.movies.video.MediaKeys;
+import com.twilightcafe.movies.web.Page;
 import com.twilightcafe.movies.web.PageScripts;
 import com.twilightcafe.movies.web.PageTarget;
-import com.twilightcafe.movies.web.PageView;
-import com.twilightcafe.movies.web.Popups;
 
 /**
  * Makes every part of the app once and wires them together: the one class that knows them all. Each part gets
  * what it needs when it's made; the few that bring many parts together (Navigation, PanelActions, MenuActions,
- * Blocking, Updates, PageEvents) get the app itself. MainActivity hands it Android's events. ARCHITECTURE.md
- * has the picture.
+ * Blocking, Updates, PageEvents) get the app itself. The web engine is the box's own or Firefox's (Engines).
+ * MainActivity hands it Android's events. ARCHITECTURE.md has the picture.
  */
 public final class MoviesApp {
     private static final String STATE_URL = "resume_url";
@@ -46,7 +45,7 @@ public final class MoviesApp {
     final Updater updater;
     final AdBlocker blocker;
     final PageScripts scripts;
-    final int engine;   // the box's web engine (Chrome 66: 66)
+    final boolean engineChoice;   // whether Firefox's engine can run here, so the menu offers both
 
     final Navigation nav = new Navigation(this);
     final PanelActions panelActions = new PanelActions(this);
@@ -55,7 +54,7 @@ public final class MoviesApp {
     final Updates updates = new Updates(this);
 
     // On the screen, from the bottom up
-    final PageView page;
+    final Page page;
     final PageTarget target;
     final Fullscreen fullscreen;
     final Splash splash;
@@ -71,7 +70,6 @@ public final class MoviesApp {
 
     final KeepAwake awake;
     final MediaKeys media;
-    final Popups popups;
     public final RemoteKeys keys;
 
     public MoviesApp(Activity a, Bundle state) {
@@ -84,10 +82,11 @@ public final class MoviesApp {
         blocker.setTexts(screen.t(R.string.page_blocked_title), screen.t(R.string.page_blocked_text), screen.texts.kurdish());
         blocker.start();   // the rules load while the start picture shows; the first page waits for them
         scripts = new PageScripts(a.getAssets());
-        engine = PageView.engineVersion(a);
+        engineChoice = Engines.choice(a);
 
-        page = new PageView(a, new PageEvents(this));
-        page.expose(blocker.bridge(), blocker.bridgeName);
+        BlockerLink link = new BlockerLink(blocker);
+        page = Engines.make(a, screen.main, settings, new PageEvents(this), link);
+        page.expose(link, blocker.bridgeName);
         screen.add(page.view());
         target = new PageTarget(page);
         fullscreen = new Fullscreen(screen, target, nav);
@@ -110,7 +109,6 @@ public final class MoviesApp {
 
         awake = new KeepAwake(screen, page, scripts);
         media = new MediaKeys(screen, page, scripts, target, osd);
-        popups = new Popups(a, screen.main, blocking);
         keys = new RemoteKeys(screen.main, target, pointer, media, panelActions);
         pointer.setEnabled(sites.pointer());
 
@@ -134,7 +132,7 @@ public final class MoviesApp {
         page.pause(scripts.call(PageScripts.PAUSE_ALL));
     }
 
-    /** Only the address: a whole WebView's state can be too big for Android to keep. */
+    /** Only the address: a whole page's state can be too big for Android to keep. */
     public void save(Bundle out) {
         String url = page.alive() ? page.url() : nav.resumeUrl();
         if (url != null) out.putString(STATE_URL, url);

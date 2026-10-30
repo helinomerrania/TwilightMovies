@@ -1,13 +1,14 @@
 // Hides the page's ad boxes: first the site's own rules and the ones for every page, then the rules for the
 // classes and ids the page has (".ad-box", "#banner"), asked for as they appear, a few dozen at a time.
 // B: the name of the app's bridge (different on every start, so pages can't look for it). It answers with CSS
-// only. Once a page, however often the app puts it in.
+// only: at once in the box's own web engine, later (a promise) in Firefox's. Once a page, however often the
+// app puts it in; if the bridge isn't there yet, the next time.
 (function (B) {
   var w = window, d = document;
   if (!d || !d.documentElement || w.__twc === d) return;
-  w.__twc = d;
   var b = w[B];
   if (!b) return;
+  w.__twc = d;
   var done = {}, q = [], t = 0, h = location.hostname;
 
   function add(css) {
@@ -15,6 +16,16 @@
     var s = d.createElement('style');
     s.textContent = css;
     (d.head || d.documentElement).appendChild(s);
+  }
+
+  function ask(what, keys) {
+    try {
+      var r = b.ask(what, h, keys);
+      if (r && typeof r.then === 'function') r.then(add, function () {});
+      else add(r);
+    } catch (x) {
+      // the app is busy or gone: the boxes stay
+    }
   }
 
   function key(k) {
@@ -50,18 +61,10 @@
     if (!q.length) return;
     var k = q.join(' ');
     q = [];
-    try {
-      add(b.generic(h, k));
-    } catch (x) {
-      // the app is busy or gone: the boxes stay
-    }
+    ask('generic', k);
   }
 
-  try {
-    add(b.page(h));
-  } catch (x) {
-    // as above
-  }
+  ask('page', '');
   scan(d.documentElement);
   if (w.MutationObserver) {
     new w.MutationObserver(function (m) {

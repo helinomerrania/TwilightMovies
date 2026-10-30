@@ -75,6 +75,13 @@ final class MenuActions implements MenuPanel.Actions, MenuPanel.Status {
         app.updates.button();
     }
 
+    /** The other web engine, for this box: the app starts again with it. */
+    @Override
+    public void switchEngine() {
+        app.panels.close();
+        Engines.switchTo(app.screen.activity, app.settings, !app.page.inApp());
+    }
+
     @Override
     public void exit() {
         app.screen.activity.finish();
@@ -82,12 +89,14 @@ final class MenuActions implements MenuPanel.Actions, MenuPanel.Status {
 
     // MenuPanel.Status
 
-    /** The page's address, the app's build, and the box's web engine. */
+    /** The page's address, the app's build, and the web engine (the box's own, or Firefox's). */
     @Override
     public String subtitle() {
         String url = app.page.url();
         String sub = Urls.shortUrl(url != null ? url : app.sites.address()) + "  ·  " + t(R.string.menu_build, app.updater.myBuild());
-        return app.engine > 0 ? sub + "  ·  " + t(R.string.menu_engine, app.engine) : sub;
+        int v = app.page.engineVersion();
+        if (v <= 0) return sub;
+        return sub + "  ·  " + t(app.page.inApp() ? R.string.menu_engine_firefox : R.string.menu_engine, v);
     }
 
     /** The ad blocker's rules: how many, and from when. */
@@ -121,5 +130,12 @@ final class MenuActions implements MenuPanel.Actions, MenuPanel.Status {
     @Override
     public String updateLabel() {
         return app.updates.label();
+    }
+
+    /** The engine in use, when the box can have either (null: only its own). */
+    @Override
+    public String engineLabel() {
+        if (!app.engineChoice) return null;
+        return t(app.page.inApp() ? R.string.menu_engine_inapp : R.string.menu_engine_box);
     }
 }

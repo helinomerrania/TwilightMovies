@@ -2,9 +2,10 @@ name: Try the app
 
 # On GitHub's machines, which reach the websites: the website opened in Chromium the way a TV box asks for it
 # (tests/try/website.js), which web engine its scripts need, what the app's ad blocker would block there, and the
-# app itself on two Android TV emulators: one with a web engine from 2018 like the café's box, one with a new
-# one (tests/try/emulator.sh). The screenshots and logs go to the pre-release "try". Runs on a push to a branch
-# named try/..., or by hand from the Actions tab.
+# app itself on two emulators with a TV's screen (tests/try/emulator.sh): Android 9, with a web engine from 2018
+# like the café's box (so the app uses Firefox's, inside it), and Android 14, with a new one (the box's own).
+# The screenshots and logs go to the pre-release "try". Runs on a push to a branch named try/..., or by hand
+# from the Actions tab.
 on:
   push:
     branches: ['try/**']
@@ -66,16 +67,16 @@ jobs:
         run: bash tests/try/publish.sh out/website website-
 
   emulator:
-    name: The app on Android ${{ matrix.api }} TV
+    name: The app on Android ${{ matrix.api }} (${{ matrix.name }})
     needs: prepare
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         include:
-          - name: old   # Android 9: a web engine from 2018, like the café's box
+          - name: old   # Android 9: a web engine from 2018, like the café's box (the app uses Firefox's)
             api: 28
-          - name: new   # Android 14: a new web engine
+          - name: new   # Android 14: a new web engine (the app uses it)
             api: 34
     steps:
       - uses: actions/checkout@v7
@@ -90,8 +91,10 @@ jobs:
           mkdir -p app/src/main/assets
           gh release download filters -p filters.bin -D app/src/main/assets --clobber
           chmod +x gradlew
-          ./gradlew --no-daemon assembleRelease
+          # Firefox's engine for the emulators' processor (the boxes get the one for ARM)
+          ./gradlew --no-daemon assembleRelease -Pgeckoabi=x86_64
           cp app/build/outputs/apk/release/app-release.apk twilight-movies.apk
+          ls -l twilight-movies.apk
       - name: Let the emulator use the processor's virtualization
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -101,8 +104,8 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api }}
-          target: android-tv
-          arch: x86
+          target: google_apis   # 64-bit, as Firefox's engine is (Android TV's own emulators are 32-bit)
+          arch: x86_64
           profile: tv_1080p
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-boot-anim

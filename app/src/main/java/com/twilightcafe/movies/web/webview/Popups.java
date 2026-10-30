@@ -1,4 +1,4 @@
-package com.twilightcafe.movies.web;
+package com.twilightcafe.movies.web.webview;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -9,33 +9,26 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.twilightcafe.movies.web.PageListener;
+
 /**
- * Windows the page opens. One the viewer clicked opens in the app's own page, if the app allows where it goes;
- * ad pop-ups (opened by a script, or going to another site) are dropped. The window itself is never shown.
+ * Windows the page opens, in Android's WebView. One the viewer clicked is given a hidden WebView, only to see
+ * where it goes: that address goes to PageListener.popup (the app may open it in its own page), and the window
+ * is gone. Windows a script opens by itself (ads) never get one.
  */
-public final class Popups {
-    public interface Rules {
-        /** Whether the app's page may go to url. */
-        boolean allowed(String url);
-
-        void open(String url);
-
-        /** A window the app didn't open (the viewer is told). */
-        void refused();
-    }
-
+final class Popups {
     private final Context ctx;
     private final Handler main;
-    private final Rules rules;
+    private final PageListener listener;
 
-    public Popups(Context ctx, Handler main, Rules rules) {
+    Popups(Context ctx, Handler main, PageListener listener) {
         this.ctx = ctx;
         this.main = main;
-        this.rules = rules;
+        this.listener = listener;
     }
 
     /** For WebChromeClient.onCreateWindow: true if the window is taken (to see where it goes). */
-    public boolean open(boolean userGesture, Message msg) {
+    boolean open(boolean userGesture, Message msg) {
         if (!userGesture || msg == null || !(msg.obj instanceof WebView.WebViewTransport)) return false;
         final WebView popup = new WebView(ctx);
         final boolean[] done = {false};
@@ -54,8 +47,7 @@ public final class Popups {
             private void take(String url) {
                 if (done[0] || url == null || url.startsWith("about:")) return;
                 done[0] = true;
-                if (rules.allowed(url)) rules.open(url);
-                else rules.refused();
+                listener.popup(url, true);
                 main.post(dispose);
             }
 

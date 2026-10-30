@@ -30,6 +30,14 @@ public final class RequestKindTest {
         eq("a video stream", RequestKind.of(null, "https://a.com/live.m3u8"), Request.MEDIA);
         eq("anything else: unknown", RequestKind.of(null, "https://a.com/api/track"), Request.UNKNOWN);
         eq("a header in any letters", RequestKind.header(headers("REFERER", "https://a.com/"), "Referer"), "https://a.com/");
+        eq("Firefox's engine: a script", RequestKind.named("script", "https://a.com/x"), Request.SCRIPT);
+        eq("...a frame", RequestKind.named("sub_frame", "https://a.com/x"), Request.SUBDOCUMENT);
+        eq("...the page itself", RequestKind.named(RequestKind.PAGE, "https://a.com/x"), Request.DOCUMENT);
+        eq("...a fetch", RequestKind.named("xmlhttprequest", "https://a.com/x.js"), Request.XHR);
+        eq("...a beacon is a ping", RequestKind.named("beacon", "https://a.com/x"), Request.PING);
+        eq("...a picture set is a picture", RequestKind.named("imageset", "https://a.com/x"), Request.IMAGE);
+        eq("...a kind it doesn't name: by the address", RequestKind.named("something-new", "https://a.com/ad.js"), Request.SCRIPT);
+        eq("the page itself, in Firefox's words", RequestKind.PAGE, "main_frame");
         String page = BlockedPage.html("<An ad>", "Stopped & \"gone\"", "popads.net", true);
         ok("the blocked page: right to left in Kurdish", page.contains("dir=\"rtl\""));
         ok("...its words, safely", page.contains("&lt;An ad&gt;") && page.contains("Stopped &amp; &quot;gone&quot;"));

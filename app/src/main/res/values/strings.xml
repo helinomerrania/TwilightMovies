@@ -24,6 +24,9 @@
     <string name="menu_hint">Hold OK or press Menu to open this menu</string>
     <string name="menu_build">build %1$d</string>
     <string name="menu_engine">web engine %1$d</string>
+    <string name="menu_engine_firefox">Firefox %1$d</string>
+    <string name="menu_engine_inapp">Web engine: Firefox\'s, inside the app</string>
+    <string name="menu_engine_box">Web engine: this TV box\'s own</string>
 
     <!-- Short messages at the top of the screen -->
     <string name="osd_back_again">Press Back again to leave  ·  Hold OK for the menu</string>

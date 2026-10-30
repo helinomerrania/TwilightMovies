@@ -1,20 +1,18 @@
 package com.twilightcafe.movies.app;
 
 import android.os.SystemClock;
-import android.webkit.ValueCallback;
 
 import com.twilightcafe.movies.R;
 import com.twilightcafe.movies.adblock.SitePolicy;
 import com.twilightcafe.movies.util.Urls;
 import com.twilightcafe.movies.web.PageScripts;
-import com.twilightcafe.movies.web.Popups;
 
 /**
  * The ad blocker's part in the app: stopping jumps to other sites (and saying so), hiding the ad boxes of each
  * page, clearing see-through layers before the pointer clicks, its switch and "allow" in the menu, and which
- * pop-ups may open (Popups.Rules).
+ * pop-ups may open in the app's page.
  */
-final class Blocking implements Popups.Rules {
+final class Blocking {
     private final MoviesApp app;
     private String lastJump;      // the last jump to another site that was stopped (the menu can allow it)
     private long lastNoteAt;
@@ -88,7 +86,7 @@ final class Blocking implements Popups.Rules {
     /** The ad-hiding script, into the page shown (it works once a page, however often it's put in). */
     void hideAds() {
         if (!app.page.alive() || app.blocker.filters() == null || !app.blocker.activeHere()) return;
-        app.page.run(app.scripts.call(PageScripts.HIDE_ADS, app.blocker.bridgeName));
+        app.page.run(app.scripts.call(PageScripts.HIDE_ADS, app.blocker.bridgeName), null);
     }
 
     /** A click with the pointer at x, y, after taking away see-through ad layers over the page there. */
@@ -109,29 +107,19 @@ final class Blocking implements Popups.Rules {
         app.screen.main.postDelayed(tap, 250);   // if the page doesn't answer at once, the click anyway
         float w = Math.max(1, app.screen.root.getWidth());
         float h = Math.max(1, app.screen.root.getHeight());
-        app.page.run(app.scripts.call(PageScripts.AD_LAYERS, x / w, y / h), new ValueCallback<String>() {
-            @Override
-            public void onReceiveValue(String removed) {
-                app.screen.main.removeCallbacks(tap);
-                tap.run();
-            }
+        app.page.run(app.scripts.call(PageScripts.AD_LAYERS, x / w, y / h), removed -> {
+            app.screen.main.removeCallbacks(tap);
+            tap.run();
         });
     }
 
-    // Popups.Rules: a pop-up the viewer clicked opens if it stays on the website, or goes to a site the app allows
-
-    @Override
-    public boolean allowed(String url) {
-        return app.page.alive() && Urls.isWebScheme(url) && (app.sites.shows(url) || app.blocker.sites.ownOrAllowed(url));
-    }
-
-    @Override
-    public void open(String url) {
-        app.nav.load(url);
-    }
-
-    @Override
-    public void refused() {
-        app.osd.show(t(R.string.osd_popup_blocked), 1500);
+    /**
+     * A window the page opened: one the viewer clicked opens in the app's page if it stays on the website or goes
+     * to a site the app allows (else it's said); one a script opened by itself (an ad) is dropped quietly.
+     */
+    void popup(String url, boolean userGesture) {
+        if (!userGesture || !app.page.alive()) return;
+        if (Urls.isWebScheme(url) && (app.sites.shows(url) || app.blocker.sites.ownOrAllowed(url))) app.nav.load(url);
+        else app.osd.show(t(R.string.osd_popup_blocked), 1500);
     }
 }

@@ -1,4 +1,4 @@
-package com.twilightcafe.movies.web;
+package com.twilightcafe.movies.web.webview;
 
 import android.graphics.Bitmap;
 import android.net.http.SslError;
@@ -12,13 +12,21 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.twilightcafe.movies.util.Urls;
+import com.twilightcafe.movies.web.PageListener;
+import com.twilightcafe.movies.web.RequestFilter;
 
-/** The page's loading, from Android's WebViewClient to the app's PageListener. */
+import java.io.ByteArrayInputStream;
+import java.util.HashMap;
+import java.util.Map;
+
+/** The page's loading, from Android's WebViewClient to the app's PageListener; every address to its RequestFilter. */
 final class PageClient extends WebViewClient {
     private final PageListener l;
+    private final RequestFilter filter;
 
-    PageClient(PageListener l) {
+    PageClient(PageListener l, RequestFilter filter) {
         this.l = l;
+        this.filter = filter;
     }
 
     @Override
@@ -34,9 +42,16 @@ final class PageClient extends WebViewClient {
         return request.isForMainFrame() && !l.mayGo(url);
     }
 
+    /** On the WebView's own threads. */
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-        return l.intercept(request);
+        String kind = request.isForMainFrame() ? RequestFilter.PAGE : null;
+        RequestFilter.Answer a = filter.check(request.getUrl().toString(), kind, null, null, request.getRequestHeaders());
+        if (a == null) return null;
+        Map<String, String> h = new HashMap<String, String>();
+        h.put("Access-Control-Allow-Origin", "*");
+        h.put("Cache-Control", "no-store");
+        return new WebResourceResponse(a.mime, "UTF-8", 200, "OK", h, new ByteArrayInputStream(a.data));
     }
 
     @Override
@@ -79,7 +94,7 @@ final class PageClient extends WebViewClient {
 
     @Override
     public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
-        l.crashed(view);
+        l.crashed();
         return true;
     }
 }

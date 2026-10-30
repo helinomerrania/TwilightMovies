@@ -1,24 +1,19 @@
 package com.twilightcafe.movies.web;
 
-import android.os.Message;
 import android.view.KeyEvent;
 import android.view.View;
-import android.webkit.WebChromeClient;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
-import android.webkit.WebView;
 
-/** What the website tells the app (through PageClient and ChromeClient), on the main thread unless it says. */
+/** What the website tells the app, from either web engine, on the main thread. */
 public interface PageListener {
-    /** Every address the page and its frames load, on the web engine's threads: null to load it, or what to answer. */
-    WebResourceResponse intercept(WebResourceRequest request);
-
     /** Whether the page itself may go to url (a link, a script's jump, a redirect). */
     boolean mayGo(String url);
 
+    /** A window the page opened, to url (the window itself never opens; the app's page may go there). */
+    void popup(String url, boolean userGesture);
+
     void started(String url);
 
-    /** The new page is on the screen (Android 6 and newer). */
+    /** The new page is on the screen. */
     void shown(String url);
 
     void finished(String url);
@@ -28,23 +23,23 @@ public interface PageListener {
     /** The page itself couldn't load; why: the web engine's own words. */
     void failed(String url, String why);
 
-    /** A security error on url (code: Android's SslError) while pageUrl is shown. Nothing was loaded from it. */
+    /** A security error on url (code: the engine's) while pageUrl is shown. Nothing was loaded from it. */
     void insecure(String url, String pageUrl, int code);
 
-    /** A key the page didn't use: it ends with the app, never with Android. */
+    /** A key the page didn't use (only from engines that say so: Page.reportsUnusedKeys). */
     void keyNotUsed(KeyEvent e);
 
-    /** The page's engine crashed (often low memory on TV boxes). */
-    void crashed(WebView view);
+    /** The page's engine crashed (often low memory on TV boxes), or Android closed it. */
+    void crashed();
 
-    /** The page's video full screen, with its own player's controls. */
-    void fullscreen(View video, WebChromeClient.CustomViewCallback callback);
+    /**
+     * The page's video full screen. video: the view that shows it, to put over the page (Android's WebView), or
+     * null when the page's own view does (Firefox's engine); exit: how the page leaves full screen.
+     */
+    void fullscreen(View video, Runnable exit);
 
     void fullscreenEnd();
 
-    /** The page opens a window: true if the app takes it (and answers msg). */
-    boolean popup(boolean userGesture, Message msg);
-
-    /** A script of the page's own that the box's engine can't even read; source: where it came from, or "". */
+    /** A script of the page's own that the engine can't even read (it's too old); source: from where. */
     void scriptError(String source);
 }

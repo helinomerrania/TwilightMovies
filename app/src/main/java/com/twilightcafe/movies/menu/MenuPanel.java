@@ -13,9 +13,9 @@ import com.twilightcafe.movies.ui.Panel;
 import com.twilightcafe.movies.ui.Screen;
 
 /**
- * The app's menu (MENU, or hold OK or BACK): the page's address and the app's build at the top, the ad
- * blocker's rules under them, then a button for each thing the app does. Labels that change (on or off, how
- * many blocked, a new version) are asked for each time it opens.
+ * The app's menu (MENU, or hold OK or BACK): the page's address, the app's build and the web engine at the
+ * top, the ad blocker's rules under them, then a button for each thing the app does. Labels that change (on or
+ * off, how many blocked, a new version, which engine) are asked for each time it opens.
  */
 public final class MenuPanel extends Panel {
     /** What each button does. */
@@ -40,6 +40,9 @@ public final class MenuPanel extends Panel {
 
         void update();
 
+        /** The other web engine (the box's own, or Firefox's). */
+        void switchEngine();
+
         void exit();
     }
 
@@ -58,6 +61,8 @@ public final class MenuPanel extends Panel {
         String allowLabel();
 
         String updateLabel();
+
+        String engineLabel();
     }
 
     private final Status status;
@@ -69,6 +74,7 @@ public final class MenuPanel extends Panel {
     private final Button adBlocker;
     private final Button allow;
     private final Button update;
+    private final Button engine;
 
     /** updates: whether this build can update itself (one built on GitHub). */
     public MenuPanel(Screen s, final Actions a, Status status, boolean updates) {
@@ -101,6 +107,7 @@ public final class MenuPanel extends Panel {
         add(s, list, 8, s.t(R.string.menu_address), v -> a.address());
         update = add(s, list, 8, "", v -> a.update());
         update.setVisibility(updates ? View.VISIBLE : View.GONE);
+        engine = add(s, list, 8, "", v -> a.switchEngine());
         add(s, list, 8, s.t(R.string.menu_exit), v -> a.exit());
 
         ScrollView scroll = new ScrollView(s.activity);
@@ -127,6 +134,7 @@ public final class MenuPanel extends Panel {
         adBlocker.setText(status.adBlockerLabel());
         set(allow, status.allowLabel());
         update.setText(status.updateLabel());
+        set(engine, status.engineLabel());
         view.setVisibility(View.VISIBLE);
         home.requestFocus();
     }

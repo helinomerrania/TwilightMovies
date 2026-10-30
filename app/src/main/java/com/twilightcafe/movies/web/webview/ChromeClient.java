@@ -1,4 +1,4 @@
-package com.twilightcafe.movies.web;
+package com.twilightcafe.movies.web.webview;
 
 import android.graphics.Bitmap;
 import android.os.Message;
@@ -9,15 +9,19 @@ import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
+import com.twilightcafe.movies.web.PageListener;
+
 /**
  * The page's progress, full screen, windows and messages, from Android's WebChromeClient to PageListener.
  * Protected (DRM) video may play if a player asks; the camera, the microphone and the location never.
  */
 final class ChromeClient extends WebChromeClient {
     private final PageListener l;
+    private final Popups popups;
 
-    ChromeClient(PageListener l) {
+    ChromeClient(PageListener l, Popups popups) {
         this.l = l;
+        this.popups = popups;
     }
 
     @Override
@@ -26,8 +30,8 @@ final class ChromeClient extends WebChromeClient {
     }
 
     @Override
-    public void onShowCustomView(View view, CustomViewCallback callback) {
-        l.fullscreen(view, callback);
+    public void onShowCustomView(View view, final CustomViewCallback callback) {
+        l.fullscreen(view, callback::onCustomViewHidden);
     }
 
     @Override
@@ -42,7 +46,7 @@ final class ChromeClient extends WebChromeClient {
 
     @Override
     public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
-        return l.popup(isUserGesture, resultMsg);
+        return popups.open(isUserGesture, resultMsg);
     }
 
     @Override

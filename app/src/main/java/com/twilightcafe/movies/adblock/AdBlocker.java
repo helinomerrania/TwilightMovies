@@ -2,18 +2,13 @@ package com.twilightcafe.movies.adblock;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.Uri;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
 
 import com.twilightcafe.movies.adblock.engine.FilterSet;
 import com.twilightcafe.movies.adblock.engine.Request;
 import com.twilightcafe.movies.adblock.surrogates.Surrogates;
 
-import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -23,10 +18,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * The ad blocker, between the website and the internet. Every address a page loads, in any of its frames, is
- * asked about here first ({@link #intercept}): ads, trackers, pop-under networks and harmful sites get an empty
- * answer or a stand-in (surrogates/) instead, so the page goes on without them. The page's ad boxes are hidden
- * by a script the app puts in the page (assets/scripts/hide-ads.js), which asks {@link CosmeticBridge}. Where
- * it works and where pages may go: {@link SitePolicy}.
+ * asked about here first ({@link #check}), in either web engine: ads, trackers, pop-under networks and harmful
+ * sites get an empty answer or a stand-in (surrogates/) instead, so the page goes on without them. The page's
+ * ad boxes are hidden by a script the app puts in the page (assets/scripts/hide-ads.js), which asks
+ * {@link #cosmetic}. Where it works and where pages may go: {@link SitePolicy}.
  *
  * The rules (engine/) come from the big filter lists, made into one compact file on GitHub (tools/filters): a
  * copy comes inside the app ({@link FilterFiles}) and a newer one is downloaded ({@link FilterUpdate}).
@@ -133,56 +128,53 @@ public final class AdBlocker {
         return sites.checkJump(url, pageHost);
     }
 
-    /** For WebViewClient.shouldInterceptRequest, on the web engine's threads: null to load it, or the answer instead. */
-    public WebResourceResponse intercept(WebResourceRequest req) {
-        Uri uri = req.getUrl();
-        String scheme = uri.getScheme();
-        if (scheme == null || !(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))) return null;
-        String url = uri.toString();
-        if (req.isForMainFrame()) {
-            setPage(url);
-            if (!activeHere() || sites.ownOrAllowed(url)) return null;
-            FilterSet s = await();
-            if (s == null || !s.blocksPage(url)) return null;
-            blockedOnPage.incrementAndGet();
-            return response("text/html", BlockedPage.html(blockedTitle, blockedText, Request.hostOf(url), rtl).getBytes(UTF8));
+    /**
+     * Every address a page loads, in any of its frames, on the web engine's threads (or the app's): null to load
+     * it, or the stand-in to answer instead. kind: what it's for, as Firefox's engine says it ("main_frame" for
+     * the page itself: RequestKind.PAGE), or null to work it out from the headers (Android's WebView). frameUrl,
+     * pageUrl: the frame and the page it's for, if the engine says (else the Referer, and the page now loading).
+     */
+    public Surrogates.Body check(String url, String kind, String frameUrl, String pageUrl, Map<String, String> headers) {
+        if (url == null || !(url.regionMatches(true, 0, "http:", 0, 5) || url.regionMatches(true, 0, "https:", 0, 6))) {
+            return null;
         }
-        String main = pageHost;
+        if (RequestKind.PAGE.equals(kind)) return checkPage(url);
+        String main = pageUrl != null ? Request.hostOf(pageUrl) : "";
+        if (main.isEmpty()) main = pageHost;
         if (!sites.activeFor(main) || sites.own(Request.hostOf(url))) return null;   // the website's own: its films too
         FilterSet s = await();
         if (s == null) return null;
-        Map<String, String> headers = req.getRequestHeaders();
-        String referer = RequestKind.header(headers, "Referer");
-        String doc = referer != null ? Request.hostOf(referer) : main;
-        int type = RequestKind.of(headers, url);
+        String frame = frameUrl != null ? frameUrl : RequestKind.header(headers, "Referer");
+        String doc = frame != null ? Request.hostOf(frame) : main;
+        int type = kind != null ? RequestKind.named(kind, url) : RequestKind.of(headers, url);
         Request r = new Request(url, doc.isEmpty() ? main : doc, type);
         if (!s.match(r)) return null;
         blockedOnPage.incrementAndGet();
         Surrogates.Body body = Surrogates.named(r.redirect);
-        if (body == null) body = Surrogates.forBlocked(url, type);
-        return response(body.mime, body.data);
+        return body != null ? body : Surrogates.forBlocked(url, type);
     }
 
-    private static WebResourceResponse response(String mime, byte[] data) {
-        Map<String, String> h = new HashMap<String, String>();
-        h.put("Access-Control-Allow-Origin", "*");
-        h.put("Cache-Control", "no-store");
-        return new WebResourceResponse(mime, "UTF-8", 200, "OK", h, new ByteArrayInputStream(data));
+    /** The page itself: an ad page (the lists say) gets the app's page instead, which says so. */
+    private Surrogates.Body checkPage(String url) {
+        setPage(url);
+        if (!activeHere() || sites.ownOrAllowed(url)) return null;
+        FilterSet s = await();
+        if (s == null || !s.blocksPage(url)) return null;
+        blockedOnPage.incrementAndGet();
+        return new Surrogates.Body("text/html", BlockedPage.html(blockedTitle, blockedText, Request.hostOf(url), rtl).getBytes(UTF8));
     }
 
-    /** For the page's hide-ads script: an object it may call (CSS only comes back). */
-    public Object bridge() {
-        return new CosmeticBridge(this);
-    }
-
-    String pageCss(String host) {
+    /**
+     * What the page's ad-hiding script asks (assets/scripts/hide-ads.js), on the engine's threads; only CSS
+     * comes back. "page": the rules that hide the site's ad boxes; "generic": those for the classes and ids
+     * (keys) the page has.
+     */
+    public String cosmetic(String question, String host, String keys) {
         FilterSet s = set;
-        return s == null || !activeHere() ? "" : s.pageCss(host);
-    }
-
-    String genericCss(String host, String keys) {
-        FilterSet s = set;
-        return s == null || !activeHere() ? "" : s.genericCss(host, keys);
+        if (s == null || !activeHere()) return "";
+        if ("page".equals(question)) return s.pageCss(host);
+        if ("generic".equals(question)) return s.genericCss(host, keys);
+        return "";
     }
 
     /** Looks for newer filters on GitHub (if it's time, or someone asked) and uses them at once, on a thread of its own. */

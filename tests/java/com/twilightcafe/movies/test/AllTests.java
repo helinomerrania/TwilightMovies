@@ -13,6 +13,7 @@ import com.twilightcafe.movies.loading.BackoffTest;
 import com.twilightcafe.movies.sites.SiteTest;
 import com.twilightcafe.movies.update.ReleaseTest;
 import com.twilightcafe.movies.util.UrlsTest;
+import com.twilightcafe.movies.web.HistoryTest;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -45,6 +46,7 @@ public final class AllTests {
         TESTS.put("SurrogatesTest", SurrogatesTest::run);
         TESTS.put("SitePolicyTest", SitePolicyTest::run);
         TESTS.put("RequestKindTest", RequestKindTest::run);
+        TESTS.put("HistoryTest", HistoryTest::run);
     }
 
     private AllTests() {

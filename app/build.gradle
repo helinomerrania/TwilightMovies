@@ -6,6 +6,12 @@ plugins {
 // (and the box keeps the website's sign-in and the app's settings).
 def buildNumber = (System.getenv('GITHUB_RUN_NUMBER') ?: '1').toInteger()
 
+// Firefox's engine (GeckoView), inside the app for boxes whose own engine is too old for the websites: the one
+// Twilight TV uses, for 32-bit ARM, which runs on every TV box. -Pgeckoabi=x86_64 builds it for the emulators
+// on GitHub instead (tests/try).
+def geckoView = '157.0.20261005135250'
+def geckoAbi = (project.findProperty('geckoabi') ?: 'armeabi-v7a').toString()
+
 android {
     namespace = 'com.twilightcafe.movies'
     compileSdk {
@@ -16,13 +22,28 @@ android {
 
     defaultConfig {
         applicationId = 'com.twilightcafe.movies'
-        minSdk = 21                                  // Android TV 5.0 and newer
+        minSdk = 21                                  // Android TV 5.0 and newer (Firefox's engine: 8.0 and newer)
         targetSdk = 35
         versionCode = buildNumber
         versionName = "1.${buildNumber}"
         // The GitHub repository the app is built from: new versions come from its releases
         // (empty on a computer, so a build made there never updates itself)
         buildConfigField "String", "REPO", "\"" + (System.getenv('GITHUB_REPOSITORY') ?: '') + "\""
+        ndk {
+            abiFilters.add(geckoAbi)
+        }
+    }
+
+    packaging {
+        // Firefox's engine compressed inside the APK (an 85 MB download, not 160); the box unpacks it as it installs
+        jniLibs {
+            useLegacyPackaging = true
+        }
+        resources {
+            // the same licence and Java-module files come with several of its libraries
+            excludes.addAll(['META-INF/versions/9/module-info.class', 'META-INF/LICENSE*', 'META-INF/NOTICE*',
+                             'META-INF/DEPENDENCIES', 'META-INF/*.kotlin_module'])
+        }
     }
 
     buildFeatures {
@@ -56,4 +77,8 @@ android {
         checkReleaseBuilds = false
         abortOnError = false
     }
+}
+
+dependencies {
+    implementation "org.mozilla.geckoview:geckoview-${geckoAbi}:${geckoView}"
 }

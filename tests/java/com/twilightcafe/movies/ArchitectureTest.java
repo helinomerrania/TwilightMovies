@@ -21,9 +21,9 @@ import static com.twilightcafe.movies.test.Sources.ROOT;
 
 /**
  * The project keeps to the rules in ARCHITECTURE.md: small files; only what Android starts by name in the top
- * folder; only MainActivity makes the app; the ground floor never reaches up; the plain-Java parts use nothing
- * of Android; nothing newer than Android 5.0 in the app; every folder documented, every class saying what it
- * does, and every test run.
+ * folder; only MainActivity makes the app; the ground floor never reaches up; only app/ knows the two web
+ * engines; the plain-Java parts use nothing of Android; nothing newer than Android 5.0 in the app; every folder
+ * documented, every class saying what it does, and every test run.
  */
 public final class ArchitectureTest {
     static final int MAX_LINES = 250;
@@ -45,7 +45,12 @@ public final class ArchitectureTest {
         MAY_USE.put("ui", set("text", "util", "top"));
         MAY_USE.put("update", set("util", "top"));
         MAY_USE.put("web", set("util"));
+        MAY_USE.put("web/webview", set("web", "util"));
+        MAY_USE.put("web/gecko", set("web", "util"));
     }
+
+    /** The web engines: only app/ (Engines) chooses and makes one; everything else knows only web/'s Page. */
+    static final Set<String> ENGINES = set("web/webview", "web/gecko");
 
     /** Library calls Android 5.0 doesn't have (the café's box is older than they are). */
     static final Pattern NEWER = Pattern.compile("java\\.util\\.(function|stream)|java\\.time\\.|import java\\.util\\.Base64"
@@ -65,6 +70,7 @@ public final class ArchitectureTest {
         topFolder();
         onlyMainActivityMakesTheApp();
         groundFloor();
+        onlyAppKnowsTheEngines();
         plainJava();
         android5();
         documented();
@@ -118,6 +124,21 @@ public final class ArchitectureTest {
             }
             ok(rule.getKey() + "/ uses only " + (rule.getValue().isEmpty() ? "itself" : new TreeSet<>(rule.getValue())), wrong.isEmpty(), wrong);
         }
+    }
+
+    static void onlyAppKnowsTheEngines() {
+        List<String> wrong = new ArrayList<>();
+        for (String folder : Sources.folders()) {
+            if (folder.equals("app") || ENGINES.contains(folder)) continue;
+            for (Path p : Sources.javaIn(folder)) {
+                for (String used : Sources.uses(p)) if (ENGINES.contains(used)) wrong.add(p.getFileName() + " uses " + used + "/");
+            }
+        }
+        ok("only app/ uses web/webview/ and web/gecko/ (the rest knows only a Page)", wrong.isEmpty(), wrong);
+        List<String> each = new ArrayList<>();
+        for (Path p : Sources.javaIn("web/webview")) if (Sources.uses(p).contains("web/gecko")) each.add(p.getFileName().toString());
+        for (Path p : Sources.javaIn("web/gecko")) if (Sources.uses(p).contains("web/webview")) each.add(p.getFileName().toString());
+        ok("neither engine uses the other", each.isEmpty(), each);
     }
 
     static void plainJava() {

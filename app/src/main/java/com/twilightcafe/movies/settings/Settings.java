@@ -5,11 +5,19 @@ import android.content.SharedPreferences;
 
 /**
  * The app's own settings, kept on the box: the language, the website shown last, each website's address (when
- * one was typed for it) and its mouse pointer, and whether the remote guide was shown. The ad blocker and the
- * updates keep their own (AdBlocker, Updater).
+ * one was typed for it) and its mouse pointer, whether the remote guide was shown, and the web engine chosen in
+ * the menu. The ad blocker and the updates keep their own (AdBlocker, Updater).
  */
 public final class Settings {
+    /** The web engine: the one the app picks for the box (the box's own if it's new enough). */
+    public static final String ENGINE_AUTO = "";
+    /** Firefox's, inside the app, chosen in the menu. */
+    public static final String ENGINE_FIREFOX = "firefox";
+    /** The box's own, chosen in the menu. */
+    public static final String ENGINE_OWN = "own";
+
     private static final String FILE = "settings";
+    private static final String ENGINE = "engine";
     private static final String LANGUAGE = "language";
     private static final String GUIDE = "guide_shown";
     private static final String SITE = "site";
@@ -40,6 +48,16 @@ public final class Settings {
 
     public void setGuideShown(boolean shown) {
         prefs.edit().putBoolean(GUIDE, shown).apply();
+    }
+
+    /** ENGINE_AUTO, ENGINE_FIREFOX or ENGINE_OWN. */
+    public String engine() {
+        return prefs.getString(ENGINE, ENGINE_AUTO);
+    }
+
+    /** Kept at once: the app starts again right after. */
+    public void setEngine(String engine) {
+        prefs.edit().putString(ENGINE, engine).commit();
     }
 
     /** The id of the website shown last ("" on a new box). */

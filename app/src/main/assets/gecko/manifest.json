@@ -1,0 +1,29 @@
+{
+  "manifest_version": 2,
+  "name": "Twilight Movies",
+  "version": "1.0",
+  "description": "The app inside Firefox's engine: its ad blocker, and its scripts in the page.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "movies@twilightcafe"
+    }
+  },
+  "permissions": [
+    "<all_urls>",
+    "webRequest",
+    "webRequestBlocking",
+    "nativeMessaging",
+    "geckoViewAddons"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["page.js"],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ]
+}

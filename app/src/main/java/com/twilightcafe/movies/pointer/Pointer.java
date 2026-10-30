@@ -8,7 +8,7 @@ import com.twilightcafe.movies.ui.Palette;
 import com.twilightcafe.movies.ui.Screen;
 import com.twilightcafe.movies.web.PageScripts;
 import com.twilightcafe.movies.web.PageTarget;
-import com.twilightcafe.movies.web.PageView;
+import com.twilightcafe.movies.web.Page;
 
 /**
  * The mouse pointer, for websites without a TV interface of their own (menu → Mouse pointer, kept for each
@@ -25,7 +25,7 @@ public final class Pointer {
     private final CursorView cursor;
     private final Touch touch;
     private final PageTarget target;
-    private final PageView page;
+    private final Page page;
     private final PageScripts scripts;
     private boolean enabled;
     private int dirX;
@@ -71,7 +71,7 @@ public final class Pointer {
         }
     };
 
-    public Pointer(Screen s, PageTarget target, PageView page, PageScripts scripts) {
+    public Pointer(Screen s, PageTarget target, Page page, PageScripts scripts) {
         this.screen = s;
         this.target = target;
         this.page = page;
@@ -222,6 +222,6 @@ public final class Pointer {
     private void scrollAt(float x, float y, float fx, float fy) {
         float w = Math.max(1, screen.root.getWidth());
         float h = Math.max(1, screen.root.getHeight());
-        page.run(scripts.call(PageScripts.SCROLL, x / w, y / h, fx, fy));
+        page.run(scripts.call(PageScripts.SCROLL, x / w, y / h, fx, fy), null);
     }
 }

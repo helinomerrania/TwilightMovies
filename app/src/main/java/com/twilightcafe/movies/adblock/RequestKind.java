@@ -6,12 +6,36 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * What a request of the page is for (a script, a picture, a frame...), as the rules ask: from what the web
- * engine asked for (Accept), else from the address's ending, else "unknown" (which the rules for scripts,
- * requests and other things still match). Plain Java.
+ * What a request of the page is for (a script, a picture, a frame...), as the rules ask. Firefox's engine says
+ * it ({@link #named}); for Android's WebView it's worked out from what the engine asked for (Accept), else from
+ * the address's ending, else "unknown" (which the rules for scripts, requests and other things still match).
+ * Plain Java.
  */
 public final class RequestKind {
+    /** The page itself, in Firefox's engine's words (the WebView's requests for it are called that too). */
+    public static final String PAGE = "main_frame";
+
     private RequestKind() {
+    }
+
+    /** What Firefox's engine says a request is for ("script", "sub_frame"...); one it doesn't name: by its address. */
+    public static int named(String kind, String url) {
+        if ("script".equals(kind)) return Request.SCRIPT;
+        if ("image".equals(kind) || "imageset".equals(kind)) return Request.IMAGE;
+        if ("stylesheet".equals(kind)) return Request.STYLESHEET;
+        if ("sub_frame".equals(kind)) return Request.SUBDOCUMENT;
+        if (PAGE.equals(kind)) return Request.DOCUMENT;
+        if ("xmlhttprequest".equals(kind)) return Request.XHR;
+        if ("media".equals(kind)) return Request.MEDIA;
+        if ("font".equals(kind)) return Request.FONT;
+        if ("object".equals(kind) || "object_subrequest".equals(kind)) return Request.OBJECT;
+        if ("ping".equals(kind) || "beacon".equals(kind) || "csp_report".equals(kind)) return Request.PING;
+        if ("websocket".equals(kind)) return Request.WEBSOCKET;
+        if ("other".equals(kind) || "speculative".equals(kind) || "xslt".equals(kind) || "xml_dtd".equals(kind)
+                || "web_manifest".equals(kind)) {
+            return Request.OTHER;
+        }
+        return of(null, url);
     }
 
     public static int of(Map<String, String> headers, String url) {

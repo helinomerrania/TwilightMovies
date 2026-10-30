@@ -6,7 +6,7 @@ import android.view.View;
 import com.twilightcafe.movies.R;
 import com.twilightcafe.movies.ui.Screen;
 import com.twilightcafe.movies.util.Urls;
-import com.twilightcafe.movies.web.PageView;
+import com.twilightcafe.movies.web.Page;
 
 /**
  * When the website can't be reached: the error screen says why (no internet, no answer, a security problem)
@@ -35,7 +35,7 @@ public final class ErrorScreen {
     }
 
     private final Screen screen;
-    private final PageView page;
+    private final Page page;
     private final Host host;
     private final ErrorPanel panel;
     private final Connection net;
@@ -63,7 +63,7 @@ public final class ErrorScreen {
         }
     };
 
-    public ErrorScreen(Screen s, PageView page, final Host host) {
+    public ErrorScreen(Screen s, Page page, final Host host) {
         this.screen = s;
         this.page = page;
         this.host = host;

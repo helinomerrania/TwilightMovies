@@ -41,9 +41,10 @@ While a film plays full screen, OK pauses and plays it, and Back leaves full scr
 - **Language**: Kurdish or English (see [Kurdish and English](#kurdish-and-english)).
 - **Website address**: if the website moves, type its new address here. **Use default** goes back to its own (for KurdFilm, `app.kurdfilm.krd/tv`).
 - **Look for a new version**, or **Install the new version** when one is waiting.
+- **Web engine**: Firefox's (inside the app) or the TV box's own, on boxes with Android 8.0 or newer (see [The web engine](#the-web-engine)). Choosing it switches to the other one: the app starts again.
 - **Exit**.
 
-Under the app's name, the menu shows the page, the app's build number and the box's web engine version (useful when something needs fixing), and how many rules the ad blocker has and from when.
+Under the app's name, the menu shows the page, the app's build number and the web engine with its version (useful when something needs fixing), and how many rules the ad blocker has and from when.
 
 ## The ad blocker
 
@@ -67,11 +68,11 @@ It's built in and on from the start.
 - **When the website can't be reached**, the app says why (the box has no internet, the website didn't answer, or the secure connection failed) and keeps trying: after 10 seconds, then 20, 40, and every minute. When the box's internet comes back, it tries again at once. **Try again** and **Change address** are there too.
 - **Pop-ups** from the website are only followed when they stay on the website (or go to another of the app's); others (ads) are blocked, and so are links that try to open other apps.
 - **Text size**: the box's own font-size setting is ignored, so the website's TV pages keep their layout.
-- If the website's pages need a newer web engine than the box has, the app says so once (see below).
+- **A box whose own web engine is too old** for the websites gets Firefox's, which comes inside the app (see [The web engine](#the-web-engine)).
 
 ## New versions
 
-Every few hours the app looks for a newer build on GitHub and downloads it in the background (it's about 1 MB). It's never installed on its own: when one is waiting, the app says so once (never over a film), and the menu shows **Install the new version**. Choose it, then **Install** on Android's screen. The first time only, Android asks to allow Twilight Movies to install apps: switch it on and press Back, and the install carries on by itself.
+Every few hours the app looks for a newer build on GitHub and downloads it in the background (about 85 MB, as Firefox's engine comes inside it). It's never installed on its own: when one is waiting, the app says so once (never over a film), and the menu shows **Install the new version**. Choose it, then **Install** on Android's screen. The first time only, Android asks to allow Twilight Movies to install apps: switch it on and press Back, and the install carries on by itself.
 
 A new version keeps the website's sign-in and the app's settings. Installing with Downloader, as at the start, works too.
 
@@ -79,7 +80,15 @@ A new version keeps the website's sign-in and the app's settings. Installing wit
 
 Twilight TV keeps the café's box in Twilight TV: any other app opened there is sent away after 10 seconds, except the one other app allowed (My TV Plus). For Twilight Movies to stay open there, it has to be that one app: on Twilight TV's phone page, Settings, **This TV box**, set **The one other app allowed** to `Twilight Movies`. Holding Back for 2 seconds in Twilight TV then opens it. (Unlocking the box for 15 minutes, by holding Back for 10 seconds, is too short for a film.)
 
-The box's own web engine is from 2018 (Twilight TV's notes explain). Twilight Movies uses the box's engine. If KurdFilm's own scripts are too new for it, the app shows a message saying so, and the menu shows the engine's version. The fix then is to bring Firefox's engine inside the app, as Twilight TV does.
+The box's own web engine is from 2018 (Chrome 66), too old for KurdFilm's film player, so there the app uses Firefox's engine (see below).
+
+## The web engine
+
+A website is shown by a web engine. Most TV boxes have one of their own (Android's WebView), and on many it's never updated: the café's box has Chrome 66, from 2018. KurdFilm's film player is behind Cloudflare's check (Turnstile), whose scripts need Chrome 80 or newer; on the café's box the player only said that the browser couldn't be verified, and the film didn't play.
+
+So Firefox's engine comes inside the app (GeckoView 157, the same as in Twilight TV), and the app uses it on any box whose own engine is older than Chrome 80, on Android 8.0 or newer. On a box with a new engine of its own, the app uses that. The ad blocker, the remote, the mouse pointer, full screen and the video keys work the same in both; in Firefox's engine the app's extension (`app/src/main/assets/gecko`) does the blocking and runs the app's scripts in the page.
+
+The menu shows which one is in use, and **Web engine** switches to the other (the app starts again, at the website's first page). Each engine keeps its own sign-ins, so after the first start with Firefox's engine, sign in to the website again. Firefox's engine needs a little more of the box's memory, and a box with Android 5, 6 or 7 always uses its own.
 
 ## Kurdish and English
 
@@ -89,7 +98,7 @@ The Kurdish texts are in `app/src/main/res/values-b+ckb/strings.xml` (translated
 
 ## How it's built
 
-Every change pushed to GitHub is built there (`.github/workflows/build.yml`): first the tests, then the APK. A change to the app on the main branch is published as the latest release, `twilight-movies.apk`, tagged `build-` and the build's number, which is also the app's version number. Changes to only the tests or the documents aren't published. The newest five builds are kept. If a build fails, the run's notes say what went wrong.
+Every change pushed to GitHub is built there (`.github/workflows/build.yml`): first the tests, then the APK, with Firefox's engine from Mozilla for 32-bit ARM, which every TV box runs. A change to the app on the main branch is published as the latest release, `twilight-movies.apk`, tagged `build-` and the build's number, which is also the app's version number. Changes to only the tests or the documents aren't published. The newest five builds are kept. If a build fails, the run's notes say what went wrong.
 
 How the app is made, part by part, is in [ARCHITECTURE.md](ARCHITECTURE.md): every folder and what it's for, how the parts fit together, the tests, and how to add a website. The files you're most likely to change:
 
