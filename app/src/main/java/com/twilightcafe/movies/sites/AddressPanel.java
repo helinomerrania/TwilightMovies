@@ -44,6 +44,10 @@ public final class AddressPanel extends Panel {
         input.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_NULL && event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                    if (event.getAction() == KeyEvent.ACTION_DOWN) listener.open(input.getText().toString());
+                    return true;   // Enter on a keyboard plugged into the box
+                }
                 if (actionId != EditorInfo.IME_ACTION_GO && actionId != EditorInfo.IME_ACTION_DONE
                         && actionId != EditorInfo.IME_ACTION_NEXT && actionId != EditorInfo.IME_ACTION_SEND) return false;
                 listener.open(input.getText().toString());

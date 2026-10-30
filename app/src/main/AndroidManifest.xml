@@ -2,9 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Firefox's engine asks for Android 8.0 or newer: the app still installs on older boxes, and uses the box's
-         own engine there (app/Engines never starts Firefox's before 8.0) -->
-    <uses-sdk tools:overrideLibrary="org.mozilla.geckoview" />
+    <!-- Firefox's engine asks for Android 8.0 or newer, and the Google library it signs in with (passkeys) for 7.0:
+         the app still installs on older boxes, and uses the box's own engine there (app/Engines never starts
+         Firefox's before 8.0) -->
+    <uses-sdk tools:overrideLibrary="org.mozilla.geckoview, com.google.android.gms.fido, com.google.android.gms.base,
+        com.google.android.gms.common, com.google.android.gms.tasks" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- whether the box is online (the error screen says which), and trying again when it is -->

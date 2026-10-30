@@ -38,7 +38,7 @@ import re, sys
 pattern = re.compile(sys.argv[1], re.I)
 xml = open(sys.argv[2], encoding="utf-8", errors="replace").read()
 for node in re.findall(r"<node [^>]*>", xml):
-    words = " ".join(re.findall(r'(?:text|content-desc)="([^"]*)"', node))
+    words = " ".join(w for w in re.findall(r'(?:text|content-desc)="([^"]*)"', node) if w)
     b = re.search(r'bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"', node)
     if b and pattern.search(words):
         x1, y1, x2, y2 = map(int, b.groups())
