@@ -1,0 +1,35 @@
+<!doctype html>
+<!-- Cloudflare's check (Turnstile), as KurdFilm's film player has it, with Cloudflare's test key that always
+     passes: whether the web engine can run it at all. The café box's own engine (Chrome 66) couldn't, so the
+     player said the browser couldn't be verified. tests/try/emulator.sh opens it in the app. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cloudflare's check, in this web engine</title>
+<style>
+  body { background: #0b0e2d; color: #f2f2f2; font: 22px/1.4 sans-serif; margin: 0; padding: 48px; }
+  h1 { font-size: 34px; margin: 0 0 12px; }
+  #engine { color: #9aa3c7; font-size: 18px; margin-bottom: 28px; }
+  #result { font-size: 30px; margin-top: 28px; }
+</style>
+</head>
+<body>
+<h1>Cloudflare's check (Turnstile), in this web engine</h1>
+<div id="engine"></div>
+<div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-theme="dark"
+     data-callback="passed" data-error-callback="failed"></div>
+<div id="result">Waiting for Cloudflare's check…</div>
+<script>
+  var result = document.getElementById('result');
+  document.getElementById('engine').textContent = navigator.userAgent;
+  function passed(token) { result.textContent = 'PASSED: Cloudflare\'s check ran here (' + token.slice(0, 16) + '…)'; }
+  function failed(code) { result.textContent = 'FAILED: Cloudflare\'s check said ' + code; }
+  window.onerror = function (message) { result.textContent = 'FAILED: a script error, ' + message; };
+  setTimeout(function () {
+    if (/Waiting/.test(result.textContent)) result.textContent = 'FAILED: Cloudflare\'s check never ran (20 seconds)';
+  }, 20000);
+</script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</body>
+</html>

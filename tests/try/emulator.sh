@@ -2,8 +2,8 @@
 # Tries the app itself on an emulator with a TV's screen (on GitHub, by .github/workflows/try.yml): installs it,
 # opens it, closes the remote guide, goes into the website (its Sorani dialect), opens a film and presses play the
 # way the remote does, with a screenshot (and the screen's UI tree) at every step; then the app's menu, which
-# shows the web engine and its version, and the log: which engine the app chose, the page's own messages, and
-# any crash.
+# shows the web engine and its version; Cloudflare's check (turnstile.html) in the app's engine; and the log:
+# which engine the app chose, the page's own messages, and any crash.
 # Usage: tests/try/emulator.sh APK OUT_DIR NAME     (FILM, PLAY: what to tap, as patterns, if not KurdFilm's)
 set -uo pipefail
 APK=$1
@@ -90,6 +90,29 @@ key KEYCODE_MENU
 sleep 3
 shot menu
 key KEYCODE_BACK
+sleep 2
+
+# Cloudflare's check (Turnstile) on a page of the test's own (turnstile.html, with Cloudflare's test key that always
+# passes): KurdFilm's player needs it, and the café box's own engine couldn't run it. Opened as the website's
+# address, typed in the menu (the emulator reaches this machine at 10.0.2.2).
+python3 -m http.server 8765 --bind 0.0.0.0 --directory "$(dirname "$0")" > /dev/null 2>&1 &
+server=$!
+sleep 2
+key KEYCODE_MENU
+sleep 3
+shot menu-again
+tap '^ناونیشانی ماڵپەڕ$|^Website address$' || true
+sleep 3
+adb shell input keyevent KEYCODE_MOVE_END
+# shellcheck disable=SC2046  # one key each
+adb shell input keyevent $(for i in $(seq 1 80); do printf 'KEYCODE_DEL '; done)
+adb shell input text "http://10.0.2.2:8765/turnstile.html"
+sleep 1
+shot address
+tap '^کردنەوە$|^Open$' || key KEYCODE_ENTER
+sleep 30
+shot turnstile
+kill "$server" 2> /dev/null
 
 adb logcat -d > "$OUT/$NAME-logcat.txt"
 grep -E "chromium|CONSOLE|AndroidRuntime|FATAL|twilightcafe|TwilightMovies|cr_|GeckoConsole|Gecko[A-Z]|libc" "$OUT/$NAME-logcat.txt" \

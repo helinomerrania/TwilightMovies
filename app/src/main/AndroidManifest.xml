@@ -2,9 +2,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Firefox's engine and its libraries ask for Android 8.0 or newer: the app still installs on older boxes,
-         and uses the box's own engine there (app/Engines never starts Firefox's before 8.0) -->
-    <uses-sdk tools:overrideLibrary="org.mozilla.geckoview, com.google.android.gms.fido, com.google.android.gms.base, com.google.android.gms.tasks, com.google.android.gms.common, com.google.android.gms.basement" />
+    <!-- Firefox's engine and the libraries it brings ask for Android 6.0 or 8.0 or newer: the app still installs on
+         older boxes, and uses the box's own engine there (app/Engines never starts Firefox's before 8.0) -->
+    <uses-sdk tools:overrideLibrary="org.mozilla.geckoview,
+        androidx.core, androidx.core.ktx, androidx.annotation.experimental, androidx.arch.core, androidx.concurrent.futures,
+        androidx.lifecycle, androidx.lifecycle.runtime, androidx.lifecycle.process, androidx.lifecycle.viewmodel,
+        androidx.lifecycle.livedata, androidx.lifecycle.livedata.core, androidx.savedstate, androidx.startup,
+        androidx.profileinstaller, androidx.tracing, androidx.versionedparcelable, androidx.window, androidx.datastore,
+        androidx.media3.common, androidx.media3.container, androidx.media3.database, androidx.media3.datasource,
+        androidx.media3.decoder, androidx.media3.exoplayer, androidx.media3.exoplayer.hls, androidx.media3.extractor,
+        com.google.android.gms.fido, com.google.android.gms.base, com.google.android.gms.basement,
+        com.google.android.gms.common, com.google.android.gms.tasks" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- whether the box is online (the error screen says which), and trying again when it is -->
