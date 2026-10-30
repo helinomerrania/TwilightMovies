@@ -41,7 +41,7 @@ for node in re.findall(r"<node [^>]*>", xml):
     b = re.search(r'bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"', node)
     if b and pattern.search(words):
         x1, y1, x2, y2 = map(int, b.groups())
-        if x2 > x1 and y2 > y1:
+        if x2 - x1 >= 20 and y2 - y1 >= 20:   # on the screen, not a hidden one
             print((x1 + x2) // 2, (y1 + y2) // 2)
             break
 PY
