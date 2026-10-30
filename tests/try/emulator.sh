@@ -143,8 +143,11 @@ adb shell input keyevent KEYCODE_MOVE_END
 adb shell input keyevent $(for i in $(seq 1 80); do printf 'KEYCODE_DEL '; done)
 adb shell input text "http://10.0.2.2:8765/turnstile.html"
 sleep 1
+# the on-screen keyboard covers the panel (it takes the whole screen on a TV): it goes, and Open is chosen
+if adb shell dumpsys input_method | grep -q "mInputShown=true"; then key KEYCODE_BACK; fi
+sleep 2
 shot address
-tap '^کردنەوە$|^Open$' || key KEYCODE_ENTER
+tap '^کردنەوە$|^Open$' || key KEYCODE_DPAD_DOWN KEYCODE_DPAD_CENTER
 sleep 30
 shot turnstile
 kill "$server" 2> /dev/null
