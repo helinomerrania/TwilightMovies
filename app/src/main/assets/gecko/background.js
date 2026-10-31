@@ -95,10 +95,11 @@ function pass(m, sender) {
     });
   return to.then(function (frameId) {
     if (typeof frameId !== 'number' || frameId < 0) return false;
-    return browser.tabs.sendMessage(tabId, {arrows: m.arrows, way: m.way, rect: m.rect}, {frameId: frameId});
+    return browser.tabs.sendMessage(tabId, {arrows: m.arrows, way: m.way, rect: m.rect, wait: m.wait}, {frameId: frameId});
   }).then(function (r) {
     return r === undefined || r === null ? false : r;
-  }, function () {
+  }, function (e) {
+    console.info('Twilight Movies, the remote: frame ' + (m.up ? 'around ' + sender.frameId : m.frame) + ' not reached: ' + e);
     return false;
   });
 }

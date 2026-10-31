@@ -1,8 +1,8 @@
 # Twilight Movies
 
-Twilight Movies opens TV websites full screen on an Android TV or TV box, and makes the remote work with them: KurdFilm's, [app.kurdfilm.krd/tv](https://app.kurdfilm.krd/tv), first, and more can be added (see [Adding a website](ARCHITECTURE.md#adding-a-website)). It is a separate app from Twilight TV.
+Twilight Movies opens TV websites full screen on an Android TV or TV box, and makes the remote work with them: KurdFilm's, [app.kurdfilm.krd/tv](https://app.kurdfilm.krd/tv), first, and the Kurdish film websites Kurd Cinema, Kurd Subtitle, Beenar, Kurd Doblazh, Kurd Movie, Awena Film, Kurdbin (Kurdsat's), Mars Cinema, Beenama, KRD WATCH, Kurdsaz, Kartoni Kurdi and ShaFilm (**Websites** in the menu). More can be added (see [Adding a website](ARCHITECTURE.md#adding-a-website)). It is a separate app from Twilight TV, which lets it on the café's box and opens it with the remote's YouTube button.
 
-It isn't made by KurdFilm or connected to them: it only shows their website, as a browser would.
+It isn't made by any of these websites or connected to them: it only shows them, as a browser would. KurdFilm has a TV interface of its own; on the others the mouse pointer is on at first (the menu switches it off for a website, and then the arrows move between its links).
 
 ## Put it on a TV box
 

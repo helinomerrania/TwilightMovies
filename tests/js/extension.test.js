@@ -126,8 +126,8 @@ check('...and its CSS back to the page', valueOf(r), '.ad{display:none!important
 // The remote between a page's frames (arrows.js): frame 5 (in the top, 0) has arrows.js, 9 is in 5, 12 has none
 const player = (m) => (m.arrows === 'in' ? { ok: true, rect: { l: 1, t: 2, r: 3, b: 4 } } : true);
 x = background(() => ({}), { 0: [-1, true], 5: [0, player], 9: [5, true], 12: [0] });
-r = x.fromPage({ arrows: 'in', frame: 5, way: 'down' }, { tab: { id: 7 }, frameId: 0 });
-check('the remote into a frame: that frame is asked, in the page shown', x.sent[0], [7, { arrows: 'in', way: 'down' }, { frameId: 5 }]);
+r = x.fromPage({ arrows: 'in', frame: 5, way: 'down', wait: 1250 }, { tab: { id: 7 }, frameId: 0 });
+check('the remote into a frame: that frame is asked, in the page shown', x.sent[0], [7, { arrows: 'in', way: 'down', wait: 1250 }, { frameId: 5 }]);
 check('...and its answer is the one given', valueOf(r), { ok: true, rect: { l: 1, t: 2, r: 3, b: 4 } });
 r = x.fromPage({ arrows: 'out', way: 'up', up: true }, { tab: { id: 7 }, frameId: 9 });
 check('out of a frame: to the frame around it', [x.sent[1], valueOf(r)], [[7, { arrows: 'out', way: 'up' }, { frameId: 5 }], true]);

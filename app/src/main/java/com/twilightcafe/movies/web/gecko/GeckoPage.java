@@ -29,6 +29,7 @@ public final class GeckoPage implements Page {
     final Handler main;
     final RequestFilter filter;
     private final Extension extension;
+    private final GeckoKeyboard keyboard;
     private GeckoView view;
     private GeckoSession session;
     String location;                    // the page's address now
@@ -63,6 +64,8 @@ public final class GeckoPage implements Page {
         session.setPermissionDelegate(events);
         session.setNavigationDelegate(new GeckoNavigation(this, listener));
         session.setPromptDelegate(new GeckoPrompts(c));
+        keyboard = new GeckoKeyboard(session.getTextInput().getDelegate());
+        session.getTextInput().setDelegate(keyboard);
         session.open(runtime);
         session.setActive(true);
         view = new GeckoView(c);
@@ -70,6 +73,10 @@ public final class GeckoPage implements Page {
         view.coverUntilFirstPaint(Color.BLACK);
         view.setFocusable(true);
         view.setFocusableInTouchMode(true);
+        view.setOnTouchListener((v, e) -> {
+            keyboard.touched();
+            return false;                          // the page's own touch, as ever
+        });
         view.setSession(session);
         extension.attach(this, filter);
     }
@@ -148,11 +155,11 @@ public final class GeckoPage implements Page {
         if (session != null) session.reload();
     }
 
-    /** The on-screen keyboard, for the page's field the remote is on (OK on it: assets/gecko/arrows.js). */
+    /** The on-screen keyboard, for the page's field the remote is on (OK on it: assets/gecko/arrows-keys.js). */
     void showKeyboard() {
         if (session == null || view == null) return;
         if (!view.hasFocus()) view.requestFocus();
-        session.getTextInput().getDelegate().showSoftInput(session);
+        keyboard.show(session);
     }
 
     @Override

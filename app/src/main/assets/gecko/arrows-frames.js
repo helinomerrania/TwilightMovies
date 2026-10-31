@@ -14,13 +14,18 @@
     } catch (e) {
       // not one the engine knows
     }
-    if (typeof id !== 'number' || id < 0) return Promise.resolve(null);
+    if (typeof id !== 'number' || id < 0) {
+      console.info('Twilight Movies, the remote: a frame the engine doesn\'t know (' + id + ')');
+      return Promise.resolve(null);
+    }
     return new Promise(function (resolve) {
       var late = setTimeout(function () {
+        console.info('Twilight Movies, the remote: frame ' + id + ' didn\'t answer');
         resolve(null);
       }, wait);
       a.send({arrows: 'in', frame: id, way: way, wait: wait - 250}).then(function (r) {
         clearTimeout(late);
+        console.info('Twilight Movies, the remote: frame ' + id + (r && r.ok ? ' takes it' : ' has nothing for it'));
         resolve(r);
       });
     });
