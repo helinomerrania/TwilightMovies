@@ -1,0 +1,81 @@
+name: Try the websites
+
+# Every website in the app (app/src/main/assets/sites.json), on GitHub's machines, which reach them: each opened in
+# Chromium the way a TV box asks for it (tests/try/website.js), on a machine of its own, with what its scripts need
+# of the web engine and what the app's ad blocker would block there (and which of its pages' addresses the app
+# would stop as another site's). The screenshots and logs go to the pre-release "try", each website's under
+# site-<its id>-. Runs on a push to a branch named try/..., or by hand from the Actions tab.
+on:
+  push:
+    branches: ['try/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: try-sites
+  cancel-in-progress: true
+
+jobs:
+  list:
+    runs-on: ubuntu-24.04
+    outputs:
+      sites: ${{ steps.read.outputs.sites }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: The websites in the app
+        id: read
+        run: echo "sites=$(jq -c '[.sites[] | {id, address, domains: (.domains // [])}]' app/src/main/assets/sites.json)" >> "$GITHUB_OUTPUT"
+      - name: The pre-release for what it sees
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release view try > /dev/null 2>&1 || gh release create try --prerelease --latest=false \
+            --title "Tried on GitHub" \
+            --notes "Screenshots and logs of the app and its websites, from .github/workflows/try.yml and sites.yml. Nothing to install."
+
+  site:
+    name: ${{ matrix.site.id }}
+    needs: list
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        site: ${{ fromJSON(needs.list.outputs.sites) }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Chromium, and a JavaScript parser
+        run: |
+          npm install --no-save --no-package-lock playwright@1.49.1 acorn@8.14.0
+          npx playwright install --with-deps chromium
+      - name: The website, as a TV box asks for it
+        run: node tests/try/website.js out/site "${{ matrix.site.address }}"
+      - name: Which web engine its scripts need
+        run: node tests/try/syntax.js out/site | tee out/site/syntax.txt
+      - name: What the app's ad blocker would block there
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DOMAINS: ${{ join(matrix.site.domains, ' ') }}
+          ADDRESS: ${{ matrix.site.address }}
+        run: |
+          gh release download filters -p filters.bin -D out --clobber
+          mkdir -p out/classes
+          javac -nowarn -d out/classes $(find app/src/main/java/com/twilightcafe/movies/adblock/engine -name '*.java') tests/try/Blocked.java
+          # the website's own domains: as given, else its address's last two labels (as the app takes them)
+          own=${DOMAINS:-$(node -e 'const h = new URL(process.argv[1]).hostname.split("."); console.log(h.slice(-2).join("."))' "$ADDRESS")}
+          # shellcheck disable=SC2086  # one argument each
+          java -cp out/classes Blocked out/filters.bin out/site/requests.tsv $own | tee out/site/blocked.txt
+      - name: Publish what it saw
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash tests/try/publish.sh out/site "site-${{ matrix.site.id }}-"

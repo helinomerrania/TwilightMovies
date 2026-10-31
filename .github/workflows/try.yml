@@ -1,11 +1,10 @@
 name: Try the app
 
-# On GitHub's machines, which reach the websites: the website opened in Chromium the way a TV box asks for it
-# (tests/try/website.js), which web engine its scripts need, what the app's ad blocker would block there, and the
-# app itself on two emulators with a TV's screen (tests/try/emulator.sh): Android 9, with a web engine from 2018
-# like the café's box (so the app uses Firefox's, inside it), and Android 14, with a new one (the box's own).
-# The screenshots and logs go to the pre-release "try". Runs on a push to a branch named try/..., or by hand
-# from the Actions tab.
+# On GitHub's machines, which reach the websites: the app itself on two emulators with a TV's screen
+# (tests/try/emulator.sh): Android 9, with a web engine from 2018 like the café's box (so the app uses Firefox's,
+# inside it), and Android 14, with a new one (the box's own). The screenshots and logs go to the pre-release "try".
+# Runs on a push to a branch named try/..., or by hand from the Actions tab. (The websites themselves, each in
+# Chromium, with what their scripts need and what the ad blocker would block: sites.yml, on the same pushes.)
 on:
   push:
     branches: ['try/**']
@@ -30,41 +29,6 @@ jobs:
           gh release view try > /dev/null 2>&1 || gh release create try --prerelease --latest=false \
             --title "Tried on GitHub" \
             --notes "Screenshots and logs of the app and its websites, from .github/workflows/try.yml. Nothing to install."
-
-  website:
-    name: The website in Chromium
-    needs: prepare
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: '22'
-      - uses: actions/setup-java@v6
-        with:
-          distribution: temurin
-          java-version: '17'
-      - name: Chromium, and a JavaScript parser
-        run: |
-          npm install --no-save --no-package-lock playwright@1.49.1 acorn@8.14.0
-          npx playwright install --with-deps chromium
-      - name: KurdFilm, as the café's box asks for it
-        run: node tests/try/website.js out/website https://app.kurdfilm.krd/tv
-      - name: Which web engine its scripts need
-        run: node tests/try/syntax.js out/website | tee out/website/syntax.txt
-      - name: What the app's ad blocker would block there
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release download filters -p filters.bin -D out --clobber
-          mkdir -p out/classes
-          javac -nowarn -d out/classes $(find app/src/main/java/com/twilightcafe/movies/adblock/engine -name '*.java') tests/try/Blocked.java
-          java -cp out/classes Blocked out/filters.bin out/website/requests.tsv kurdfilm.krd | tee out/website/blocked.txt
-      - name: Publish what it saw
-        if: always()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: bash tests/try/publish.sh out/website website-
 
   emulator:
     name: The app on Android ${{ matrix.api }} (${{ matrix.name }})

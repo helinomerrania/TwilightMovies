@@ -1,50 +1,23 @@
 // The app's extension in Firefox's engine (app/src/main/assets/gecko): its background script and its page script,
 // with a stand-in for the engine's browser API that answers at once (so the checks run in order); and that it
-// and web/gecko/Extension.java call the app by the same name, from the same folder.
+// and web/gecko/Extension.java call the app by the same name, from the same folder. (The arrows: arrows.test.js.)
 'use strict';
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const { check, ok } = require('./lib/check');
 const { ROOT } = require('./lib/scripts');
+const { SyncPromise, now, valueOf } = require('./lib/promise');
 
 const DIR = path.join(ROOT, 'app', 'src', 'main', 'assets', 'gecko');
 const read = (f) => fs.readFileSync(path.join(DIR, f), 'utf8');
-
-// Promises that keep their word at once (so the checks run in order): what the stand-in engine gives, and the
-// Promise the scripts make themselves.
-function SyncPromise(executor) {
-  let done = false;
-  let value;
-  let broken = false;
-  const waiting = [];
-  const settle = (v, b) => {
-    if (done) return;
-    if (!b && v && typeof v.then === 'function') return v.then((x) => settle(x, false), (e) => settle(e, true));
-    done = true;
-    value = v;
-    broken = b;
-    waiting.splice(0).forEach((f) => f());
-  };
-  this.then = (yes, no) => new SyncPromise((res, rej) => {
-    const run = () => {
-      const f = broken ? no : yes;
-      if (!f) return broken ? rej(value) : res(value);
-      try { res(f(value)); } catch (e) { rej(e); }
-    };
-    if (done) run(); else waiting.push(run);
-  });
-  try { executor((v) => settle(v, false), (e) => settle(e, true)); } catch (e) { settle(e, true); }
-}
-SyncPromise.resolve = (v) => new SyncPromise((r) => r(v));
-const now = (value, broken) => new SyncPromise((res, rej) => (broken ? rej(value) : res(value)));
 const NEVER = {};   // an app that never answers
-const valueOf = (p) => { let v; p.then((x) => { v = x; }); return v; };
 
-function background(app) {
+function background(app, frames) {
   const asked = [];
   const posted = [];
   const ran = [];
+  const sent = [];
   const b = { onRequest: null, filter: null, extra: null, fromPort: null, fromPage: null, nativeApp: null };
   const port = {
     onMessage: { addListener: (f) => { b.fromPort = f; } },
@@ -63,14 +36,24 @@ function background(app) {
       onMessage: { addListener: (f) => { b.fromPage = f; } },
     },
     webRequest: { onBeforeRequest: { addListener: (f, filter, extra) => { b.onRequest = f; b.filter = filter; b.extra = extra; } } },
-    tabs: { executeScript: (tab, d) => { ran.push([tab, d]); return b.script(d.code); } },
+    // frames: {frameId: [the frame around it, what its arrows.js answers (or a function of the message)]}
+    webNavigation: { getFrame: (d) => now(frames && frames[d.frameId] ? { parentFrameId: frames[d.frameId][0] } : null) },
+    tabs: {
+      executeScript: (tab, d) => { ran.push([tab, d]); return b.script(d.code); },
+      sendMessage: (tab, m, o) => {
+        sent.push([tab, m, o]);
+        const f = frames && frames[o.frameId];
+        if (!f || f[1] === undefined) return now(new Error('no one there'), true);
+        return now(typeof f[1] === 'function' ? f[1](m) : f[1]);
+      },
+    },
   };
   b.script = () => now(['ok']);
   const timers = [];
   b.timers = timers;
   vm.runInContext(read('background.js'), vm.createContext({ browser, JSON, Promise: SyncPromise,
     setTimeout: (f) => { timers.push(f); return timers.length; }, clearTimeout: (n) => { timers[n - 1] = null; } }));
-  return Object.assign(b, { asked, posted, ran });
+  return Object.assign(b, { asked, posted, ran, sent });
 }
 
 const manifest = JSON.parse(read('manifest.json'));
@@ -81,6 +64,11 @@ check('...its background script', manifest.background.scripts, ['background.js']
 const cs = manifest.content_scripts[0];
 check('...its page script: in the page itself, from the very start', [cs.js, cs.run_at, cs.all_frames], [['page.js'], 'document_start', false]);
 ok('...and an id of its own', /^[\w.-]+@[\w.-]+$/.test(manifest.browser_specific_settings.gecko.id));
+const keys = manifest.content_scripts[1] || {};
+check('...the remote\'s arrows: in every frame of the page, from the very start, with their ring',
+  [keys.js, keys.css, keys.run_at, keys.all_frames], [['arrows.js', 'arrows-reach.js', 'arrows-move.js', 'arrows-frames.js',
+    'arrows-keys.js'], ['arrows.css'], 'document_start', true]);
+ok('...and it may follow a page\'s frames, to pass the remote between them', manifest.permissions.includes('webNavigation'));
 
 const java = fs.readFileSync(path.join(ROOT, 'app', 'src', 'main', 'java', 'com', 'twilightcafe', 'movies', 'web', 'gecko',
   'Extension.java'), 'utf8');
@@ -134,6 +122,26 @@ check('a page it can\'t run in: null', x.posted[3], { done: 4, value: null });
 r = x.fromPage({ ask: 'generic', a: 'films.example', b: '.ad' }, { tab: { id: 7 } });
 check('the ad-hiding script\'s question goes to the app', x.asked[0], ['twilight', { ask: 'generic', a: 'films.example', b: '.ad' }]);
 check('...and its CSS back to the page', valueOf(r), '.ad{display:none!important}');
+
+// The remote between a page's frames (arrows.js): frame 5 (in the top, 0) has arrows.js, 9 is in 5, 12 has none
+const player = (m) => (m.arrows === 'in' ? { ok: true, rect: { l: 1, t: 2, r: 3, b: 4 } } : true);
+x = background(() => ({}), { 0: [-1, true], 5: [0, player], 9: [5, true], 12: [0] });
+r = x.fromPage({ arrows: 'in', frame: 5, way: 'down' }, { tab: { id: 7 }, frameId: 0 });
+check('the remote into a frame: that frame is asked, in the page shown', x.sent[0], [7, { arrows: 'in', way: 'down' }, { frameId: 5 }]);
+check('...and its answer is the one given', valueOf(r), { ok: true, rect: { l: 1, t: 2, r: 3, b: 4 } });
+r = x.fromPage({ arrows: 'out', way: 'up', up: true }, { tab: { id: 7 }, frameId: 9 });
+check('out of a frame: to the frame around it', [x.sent[1], valueOf(r)], [[7, { arrows: 'out', way: 'up' }, { frameId: 5 }], true]);
+r = x.fromPage({ arrows: 'shown', rect: { l: 5, t: 6, r: 7, b: 8 }, up: true }, { tab: { id: 7 }, frameId: 5 });
+check('where the remote is, shown in the frame around too', x.sent[2], [7, { arrows: 'shown', rect: { l: 5, t: 6, r: 7, b: 8 } }, { frameId: 0 }]);
+r = x.fromPage({ arrows: 'in', frame: 12, way: 'left' }, { tab: { id: 7 }, frameId: 0 });
+check('a frame without the arrows (an ad\'s, say): no', valueOf(r), false);
+r = x.fromPage({ arrows: 'out', way: 'up', up: true }, { tab: { id: 7 }, frameId: 0 });
+check('the top of the page has no frame around it: nobody is asked', [valueOf(r), x.sent.length], [false, 4]);
+check('nothing for the arrows from outside a page', valueOf(x.fromPage({ arrows: 'in', frame: 5, way: 'up' }, {})), false);
+x = background(() => ({}));
+r = x.fromPage({ keyboard: 1 }, { tab: { id: 7 }, frameId: 0 });
+check('OK on a field: the app is asked for the on-screen keyboard', [x.asked[0], valueOf(r)], [['twilight', { keyboard: 1 }], true]);
+ok('...and the app shows it', /m\.has\("keyboard"\)/.test(java) && /showKeyboard\(\)/.test(java));
 
 function pageScript(answers) {
   const sent = [];

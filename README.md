@@ -88,6 +88,8 @@ A website is shown by a web engine. Most TV boxes have one of their own (Android
 
 So Firefox's engine comes inside the app (GeckoView 157, the same as in Twilight TV), and the app uses it on any box whose own engine is older than Chrome 80, on Android 8.0 or newer. On a box with a new engine of its own, the app uses that. The ad blocker, the remote, the mouse pointer, full screen and the video keys work the same in both; in Firefox's engine the app's extension (`app/src/main/assets/gecko`) does the blocking and runs the app's scripts in the page.
 
+The box's own engine moves from link to link with the arrows by itself on a TV; Firefox's engine would only scroll. So in Firefox's engine the app's extension moves the remote itself, the same way (to the nearest link, button or field that way, into a film's player and out again), with an orange ring round what has the remote. OK on a field (the website's search) opens the on-screen keyboard, and once something is typed, OK searches. Where the website moves by the arrows itself, the website's way comes first.
+
 The menu shows which one is in use, and **Web engine** switches to the other (the app starts again, at the website's first page). Each engine keeps its own sign-ins, so after the first start with Firefox's engine, sign in to the website again. Firefox's engine needs a little more of the box's memory, and a box with Android 6 or 7 always uses its own (the app needs Android 6.0 or newer).
 
 ## Kurdish and English

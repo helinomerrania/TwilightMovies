@@ -1,7 +1,8 @@
 // The app inside Firefox's engine (web/gecko/Extension.java is the app's side). Every address a page loads, in
 // any of its frames, is asked about first: the app's ad blocker answers load it, nothing, or a stand-in (a data:
 // address). The app's scripts run in the page shown (in this extension's own part of it, which the page's
-// scripts can't see), and what the ad-hiding script asks goes to the app.
+// scripts can't see), and what the ad-hiding script asks goes to the app. The remote's arrows (arrows.js, in
+// every frame) go between a page's frames through here, and OK on a field asks the app for the keyboard.
 'use strict';
 var APP = 'twilight';
 var tab = -1;       // the page shown: the app has one
@@ -74,7 +75,32 @@ browser.runtime.onMessage.addListener(function (m, sender) {
       return '';
     });
   }
+  if (typeof m.arrows === 'string') return pass(m, sender);
+  if (m.keyboard) {
+    return ask({keyboard: 1}, 3000).then(function () {
+      return true;
+    });
+  }
   return undefined;
 });
+
+// The remote from one frame of a page to another (arrows.js): into the frame named (in: is there something for it
+// there?), or out to the frame around the sender (up). The frame's answer, or false if there's none.
+function pass(m, sender) {
+  if (!sender.tab) return Promise.resolve(false);
+  var tabId = sender.tab.id;
+  var to = !m.up ? Promise.resolve(m.frame) : browser.webNavigation.getFrame({tabId: tabId, frameId: sender.frameId})
+    .then(function (f) {
+      return f ? f.parentFrameId : -1;
+    });
+  return to.then(function (frameId) {
+    if (typeof frameId !== 'number' || frameId < 0) return false;
+    return browser.tabs.sendMessage(tabId, {arrows: m.arrows, way: m.way, rect: m.rect}, {frameId: frameId});
+  }).then(function (r) {
+    return r === undefined || r === null ? false : r;
+  }, function () {
+    return false;
+  });
+}
 
 connect();

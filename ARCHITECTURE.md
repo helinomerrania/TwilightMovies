@@ -38,7 +38,8 @@ app/src/main/AndroidManifest.xml            what Android starts by name
 app/src/main/java/com/twilightcafe/movies/  the app, a folder for each job (below)
 app/src/main/assets/sites.json              the app's websites
 app/src/main/assets/scripts/                the small scripts the app runs inside the websites
-app/src/main/assets/gecko/                  the app's extension inside Firefox's engine (its ad blocker and scripts there)
+app/src/main/assets/gecko/                  the app's extension inside Firefox's engine (its ad blocker and scripts there, and
+                                            the remote's arrows: arrows*.js, which the engine hasn't of its own)
 app/src/main/res/values/strings.xml         the app's texts in English; values-b+ckb/ has them in Kurdish
 tools/filters/                              the ad blocker's lists, its own rules, the checks, and the compiler (src/)
 tests/java/                                 the Java tests (run.sh)
@@ -47,7 +48,8 @@ tests/try/                                  trying the app and its websites on G
 art/                                        draws the banner, the icon and the start-up picture
 .github/workflows/build.yml                 tests and builds every push; from main, publishes a release when the app changed
 .github/workflows/filters.yml               makes the filters every day, and publishes them
-.github/workflows/try.yml                   tries the app on Android TV emulators and its website in Chromium
+.github/workflows/try.yml                   tries the app on Android TV emulators
+.github/workflows/sites.yml                 tries every website of sites.json in Chromium, each on a machine of its own
 ```
 
 ## The app's parts
@@ -83,7 +85,7 @@ The compiler that makes the filter file is in `tools/filters/src` (package `adbl
 - **MainActivity only passes things on.** It makes `MoviesApp` and hands it Android's events: start, stop, the remote's keys.
 - **MoviesApp is the only place that makes parts.** Each part gets what it needs when it's made, and nothing else, so a part's connections can be seen at a glance and it can be tested on its own. The few parts that bring many others together (those in `app/`) get `MoviesApp` itself; no part outside `app/` knows it.
 - **Parts talk through small interfaces**, each defined by the part that needs it: `Page`, `PageListener`, `RequestFilter`, `Bridge`, `ErrorScreen.Host`, `Fullscreen.Listener`, `RemoteKeys.Actions`, `MenuPanel.Actions` and `Status`, the panels' `Listener`s. So `web/` knows nothing of the ad blocker, the ad blocker nothing of the web engines or the screen, and the rest of the app nothing of which engine shows the page.
-- **Two web engines, one Page.** `web/webview/` (the box's own) and `web/gecko/` (Firefox's) each make a `Page` and tell a `PageListener`; only `app/Engines` makes one. Where they differ, the Page says so: Firefox's engine doesn't say which keys the page didn't use (`reportsUnusedKeys`), so `video/MediaKeys` plays and pauses by itself there; its video full screen is in the page's own view, so `video/Fullscreen` has no view to put over it. In Firefox's engine the page scripts run in the app's extension's own part of the page (`assets/gecko`), which the website's scripts can't see, and the hide-ads script's answers come as promises.
+- **Two web engines, one Page.** `web/webview/` (the box's own) and `web/gecko/` (Firefox's) each make a `Page` and tell a `PageListener`; only `app/Engines` makes one. Where they differ, the Page says so: Firefox's engine doesn't say which keys the page didn't use (`reportsUnusedKeys`), so `video/MediaKeys` plays and pauses by itself there; its video full screen is in the page's own view, so `video/Fullscreen` has no view to put over it. In Firefox's engine the page scripts run in the app's extension's own part of the page (`assets/gecko`), which the website's scripts can't see, and the hide-ads script's answers come as promises. The box's own engine moves from link to link with the arrows on a TV (its spatial navigation); Firefox's engine doesn't, so the extension does it (`assets/gecko/arrows*.js`, in every frame, by the box's engine's measure, between frames through `background.js`), and OK on a field asks `GeckoPage` for the on-screen keyboard.
 - **The ground floor never reaches up.** `util/` uses nothing else of the app; `adblock/engine/` nothing at all (the compiler shares it, on GitHub); `adblock/surrogates/` only the engine; `adblock/` only those two and `util/`; `settings/` only `util/`; `text/` only the texts; `ui/` only `text/` and `util/`; `update/` only `util/` (and `InstallResult`); `web/` only `util/`; `web/webview/` and `web/gecko/` only `web/` and `util/`, and only `app/` uses them. The features (`sites/`, `remote/`, `pointer/`, `video/`, `loading/`, `menu/` and `app/`) use the ground floor and each other. `ArchitectureTest` checks this on every build, and that every folder is in this file.
 - **The rules are plain Java, beside the Android code that uses them**, so they're tested on a computer: `SitePolicy`, `RequestKind` and `BlockedPage` beside `AdBlocker`, `Site` beside `Sites`, `Backoff` beside `ErrorScreen`, `Release` beside `Updater`, `History` beside the engines, `Urls`, `Streams` and `Http`, and all of `adblock/engine/` and `adblock/surrogates/`. Such a class says "Plain Java." at its top, and `tests/java/run.sh` compiles it with the tests.
 - **Small files.** No file of code is longer than 250 lines. `ArchitectureTest` checks every one.
@@ -134,7 +136,8 @@ There are two sets, and GitHub runs both on every push before anything is built.
 |---|---|
 | `scripts` | Each page script is one function, in plain old JavaScript, and PageScripts names every one |
 | `media`, `scroll`, `hide-ads`, `ad-layers` | Each script on stand-in pages: the video keys, scrolling, hiding ad boxes, click traps |
-| `extension` | The app's extension in Firefox's engine: every address asked about (not the page itself, not the engine's own), the answers, the app's scripts in the page and their values, the bridge; the manifest; the same name for the app on both sides |
+| `extension` | The app's extension in Firefox's engine: every address asked about (not the page itself, not the engine's own), the answers, the app's scripts in the page and their values, the bridge, the remote between frames, the keyboard; the manifest; the same name for the app on both sides |
+| `arrows`, `arrows-reach`, `arrows-frames` | The remote's arrows in Firefox's engine, on KurdFilm's TV page as the engine lays it out and on stand-in pages: where each arrow goes, the search and its keyboard, the website's own keys first, OK, what can't be gone to, windows over the page, full screen, fields, frames |
 | `sites` | sites.json: every website with an id, a name, an https address and its own domains |
 | `strings` | The texts: every one the app asks for exists, none is unused, and the Kurdish ones keep each `%1$s` |
 
@@ -151,7 +154,7 @@ There are two sets, and GitHub runs both on every push before anything is built.
 
 ### Trying it on GitHub
 
-GitHub's machines reach the websites, so the app can be tried there as a TV box would show it: push to a branch named `try/...`, or run **Try the app** from the Actions tab (`.github/workflows/try.yml`). It opens the website in Chromium with a TV box's user agent (`tests/try/website.js`), says which web engine its scripts need (`syntax.js`) and what the app's ad blocker would block there (`Blocked.java`), and runs the app itself on two emulators with a TV's screen (`emulator.sh`): Android 9 with a web engine from 2018 like the café's box, where the app uses Firefox's engine, and Android 14 with a new one, where it uses the box's own. It goes into the website, opens a film and presses play, the way the remote does. A screenshot of every step, and the logs, go to the pre-release **try** (`publish.sh`).
+GitHub's machines reach the websites, so the app can be tried there as a TV box would show it: push to a branch named `try/...`, or run **Try the app** or **Try the websites** from the Actions tab. **Try the websites** (`.github/workflows/sites.yml`) opens every website in `sites.json` in Chromium with a TV box's user agent (`tests/try/website.js`), each on a machine of its own, and says which web engine its scripts need (`syntax.js`) and what the app's ad blocker would block there, with the addresses its pages go to that the app would stop as another site's (`Blocked.java`): what a new website's `domains` need. **Try the app** (`.github/workflows/try.yml`) runs the app itself on two emulators with a TV's screen (`emulator.sh`): Android 9 with a web engine from 2018 like the café's box, where the app uses Firefox's engine, and Android 14 with a new one, where it uses the box's own. It goes into KurdFilm, moves about it with the arrows, searches, opens a film, goes into its player and out with the arrows, and presses play, the way the remote does. A screenshot of every step, and the logs, go to the pre-release **try** (`publish.sh`; a website's under `site-` and its id).
 
 ## Making a change
 

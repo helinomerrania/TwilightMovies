@@ -27,8 +27,9 @@ import java.util.concurrent.Executors;
 /**
  * The app's own extension in Firefox's engine (assets/gecko/). Its background script asks the app about every
  * address a page loads (the RequestFilter: load it, nothing, or a stand-in, as a data: address), runs the app's
- * scripts in the page shown, and passes on what the ad-hiding script asks (the Bridge). One for the engine,
- * for the page the app shows now (attach).
+ * scripts in the page shown, and passes on what the ad-hiding script asks (the Bridge). Its arrows.js takes the
+ * remote's arrows from link to link (the engine only scrolls by them) and asks for the on-screen keyboard. One
+ * for the engine, for the page the app shows now (attach).
  */
 final class Extension implements WebExtension.MessageDelegate, WebExtension.PortDelegate {
     private static final String TAG = "TwilightMovies";
@@ -118,13 +119,18 @@ final class Extension implements WebExtension.MessageDelegate, WebExtension.Port
         else if (unsent.size() < 20) unsent.add(m);
     }
 
-    // From the background script (WebExtension.MessageDelegate): every address the page loads, and the ad-hiding
-    // script's questions. Answered on the ad blocker's threads, as JSON text (the engine takes no JSONObject back).
+    // From the background script (WebExtension.MessageDelegate, on the main thread): every address the page loads,
+    // and the ad-hiding script's questions, answered on the ad blocker's threads, as JSON text (the engine takes no
+    // JSONObject back); and OK on one of the page's fields (arrows.js): the on-screen keyboard.
 
     @Override
     public GeckoResult<Object> onMessage(String nativeApp, Object message, WebExtension.MessageSender sender) {
         if (!(message instanceof JSONObject)) return null;
         final JSONObject m = (JSONObject) message;
+        if (m.has("keyboard")) {
+            if (page instanceof GeckoPage) ((GeckoPage) page).showKeyboard();
+            return GeckoResult.fromValue("{}");
+        }
         final RequestFilter f = filter;
         final Bridge b = bridge;
         final GeckoResult<Object> answer = new GeckoResult<Object>();

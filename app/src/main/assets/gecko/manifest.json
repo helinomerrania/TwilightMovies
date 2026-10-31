@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Twilight Movies",
   "version": "1.0",
-  "description": "The app inside Firefox's engine: its ad blocker, and its scripts in the page.",
+  "description": "The app inside Firefox's engine: its ad blocker, its scripts in the page, and the remote's arrows.",
   "browser_specific_settings": {
     "gecko": {
       "id": "movies@twilightcafe"
@@ -12,6 +12,7 @@
     "<all_urls>",
     "webRequest",
     "webRequestBlocking",
+    "webNavigation",
     "nativeMessaging",
     "geckoViewAddons"
   ],
@@ -24,6 +25,13 @@
       "js": ["page.js"],
       "run_at": "document_start",
       "all_frames": false
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["arrows.js", "arrows-reach.js", "arrows-move.js", "arrows-frames.js", "arrows-keys.js"],
+      "css": ["arrows.css"],
+      "run_at": "document_start",
+      "all_frames": true
     }
   ]
 }

@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Tries the app itself on an emulator with a TV's screen (on GitHub, by .github/workflows/try.yml): installs it,
-# opens it, closes the remote guide, goes into the website (its Sorani dialect), opens a film and presses play the
-# way the remote does, with a screenshot (and the screen's UI tree) at every step; then the app's menu, which
-# shows the web engine and its version; Cloudflare's check (turnstile.html) in the app's engine; and the log:
-# which engine the app chose, the page's own messages, and any crash.
+# opens it, closes the remote guide, goes into the website (its Sorani dialect), moves about it with the arrows (and
+# searches with OK and the on-screen keyboard), opens a film, goes into its player and out with the arrows, and
+# presses play the way the remote does, with a screenshot (and the screen's UI tree) at every step; then the app's
+# menu, which shows the web engine and its version; Cloudflare's check (turnstile.html) in the app's engine; and
+# the log: which engine the app chose, where the arrows went, the page's own messages, and any crash.
 # Usage: tests/try/emulator.sh APK OUT_DIR NAME     (FILM, PLAY: what to tap, as patterns, if not KurdFilm's)
 set -uo pipefail
 APK=$1
@@ -100,9 +101,41 @@ shot guide-closed
 tap 'سۆرانی|sorani' || key KEYCODE_DPAD_CENTER   # the website has Sorani chosen already
 sleep 20
 shot home
+
+# The arrows, from nothing chosen: the header, the search; OK on it opens the on-screen keyboard, the words go in,
+# and OK searches
+key KEYCODE_DPAD_DOWN
+sleep 2
+shot arrows-header
+key KEYCODE_DPAD_DOWN
+sleep 2
+shot arrows-search
+key KEYCODE_DPAD_CENTER
+sleep 3
+keyboard=$(adb shell dumpsys input_method | grep -c "mInputShown=true")
+echo "on-screen keyboard after OK on the search: $([ "$keyboard" -gt 0 ] && echo shown || echo "not shown")" | tee -a "$OUT/$NAME-device.txt"
+shot arrows-keyboard
+adb shell input text "${SEARCH:-chicken}"
+sleep 2
+if adb shell dumpsys input_method | grep -q "mInputShown=true"; then key KEYCODE_BACK; fi   # the keyboard goes
+shot arrows-typed
+key KEYCODE_DPAD_CENTER
+sleep 15
+shot arrows-found
+key KEYCODE_DPAD_DOWN KEYCODE_DPAD_DOWN KEYCODE_DPAD_LEFT
+sleep 2
+shot arrows-films
+
 tap "${FILM:-★}" || key KEYCODE_DPAD_CENTER   # a film (KurdFilm's posters say "★ 7.2")
 sleep 20
 shot film
+# Into the film's player (a frame of the page) with the arrows, and out of it again
+key KEYCODE_DPAD_DOWN KEYCODE_DPAD_DOWN
+sleep 3
+shot arrows-player
+key KEYCODE_DPAD_UP
+sleep 3
+shot arrows-out
 tap "${PLAY:-پەخش|سەیرکردن|سەیربکە|تەماشا|بینین|play|watch|▶}" || key KEYCODE_DPAD_CENTER
 sleep 30
 shot play
@@ -157,4 +190,5 @@ sleep 1
 grep -E "chromium|CONSOLE|AndroidRuntime|FATAL|twilightcafe|TwilightMovies|cr_|GeckoConsole|Gecko[A-Z]|libc" "$OUT/$NAME-logcat.txt" \
   | tail -n 600 > "$OUT/$NAME-log.txt"
 grep -m 3 "web engine:" "$OUT/$NAME-logcat.txt" | tee -a "$OUT/$NAME-device.txt"
+grep -o "the remote: .*" "$OUT/$NAME-logcat.txt" | head -40 | tee -a "$OUT/$NAME-device.txt"
 echo "done: $(ls "$OUT" | wc -l) files"

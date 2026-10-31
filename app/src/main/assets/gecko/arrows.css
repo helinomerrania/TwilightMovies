@@ -1,0 +1,13 @@
+/* Where the remote is on the website, in Firefox's engine (arrows.js puts it there): a ring in the app's own colour,
+   clear from across a room, drawn inside the edge so a row of films doesn't cut it off. Only for the remote's way
+   of getting there (focus-visible), not for the mouse pointer's clicks; not round a frame (what has the remote is
+   inside it, with a ring of its own). */
+:root :focus-visible {
+  outline: 4px solid #ffb07a !important;
+  outline-offset: -3px !important;
+}
+
+:root iframe:focus-visible,
+:root frame:focus-visible {
+  outline: none !important;
+}

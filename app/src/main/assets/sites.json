@@ -7,6 +7,84 @@
       "address": "https://app.kurdfilm.krd/tv",
       "domains": ["kurdfilm.krd"],
       "pointer": false
+    },
+    {
+      "id": "kurdcinama",
+      "name": "Kurd Cinama",
+      "address": "https://kurdcinama.com/",
+      "pointer": true
+    },
+    {
+      "id": "kurdsubtitle",
+      "name": "Kurd Subtitle",
+      "address": "https://kurdsubtitle.net/",
+      "pointer": true
+    },
+    {
+      "id": "beenar",
+      "name": "Beenar",
+      "address": "https://beenar.net/",
+      "pointer": true
+    },
+    {
+      "id": "kurddoblazh",
+      "name": "Kurd Doblazh",
+      "address": "https://www.kurddoblazh.com/",
+      "pointer": true
+    },
+    {
+      "id": "kurd-movie",
+      "name": "Kurd Movie",
+      "address": "https://www.kurd-movie.com/",
+      "pointer": true
+    },
+    {
+      "id": "awenafilm",
+      "name": "Awena Film",
+      "address": "https://awenafilm.com/",
+      "pointer": true
+    },
+    {
+      "id": "kurdbin",
+      "name": "KurdBin",
+      "address": "https://kurdbin.kurdsat.tv/",
+      "pointer": true
+    },
+    {
+      "id": "marscinema",
+      "name": "Mars Cinema",
+      "address": "https://marscinema.net/",
+      "pointer": true
+    },
+    {
+      "id": "beenama",
+      "name": "Beenama",
+      "address": "https://beenama.com/",
+      "pointer": true
+    },
+    {
+      "id": "krd-watch",
+      "name": "KRD Watch",
+      "address": "https://krd.watch/",
+      "pointer": true
+    },
+    {
+      "id": "kurdsaz",
+      "name": "KurdSaz",
+      "address": "https://kurdsaz.com/",
+      "pointer": true
+    },
+    {
+      "id": "kartonikurde",
+      "name": "Kartoni Kurde",
+      "address": "https://www.kartonikurde.com/",
+      "pointer": true
+    },
+    {
+      "id": "shafilm",
+      "name": "ShaFilm",
+      "address": "https://shafilm.vip/",
+      "pointer": true
     }
   ]
 }

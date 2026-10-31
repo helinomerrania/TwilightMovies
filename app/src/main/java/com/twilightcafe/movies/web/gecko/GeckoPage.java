@@ -148,6 +148,13 @@ public final class GeckoPage implements Page {
         if (session != null) session.reload();
     }
 
+    /** The on-screen keyboard, for the page's field the remote is on (OK on it: assets/gecko/arrows.js). */
+    void showKeyboard() {
+        if (session == null || view == null) return;
+        if (!view.hasFocus()) view.requestFocus();
+        session.getTextInput().getDelegate().showSoftInput(session);
+    }
+
     @Override
     public void run(String script, Result result) {
         if (session != null) extension.run(this, script, result);
