@@ -26,7 +26,8 @@
     else if (under) window.scrollBy({top: r.b - a.box(under).t + 8, behavior: 'instant'});
   }
 
-  // In Android's log (adb logcat), where the remote went: for whoever makes a website work with it
+  // Where the remote went, in Android's log (adb logcat) in the builds that log the pages' messages (on GitHub's
+  // emulators): for whoever makes a website work with it
   a.note = function (way, el) {
     var words = (el.getAttribute('aria-label') || el.getAttribute('title') || el.textContent || '').slice(0, 200);
     words = words.replace(/\s+/g, ' ').trim().slice(0, 40);

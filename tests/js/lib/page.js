@@ -161,6 +161,7 @@ function page(body, o) {
   };
   const ctx = vm.createContext({
     window: win, document: doc, browser, Promise: SyncPromise, console: { info: (s) => p.notes.push(s) },
+    location: { host: 'films.example' },
     setTimeout: (f) => p.timers.push(f), clearTimeout: (n) => { p.timers[n - 1] = null; },
   });
   for (const [file, source] of SOURCES) vm.runInContext(source, ctx, { filename: file });

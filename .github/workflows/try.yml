@@ -55,8 +55,9 @@ jobs:
           mkdir -p app/src/main/assets
           gh release download filters -p filters.bin -D app/src/main/assets --clobber
           chmod +x gradlew
-          # Firefox's engine for the emulators' processor (the boxes get the one for ARM)
-          ./gradlew --no-daemon assembleRelease -Pgeckoabi=x86_64
+          # Firefox's engine for the emulators' processor (the boxes get the one for ARM), with the pages' own
+          # messages in Android's log (never on the boxes)
+          ./gradlew --no-daemon assembleRelease -Pgeckoabi=x86_64 -Ppagelog
           cp app/build/outputs/apk/release/app-release.apk twilight-movies.apk
           ls -l twilight-movies.apk
       - name: Let the emulator use the processor's virtualization

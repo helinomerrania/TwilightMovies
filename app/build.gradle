@@ -29,6 +29,10 @@ android {
         // The GitHub repository the app is built from: new versions come from its releases
         // (empty on a computer, so a build made there never updates itself)
         buildConfigField "String", "REPO", "\"" + (System.getenv('GITHUB_REPOSITORY') ?: '') + "\""
+        // -Ppagelog (the try builds, on GitHub's emulators): the websites' own messages in Android's log. Never on
+        // the boxes: some websites take a browser that hands their messages on for one with its tools open, and
+        // go blank; and a website that writes a lot of them is slower
+        buildConfigField "boolean", "PAGE_LOG", project.hasProperty('pagelog') ? 'true' : 'false'
         ndk {
             abiFilters.add(geckoAbi)
         }

@@ -32,8 +32,9 @@
     return /^(BUTTON|INPUT|SELECT|TEXTAREA|IFRAME|FRAME|SUMMARY)$/.test(tag);
   }
 
-  // It can have the remote at all: not switched off, not kept out of the keys' way (tabindex -1), not a hidden
-  // field, not a tiny frame (an ad's), not in a part of the page out of use (inert)
+  // It can have the remote at all: not switched off, not kept out of the keys' way (tabindex -1: but a frame, a
+  // film's player, is gone into all the same, as in the box's engine), not a hidden field, not a tiny frame (an
+  // ad's), not in a part of the page out of use (inert)
   function takes(el) {
     try {
       if (el.matches(':disabled')) return false;
@@ -41,7 +42,7 @@
       // not a field
     }
     var t = el.getAttribute('tabindex');
-    if (t !== null) {
+    if (t !== null && !a.isFrame(el)) {
       var n = parseInt(t, 10);
       if (n < 0 || (isNaN(n) && !own(el))) return false;
     }
@@ -119,10 +120,11 @@
     return tried > 0;
   }
 
-  // It shows, for the remote coming from from: not hidden, within reach, not under something else
+  // It shows, for the remote coming from from: not hidden, within reach, not under something else (a frame may
+  // be: players often have a see-through layer over them, which the keys go past)
   function shown(el, r, from) {
     var s = a.style(el);
-    return !!s && s.visibility === 'visible' && !outOfReach(el, r, from) && !covered(el, r);
+    return !!s && s.visibility === 'visible' && !outOfReach(el, r, from) && (a.isFrame(el) || !covered(el, r));
   }
 
   // The window over the page (a dialog) that keeps the remote, if one is open

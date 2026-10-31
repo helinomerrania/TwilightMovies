@@ -78,3 +78,17 @@ check('...where its remote is, as the page around sees it', answer, { ok: true, 
 p = outer((m) => (m.arrows === 'in' && m.frame === 9 ? { ok: false } : true));
 p.fromBackground({ arrows: 'in', way: 'down', wait: 1250 }).then((a) => { answer = a; });
 check('...the frame inside has nothing for it: on past it', [at(p), answer.ok], ['below-player', true]);
+
+// KurdFilm's player: kept out of the keys' way (tabindex -1), under a see-through layer that catches clicks
+p = page([
+  E('a', { name: 'home', attrs: { href: '/' }, rect: [100, 0, 300, 50] }),
+  E('iframe', { name: 'player', frameId: 4, attrs: { tabindex: '-1' }, rect: [0, 100, 1920, 1000] }),
+  E('div', { name: 'layer', z: 3, rect: [0, 100, 1920, 1000], style: { position: 'absolute' } }),
+], { answer: (m) => (m.arrows === 'in' ? { ok: true, rect: { l: 10, t: 10, r: 110, b: 60 } } : true) });
+put(p, 'home');
+press(p, 'ArrowDown');
+check('a player kept out of the keys\' way, under a see-through layer: gone into all the same', at(p), 'player');
+p = page([E('div', { name: 'nothing', rect: [0, 0, 100, 100] })], { frame: true });
+p.fromBackground({ arrows: 'in', way: 'down' });
+check('...and a frame with nothing for the remote says so in Android\'s log', p.notes[0],
+  'Twilight Movies, the remote: nothing for it in films.example, coming down');

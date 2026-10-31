@@ -45,10 +45,11 @@ public final class GeckoPage implements Page {
         }
     };
 
-    public GeckoPage(Context c, Handler main, PageListener listener, RequestFilter filter) {
+    /** pageLog: the pages' own messages in Android's log (only for trying the app: see BuildConfig.PAGE_LOG). */
+    public GeckoPage(Context c, Handler main, PageListener listener, RequestFilter filter, boolean pageLog) {
         this.main = main;
         this.filter = filter;
-        GeckoRuntime runtime = GeckoEngine.runtime(c);
+        GeckoRuntime runtime = GeckoEngine.runtime(c, pageLog);
         extension = GeckoEngine.extension(runtime);
         session = new GeckoSession(new GeckoSessionSettings.Builder()
                 .usePrivateMode(false)                 // the website's sign-in stays

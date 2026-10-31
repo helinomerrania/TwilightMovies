@@ -44,13 +44,14 @@ public final class GeckoEngine {
         }
     }
 
-    static GeckoRuntime runtime(Context c) {
+    /** The engine, started once for the app; pageLog: the pages' own messages in Android's log (try builds only). */
+    static GeckoRuntime runtime(Context c, boolean pageLog) {
         if (runtime == null) {
             Context app = c.getApplicationContext();
             GeckoRuntimeSettings.Builder s = new GeckoRuntimeSettings.Builder()
                     .javaScriptEnabled(true)
                     .remoteDebuggingEnabled(false)
-                    .consoleOutput(true)                   // the pages' messages, in Android's log
+                    .consoleOutput(pageLog)
                     .doubleTapZoomingEnabled(false)
                     .inputAutoZoomEnabled(false)
                     .automaticFontSizeAdjustment(false)    // the box's own font size would break TV layouts

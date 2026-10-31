@@ -89,7 +89,10 @@
   function comeIn(way, wait) {
     var f = a.focused();
     if (f) return Promise.resolve({ok: true, rect: a.box(f)});
-    return a.enter(way, a.edge(way), null, [], wait);
+    return a.enter(way, a.edge(way), null, [], wait).then(function (r) {
+      if (!r.ok) console.info('Twilight Movies, the remote: nothing for it in ' + location.host + ', coming ' + way);
+      return r;
+    });
   }
 
   // The remote comes out of a frame of this page, that way: on from the frame, to the nearest past it
