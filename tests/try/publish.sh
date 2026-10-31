@@ -8,7 +8,7 @@ PREFIX=${2:-}
 STAGE=$(mktemp -d)
 trap 'rm -rf "$STAGE"' EXIT
 for f in "$DIR"/*; do
-  [ -f "$f" ] || continue
+  [ -s "$f" ] || continue   # a file, and not an empty one (GitHub takes no empty file)
   case "$f" in
     *.png | *.txt | *.log | *.tsv | *.xml | *.html) cp "$f" "$STAGE/$PREFIX$(basename "$f")" ;;
   esac

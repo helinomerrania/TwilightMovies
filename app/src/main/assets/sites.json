@@ -10,7 +10,8 @@
     },
     {
       "id": "kurdcinama",
-      "name": "Kurd Cinama",
+      "name": "Kurd Cinema",
+      "name_ckb": "کوردسینەما",
       "address": "https://kurdcinama.com/",
       "pointer": true
     },
@@ -23,18 +24,21 @@
     {
       "id": "beenar",
       "name": "Beenar",
+      "name_ckb": "بینەر",
       "address": "https://beenar.net/",
       "pointer": true
     },
     {
       "id": "kurddoblazh",
       "name": "Kurd Doblazh",
+      "name_ckb": "کورد دۆبلاژ",
       "address": "https://www.kurddoblazh.com/",
       "pointer": true
     },
     {
       "id": "kurd-movie",
       "name": "Kurd Movie",
+      "name_ckb": "کوردموڤی",
       "address": "https://www.kurd-movie.com/",
       "pointer": true
     },
@@ -46,7 +50,7 @@
     },
     {
       "id": "kurdbin",
-      "name": "KurdBin",
+      "name": "Kurdbin",
       "address": "https://kurdbin.kurdsat.tv/",
       "pointer": true
     },
@@ -64,19 +68,21 @@
     },
     {
       "id": "krd-watch",
-      "name": "KRD Watch",
+      "name": "KRD WATCH",
       "address": "https://krd.watch/",
       "pointer": true
     },
     {
       "id": "kurdsaz",
-      "name": "KurdSaz",
+      "name": "Kurdsaz",
+      "name_ckb": "کوردساز",
       "address": "https://kurdsaz.com/",
       "pointer": true
     },
     {
       "id": "kartonikurde",
-      "name": "Kartoni Kurde",
+      "name": "Kartoni Kurdi",
+      "name_ckb": "کارتۆنی کوردی",
       "address": "https://www.kartonikurde.com/",
       "pointer": true
     },

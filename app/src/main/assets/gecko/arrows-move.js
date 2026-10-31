@@ -65,13 +65,19 @@
     return a.send(m);
   };
 
-  // The remote to the nearest that way from c: true if it went there (or is going: into a frame), false if
-  // nothing's near enough
+  // The remote to the nearest that way from c: true if it went there (or is going: into a frame, which is asked
+  // first; with nothing for it there, on past the frame, or the page scrolls), false if nothing's near enough
   a.go = function (way, c, from, skip) {
     var best = a.nearest(way, c, from, skip, false);
     if (!best || a.tooFar(way, best.rect)) return false;
-    if (a.isFrame(best.el)) return a.into(way, best.el, c, from, skip);
-    a.put(best.el, way);
+    if (!a.isFrame(best.el)) {
+      a.put(best.el, way);
+      return true;
+    }
+    a.enter(way, c, from, skip, 1500).then(function (r) {
+      if (r.ok) a.shown(r.rect);
+      else if (!a.scroll(way, from)) a.out(way);
+    });
     return true;
   };
 

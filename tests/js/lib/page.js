@@ -76,6 +76,10 @@ function E(tag, o, kids) {
     e.doc.activeElement = e;
     e.doc.fire('focusin', {});
   };
+  e.blur = () => {
+    e.calls.push(['blur']);
+    if (e.doc.activeElement === e) e.doc.activeElement = e.doc.body;
+  };
   e.scrollIntoView = (opts) => e.calls.push(['scrollIntoView', opts]);
   e.click = () => e.calls.push(['click']);
   e.showPicker = () => {
