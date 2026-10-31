@@ -26,7 +26,8 @@ jobs:
       - uses: actions/checkout@v7
       - name: The websites in the app
         id: read
-        run: echo "sites=$(jq -c '[.sites[] | {id, address, domains: (.domains // [])}]' app/src/main/assets/sites.json)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "sites=$(jq -c '[.sites[] | {id, address, domains: (.domains // [])}]' app/src/main/assets/sites.json)" >> "$GITHUB_OUTPUT"
       - name: The pre-release for what it sees
         env:
           GH_TOKEN: ${{ github.token }}
