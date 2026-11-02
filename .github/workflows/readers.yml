@@ -1,0 +1,43 @@
+name: Try the readers
+
+# The app's readers (app/src/main/assets/gecko/ui/readers/) against the live websites (tests/try/readers.js), on
+# GitHub's machines: each one's home lists, a search, a film and a series in full, a season's episodes and the
+# addresses that play them. Every morning too, so a website that changed is seen before the café's boxes find out.
+# What they gave goes to the pre-release "try", under readers-. Runs on a push to a branch named try/... or
+# probe/..., every day, or by hand from the Actions tab.
+on:
+  push:
+    branches: ['try/**', 'probe/**']
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: readers
+  cancel-in-progress: true
+
+jobs:
+  readers:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: The readers, against the websites
+        timeout-minutes: 10
+        run: node tests/try/readers.js out/readers
+      - name: Every reader read what it should
+        run: |
+          if grep -q '^FAIL' out/readers/readers.log; then
+            grep '^FAIL' out/readers/readers.log
+            exit 1
+          fi
+      - name: Publish what they gave
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash tests/try/publish.sh out/readers "readers-"

@@ -1,0 +1,83 @@
+{
+ "data": {
+  "id": 3057,
+  "name": "Hope",
+  "name_en": "هیوا",
+  "release_date": "2026-07-15",
+  "description": "لە شارۆچکەیەکی دوورەدەستی کەناراوەکانی کۆریای باشوور، بونەوەرێکی نادیار ئارامی شارۆچکەکە تێکدەدات. سەرۆکی پۆلیس (بۆک سۆک) بە یارمەتی گروپێک لە ڕاوچییەکان هەوڵدەدەن ئەم بونەوەرە نامۆیە بدۆزنەوە، بەڵام ئەوەی لە سەرەتادا وەک ڕووداوێکی ئاسایی دەردەکەوێت، بە خێرایی دەگۆڕێت بۆ شەڕێکی ترسناک بۆ مانەوە، چونکە دانیشتووانی شارۆچکەکە ڕووبەڕووی هێزێکی نادیار دەبنەوە کە ژیانیان دەخاتە مەترسییەوە",
+  "tagline": "لە ڕاوچییەوە بوون بە نێچیر",
+  "poster": "storage/media-images/poster/YV8lSgDkUMDweOH0ZbMDUSjMPYlehT504KfDmhlP.jpg",
+  "backdrop": "storage/media-images/backdrops/cxPqbXItsp5Awt5D20eNt4JmMb3md6ZxnriskvF6.jpg",
+  "runtime": "158",
+  "is_series": 0,
+  "is_4k": false,
+  "path_poster": "/storage/media-images/poster/YV8lSgDkUMDweOH0ZbMDUSjMPYlehT504KfDmhlP.jpg",
+  "path_backdrop": "/storage/media-images/backdrops/cxPqbXItsp5Awt5D20eNt4JmMb3md6ZxnriskvF6.jpg",
+  "genres": [
+   {
+    "id": 62374,
+    "genre_id": 30,
+    "title_id": 3057,
+    "genre": {
+     "id": 30,
+     "name": "ئاکشن",
+     "created_at_readable": null
+    }
+   },
+   {
+    "id": 62375,
+    "genre_id": 200,
+    "title_id": 3057,
+    "genre": {
+     "id": 200,
+     "name": "ترسناک",
+     "created_at_readable": null
+    }
+   }
+  ],
+  "nmra": [
+   {
+    "title_id": 3057,
+    "nmra_id": 5,
+    "id": 7611,
+    "nmra": "6.8",
+    "nmra_relation": {
+     "id": 5,
+     "name": "IMDb",
+     "icon": "UcaeW151fnPviH4DpzsEehj7IBUE7dHwUsgjSDa3.png",
+     "created_at_readable": null
+    }
+   },
+   {
+    "title_id": 3057,
+    "nmra_id": 4,
+    "id": 7612,
+    "nmra": "82%",
+    "nmra_relation": {
+     "id": 4,
+     "name": "Rotten Tomatoes",
+     "icon": "lBIdRAlQzKMFT4A6Fqu1xwHpELC8TICSf9L7vGEe.png",
+     "created_at_readable": null
+    }
+   },
+   {
+    "title_id": 3057,
+    "nmra_id": 6,
+    "id": 7613,
+    "nmra": "71",
+    "nmra_relation": {
+     "id": 6,
+     "name": "Metacritic",
+     "icon": "uDGVpvYUqSrYXnmmWzYSgzOrWwrBB6oVpE4Yno3e.png",
+     "created_at_readable": null
+    }
+   }
+  ],
+  "certification": {
+   "id": 3,
+   "name": "R",
+   "description": "مەبەست لەم جۆرە هەڵسەنگاندنە لەکاتی بینینی بیریت بۆ کوشتن و دیمەنی نەخوارزاو بچێت",
+   "created_at_readable": null
+  }
+ }
+}

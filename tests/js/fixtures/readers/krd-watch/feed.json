@@ -1,0 +1,64 @@
+{
+ "items": [
+  {
+   "kind": "added",
+   "type": "season",
+   "href": "/tv/259909",
+   "title": "Dexter: Resurrection",
+   "year": 2026,
+   "label": "Season 2",
+   "poster": "https://image.tmdb.org/t/p/w92/kEHZfSZhZKDot4wqurgIzMUNq1W.jpg",
+   "date": null
+  },
+  {
+   "kind": "added",
+   "type": "episode",
+   "href": "/tv/337721",
+   "title": "Prohibida Obsesión",
+   "year": 2026,
+   "label": "S01E17",
+   "poster": "https://image.tmdb.org/t/p/w92/wCZtNtSDUj9oH92nXRX3Km2LC6P.jpg",
+   "date": null
+  },
+  {
+   "kind": "soon",
+   "type": "episode",
+   "href": "/tv/285418",
+   "title": "Youth",
+   "year": 2026,
+   "label": "S01E08",
+   "poster": "https://image.tmdb.org/t/p/w92/t0X9TVBkqJlTsdWZCTADsQqg4gC.jpg",
+   "date": "2026-11-02"
+  },
+  {
+   "kind": "added",
+   "type": "episode",
+   "href": "/tv/335679",
+   "title": "Sabor a ti… Entre historias y secretos",
+   "year": 2026,
+   "label": "S01E31",
+   "poster": "https://image.tmdb.org/t/p/w92/1kILvRCn7p2mmIMJpzZNraafPed.jpg",
+   "date": null
+  },
+  {
+   "kind": "added",
+   "type": "episode",
+   "href": "/tv/318356",
+   "title": "Okolochny",
+   "year": 2026,
+   "label": "S01E07",
+   "poster": "https://image.tmdb.org/t/p/w92/yJx3Bdj1mNwUUdWO6MRwoyyQWmG.jpg",
+   "date": null
+  },
+  {
+   "kind": "soon",
+   "type": "episode",
+   "href": "/tv/303745",
+   "title": "Love in Disguise",
+   "year": 2026,
+   "label": "S01E05",
+   "poster": "https://image.tmdb.org/t/p/w92/kSAXIAovLC4z7Wp2Hy8oqLmpkox.jpg",
+   "date": "2026-11-02"
+  }
+ ]
+}

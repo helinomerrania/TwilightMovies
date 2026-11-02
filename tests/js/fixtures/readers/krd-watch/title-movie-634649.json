@@ -1,0 +1,56 @@
+{
+ "kind": "movie",
+ "tmdbId": 634649,
+ "title": "پیاوی جاڵجاڵۆکە: هیچ ڕێگایەک نییە بۆ ماڵەوە",
+ "originalTitle": "Spider-Man: No Way Home",
+ "year": 2021,
+ "genres": [
+  "ئاکشن",
+  "سەرکێشی",
+  "زانستی-خەیاڵی"
+ ],
+ "rating": 7.948,
+ "votes": 23483,
+ "runtime": 148,
+ "seasonsCount": null,
+ "certification": null,
+ "overview": "پیتەر پارکەر دەمامکی نەماوە و چیتر ناتوانێت ژیانی ئاسایی خۆی لە گرەوی بەرزی بوون بە پاڵەوانێکی سەرسوڕهێنەر جیا بکاتەوە. کاتێک داوای یارمەتی لە دکتۆر ستڕەینج دەکات گرەوەکان مەترسیدارتر دەبن، ئەمەش ناچاری دەکات بزانێت بەڕاستی مانای سپایدەرمان چییە.",
+ "tagline": "بەرەو گەردوونە فرەییەکان",
+ "taglinePending": false,
+ "poster": "/assets/posters_krdwatch/movies/11528_Spider_Man_No_Way_Home.jpg",
+ "backdrop": "https://image.tmdb.org/t/p/w1280/iQFcwSGbZXMkeyKrxbPnwnRo5fl.jpg",
+ "logo": "https://image.tmdb.org/t/p/w500/9xjIoK8eGVvMdiqwUQbEBUeh9Ej.png",
+ "playable": true,
+ "cast": [
+  {
+   "id": 1136406,
+   "name": "Tom Holland",
+   "character": "Peter Parker / Spider-Man",
+   "photo": "https://image.tmdb.org/t/p/w185/5OK84Wn1bIEIThFKcVoaN087mLj.jpg"
+  }
+ ],
+ "seasons": [],
+ "more": [
+  {
+   "kind": "movie",
+   "tmdbId": 969681,
+   "dbId": 14244,
+   "title": "Spider-Man: Brand New Day",
+   "titleKu": null,
+   "year": 2026,
+   "genre": "Science Fiction, Action, Adventure",
+   "rating": 8.2,
+   "poster": "/assets/posters_krdwatch/movies/14244_Spider_Man_Brand_New_Day.jpg",
+   "backdrop": "https://image.tmdb.org/t/p/w1280/eSvYccJm5ejJXFtJTqM2dIqrhK7.jpg",
+   "logo": "https://image.tmdb.org/t/p/w500/dGMb0iSnNp7UMAHkKX63Kh6AJvy.png",
+   "overview": "Fighting crime full-time as Spider-Man in a world that doesn't remember him—and the pressure of seeing his old friends move on without him—sparks a change in Peter Parker he may not have the power to control. But that transformation might also be the only thing that can stop a shocking new threat to the city and those he loves - a powerful villain no one can even see.",
+   "overviewKu": "شەڕکردنی بەردەوام دژی تاوان وەک سپایدەرمان لە جیهانێکدا کە ئەوی بەبیر نایەتەوە—و فشاری بینینی هاوڕێ کۆنەکانی کە بەبێ ئەو ژیانی خۆیان بەردەوام دەکەن—گۆڕانکارییەک لە پیتەر پارکەردا دروست دەکات کە ڕەنگە هێزی کۆنترۆڵکردنی نەبێت. بەڵام ڕەنگە ئەم گۆڕانکارییە تاکە شت بێت کە بتوانێت ڕێگری لە هەڕەشەیەکی نوێ و شۆککەر بۆ سەر شارەکە و ئەو کەسانە بکات کە خۆشی دەوێن - خراپەکارێکی بەهێز کە کەس تەنانەت ناتوانێت بیبینێت.",
+   "runtime": 145,
+   "country": "US",
+   "language": "en",
+   "popularity": 719.5221,
+   "playable": true,
+   "newAt": 1791361559
+  }
+ ]
+}

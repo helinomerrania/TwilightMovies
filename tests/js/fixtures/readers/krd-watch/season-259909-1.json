@@ -1,0 +1,29 @@
+[
+ {
+  "episode": 1,
+  "name": "A Beating Heart...",
+  "overview": "Dexter Morgan awakens from a ten-week coma.",
+  "overviewKu": "دێکستر مۆرگان لە کۆمایەکی دە هەفتەیی بەئاگا دێتەوە.",
+  "still": "https://image.tmdb.org/t/p/w300/cdxZjP0S2K1FGO3NiXbQAM6TqwS.jpg",
+  "runtime": 52,
+  "airDate": "2025-07-13"
+ },
+ {
+  "episode": 2,
+  "name": "Camera Shy",
+  "overview": "Dexter tracks down a serial killer in NYC as Harrison spirals from guilt.",
+  "overviewKu": "دێکستر شوێنپێی بکوژێکی زنجیرەیی دەگرێت لە نیویۆرک لە کاتێکدا هاریسۆن لە تاوانبارییەوە دەسوڕێتەوە.",
+  "still": "https://image.tmdb.org/t/p/w300/gxTEgknl8AequxdxtkLHOMFN5T3.jpg",
+  "runtime": 48,
+  "airDate": "2025-07-13"
+ },
+ {
+  "episode": 3,
+  "name": "Backseat Driver",
+  "overview": "Dexter must carefully balance attempts to help get him acclimated.",
+  "overviewKu": "دێکستر دەبێت بە وردی هاوسەنگی لە نێوان هەوڵەکاندا بدات بۆ ئەوەی یارمەتی بدات بۆ ئەوەی خۆی لەگەڵ خۆی بگونجێنێت.",
+  "still": "https://image.tmdb.org/t/p/w300/yVtgDRQDFbQ7EMhpFfqhWHzyH5J.jpg",
+  "runtime": 52,
+  "airDate": "2025-07-20"
+ }
+]

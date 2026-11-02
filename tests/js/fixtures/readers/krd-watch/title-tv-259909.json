@@ -1,0 +1,187 @@
+{
+ "kind": "tv",
+ "tmdbId": 259909,
+ "title": "دێکستر: زیندووبوونەوە",
+ "originalTitle": "Dexter: Resurrection",
+ "year": 2025,
+ "genres": [
+  "تاوان",
+  "دراما",
+  "نهێنی"
+ ],
+ "rating": 8.5,
+ "votes": 721,
+ "runtime": null,
+ "seasonsCount": 2,
+ "certification": "TV-MA",
+ "overview": "دێکستر مۆرگان لە کۆما بەئاگا دێتەوە و دەبینێت هاریسۆن بەبێ شوێنەواری نەماوە. دێکستر بە درککردن بە قورسایی ئەو شتانەی کە کوڕەکەی بەسەردا هێناوە، بەرەو شاری نیویۆرک بەڕێدەکەوێت، بڕیاریداوە بیدۆزێتەوە و شتەکان ڕاست بکاتەوە. بەڵام داخستن بە ئاسانی نایەت. کاتێک ئەنجێل باتیستا یاریزانی یانەی میامی میترۆ بە پرسیارەوە دەگاتە لای، دێکستر تێدەگات ڕابردووی بە خێرایی بەرەو پێشەوە دەچێت. لە کاتێکدا باوک و کوڕ لە تاریکییەکانی خۆیاندا لەو شارەدا دەڕۆن کە هەرگیز ناخەوێت، زۆری نەخایاند خۆیان قووڵتر دەبیننەوە لەوەی کە خەیاڵیان بۆ دەکرد - و تاکە ڕێگەی دەربازبوون پێکەوەیە.",
+ "tagline": "گەڕایەوە بە تیژتر لە جاران",
+ "taglinePending": false,
+ "poster": "https://image.tmdb.org/t/p/w500/kEHZfSZhZKDot4wqurgIzMUNq1W.jpg",
+ "backdrop": "https://image.tmdb.org/t/p/w1280/vcpj6rRDS93ImHCLPY8bwBuFGjR.jpg",
+ "logo": "https://image.tmdb.org/t/p/w500/8vN1JzNMVIVuyhEyGkKwr0NhMPh.png",
+ "playable": true,
+ "cast": [
+  {
+   "id": 53820,
+   "name": "Michael C. Hall",
+   "character": "Dexter Morgan",
+   "photo": "https://image.tmdb.org/t/p/w185/7zUMGoujuev5PUwwv4Gl6ikB50k.jpg"
+  }
+ ],
+ "seasons": [
+  {
+   "season": 1,
+   "episodes": [
+    {
+     "id": 64349,
+     "episode": 1,
+     "title": null,
+     "synopsis": null
+    },
+    {
+     "id": 64350,
+     "episode": 2,
+     "title": "Camera Shy",
+     "synopsis": "Dexter embeds himself in New York's ride-share community to track down a serial killer. Meanwhile, Harrison spirals from the guilt of a violent outburst."
+    },
+    {
+     "id": 64351,
+     "episode": 3,
+     "title": "Backseat Driver",
+     "synopsis": "As Dexter sets his sights on tracking down a serial killer, he must carefully balance Blessing Kamara's attempts to help get him acclimated to the ride-share driver lifestyle. Meanwhile, Harrison is drawn deeper into the police investigation."
+    },
+    {
+     "id": 64352,
+     "episode": 4,
+     "title": "Call Me Red",
+     "synopsis": "Dexter attends a mysterious gathering, hosted by a highly influential figure with macabre ambitions. Harrison continues to struggle with mounting guilt and pressure at work, just as Angel Batista arrives in New York City."
+    },
+    {
+     "id": 64353,
+     "episode": 5,
+     "title": "Murder Horny",
+     "synopsis": "An encounter pushes Harrison further into his own darkness, escalating his fear of arrest. Meanwhile, as Batista closes in, Dexter pursues a dangerous connection with a seductive killer, believing they operate under a similar code."
+    },
+    {
+     "id": 64354,
+     "episode": 6,
+     "title": "Cats & Mouse",
+     "synopsis": "As Dexter closes in on a murderer, Harrison faces a crisis of identity."
+    },
+    {
+     "id": 64355,
+     "episode": 7,
+     "title": "Course Correction",
+     "synopsis": "Dexter, at a remote retreat, discovers unsettling information about Gareth. Meanwhile, Harrison contemplates his future."
+    },
+    {
+     "id": 64356,
+     "episode": 8,
+     "title": "The Kill Room Where It Happens",
+     "synopsis": "Dexter redirects his attention as a way to step up as a father."
+    },
+    {
+     "id": 64357,
+     "episode": 9,
+     "title": "Touched By An Ángel",
+     "synopsis": "Prater and Charley's revelation forces Dexter to go to extreme lengths."
+    },
+    {
+     "id": 64358,
+     "episode": 10,
+     "title": "And Justice For All...",
+     "synopsis": "Dexter and Harrison face the consequences of their darkness. Season finale."
+    }
+   ]
+  },
+  {
+   "season": 2,
+   "episodes": [
+    {
+     "id": 256620,
+     "episode": 1,
+     "title": "Risky Business",
+     "synopsis": "Dexter struggles to find purpose beyond the hunt as Harrison begins his NYPD career. A brazen new murderer puts the city on edge."
+    },
+    {
+     "id": -2002,
+     "episode": 2,
+     "title": "Young Blood",
+     "synopsis": null
+    },
+    {
+     "id": -2003,
+     "episode": 3,
+     "title": "Fallen",
+     "synopsis": null
+    },
+    {
+     "id": -2004,
+     "episode": 4,
+     "title": "Live Free and Die",
+     "synopsis": null
+    },
+    {
+     "id": -2005,
+     "episode": 5,
+     "title": "Panic Attack",
+     "synopsis": null
+    },
+    {
+     "id": -2006,
+     "episode": 6,
+     "title": "Out of the Past",
+     "synopsis": null
+    },
+    {
+     "id": -2007,
+     "episode": 7,
+     "title": "Rule Number One",
+     "synopsis": null
+    },
+    {
+     "id": -2008,
+     "episode": 8,
+     "title": "Game On",
+     "synopsis": null
+    },
+    {
+     "id": -2009,
+     "episode": 9,
+     "title": "Credit Where Credit is Due",
+     "synopsis": null
+    },
+    {
+     "id": -2010,
+     "episode": 10,
+     "title": "Now You See Me",
+     "synopsis": null
+    }
+   ]
+  }
+ ],
+ "more": [
+  {
+   "kind": "tv",
+   "tmdbId": 131927,
+   "dbId": 1354,
+   "title": "Dexter: New Blood",
+   "titleKu": "دێکستر: خوێنی نوێ",
+   "year": 2021,
+   "genre": "Drama, Crime",
+   "rating": 7.912,
+   "poster": "https://image.tmdb.org/t/p/w500/9EBKgrFIsCFSV1RZKWhYUdbtGiv.jpg",
+   "backdrop": "https://image.tmdb.org/t/p/w1280/e6v08948EZVvLrx0sWpmglguY9e.jpg",
+   "logo": "https://image.tmdb.org/t/p/w500/9EOXgtyt23jX2rISrymlJ0E6c3D.png",
+   "overview": "10 years after Dexter went missing in the eye of Hurricane Laura, we find him living under an assumed name in the small town of Iron Lake, New York.  Dexter may be embracing his new life, but in the wake of unexpected events in this close-knit community, his Dark Passenger beckons.",
+   "overviewKu": "دوای ١٠ ساڵ لە ونبوونی دێکستر لە چاوی زریانی لۆرا، دەبینین کە لە ژێر ناوێکی گریمانەکراودا لە شارۆچکە بچووکەکەی ئایرۆن لەیک لە نیویۆرک دەژی.  ڕەنگە دێکستر ژیانی نوێی خۆی لە باوەش بگرێت، بەڵام لە دوای ڕووداوە چاوەڕواننەکراوەکانی ئەم کۆمەڵگە نزیکە، ​​سەرنشینە تاریکەکەی ئیشارەت دەکات.",
+   "runtime": null,
+   "country": "US",
+   "language": "en",
+   "popularity": 14.8605,
+   "playable": true,
+   "newAt": 0
+  }
+ ]
+}

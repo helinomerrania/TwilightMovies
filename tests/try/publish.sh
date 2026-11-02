@@ -10,7 +10,7 @@ trap 'rm -rf "$STAGE"' EXIT
 for f in "$DIR"/*; do
   [ -s "$f" ] || continue   # a file, and not an empty one (GitHub takes no empty file)
   case "$f" in
-    *.png | *.txt | *.log | *.tsv | *.xml | *.html) cp "$f" "$STAGE/$PREFIX$(basename "$f")" ;;
+    *.png | *.txt | *.log | *.tsv | *.xml | *.html | *.json) cp "$f" "$STAGE/$PREFIX$(basename "$f")" ;;
   esac
 done
 ls "$STAGE"

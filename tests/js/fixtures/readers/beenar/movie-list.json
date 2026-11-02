@@ -1,0 +1,203 @@
+{
+ "data": {
+  "current_page": 1,
+  "data": [
+   {
+    "id": 3061,
+    "name": "Animals",
+    "description": "کاتێک کوڕی کاندیدێکی شارەوانی \"لۆس ئەنجڵەس\" دەڕفێنرێت، ئەو و هاوسەرەکەی تەنها چەند کاتژمێرێکیان لەبەردەستدایە بۆ ئەوەی بڕە پارەی داواکراوە ۆ ڕزگارکردنی کوڕەکەیان دابینی بکەن. لەبەر ئەوەی زۆربەی سەروەت و سامانیان لە هەڵمەتی هەڵبژاردنەکەدا خەرج کردووە، ناچار دەبن دەست بۆ کاری نایاسایی بەرن و ڕووخسارێکی ژیانیان ئاشکرا بکەن کە هەرگیز نەیانویستبوو ڕۆژێک بۆ ڕای گشتی ئاشکرا ببێت.",
+    "poster": "storage/media-images/poster/wVafbUZC3RjSmeXLSkkI6xRJ23ApjoYYSj4x5DvI.jpg",
+    "views": 3016,
+    "runtime": "107",
+    "release_date": "2026-10-09",
+    "tagline": "دەسەڵات ناتوانێت بتپارێزێت",
+    "is_series": 0,
+    "watcher_count": 17,
+    "created_at_readable": null,
+    "path_poster": "/storage/media-images/poster/wVafbUZC3RjSmeXLSkkI6xRJ23ApjoYYSj4x5DvI.jpg",
+    "path_backdrop": null,
+    "runtime_readable": "1 h 46 min",
+    "created_at_readable_full": null,
+    "is_4k": false,
+    "genres": [
+     {
+      "id": 62438,
+      "genre_id": 30,
+      "title_id": 3061,
+      "genre": {
+       "id": 30,
+       "name": "ئاکشن",
+       "created_at_readable": null
+      }
+     },
+     {
+      "id": 62439,
+      "genre_id": 1,
+      "title_id": 3061,
+      "genre": {
+       "id": 1,
+       "name": "تاوانکاری",
+       "created_at_readable": null
+      }
+     },
+     {
+      "id": 62440,
+      "genre_id": 2,
+      "title_id": 3061,
+      "genre": {
+       "id": 2,
+       "name": "دراما",
+       "created_at_readable": null
+      }
+     },
+     {
+      "id": 62441,
+      "genre_id": 17,
+      "title_id": 3061,
+      "genre": {
+       "id": 17,
+       "name": "هەستبزوێن",
+       "created_at_readable": null
+      }
+     }
+    ],
+    "nmra": [
+     {
+      "title_id": 3061,
+      "nmra_id": 5,
+      "id": 7623,
+      "nmra": "5.7",
+      "nmra_relation": {
+       "id": 5,
+       "name": "IMDb",
+       "icon": "UcaeW151fnPviH4DpzsEehj7IBUE7dHwUsgjSDa3.png",
+       "created_at_readable": null
+      }
+     },
+     {
+      "title_id": 3061,
+      "nmra_id": 4,
+      "id": 7624,
+      "nmra": "30%",
+      "nmra_relation": {
+       "id": 4,
+       "name": "Rotten Tomatoes",
+       "icon": "lBIdRAlQzKMFT4A6Fqu1xwHpELC8TICSf9L7vGEe.png",
+       "created_at_readable": null
+      }
+     },
+     {
+      "title_id": 3061,
+      "nmra_id": 6,
+      "id": 7625,
+      "nmra": "33",
+      "nmra_relation": {
+       "id": 6,
+       "name": "Metacritic",
+       "icon": "uDGVpvYUqSrYXnmmWzYSgzOrWwrBB6oVpE4Yno3e.png",
+       "created_at_readable": null
+      }
+     }
+    ]
+   },
+   {
+    "id": 3058,
+    "name": "Fall 2: Deadpoint",
+    "description": "بە خەمباربوونی مردنی خوشکەکەی، (جاکس هەنتەر) پەیوەندی لەگەڵ هاوڕێ بوێرەکەی (شایڵۆ)ـدا دروست دەکات، (لوس). پێکەوە بەسەر چیای مەترسیداری (کوان)ـدا سەردەکەون لە (تایلەندا). کاتێک کەوتنەخوارەوەی بەردەکان وایان لێدەکات لەسەر پارچە تەختەدارێکی باریک گیر بخۆن لە بەرزی 1220 مەتر، دەبێت (جاکس) ڕووبەرووی ترسەکانی ببێتەوە تا لە ژیان بمێنێتەوە",
+    "poster": "storage/media-images/poster/Qsbj2CbT7uynXVw9qPN7RarEQmwZP8Td5SukX6ka.jpg",
+    "views": 16390,
+    "runtime": "98",
+    "release_date": "2026-09-02",
+    "tagline": "ئامادەیت ئەم سەرکێشییە بکەیت؟",
+    "is_series": 0,
+    "watcher_count": 14,
+    "created_at_readable": null,
+    "path_poster": "/storage/media-images/poster/Qsbj2CbT7uynXVw9qPN7RarEQmwZP8Td5SukX6ka.jpg",
+    "path_backdrop": null,
+    "runtime_readable": "1 h 37 min",
+    "created_at_readable_full": null,
+    "is_4k": false,
+    "genres": [
+     {
+      "id": 62386,
+      "genre_id": 30,
+      "title_id": 3058,
+      "genre": {
+       "id": 30,
+       "name": "ئاکشن",
+       "created_at_readable": null
+      }
+     },
+     {
+      "id": 62387,
+      "genre_id": 2,
+      "title_id": 3058,
+      "genre": {
+       "id": 2,
+       "name": "دراما",
+       "created_at_readable": null
+      }
+     },
+     {
+      "id": 62388,
+      "genre_id": 18,
+      "title_id": 3058,
+      "genre": {
+       "id": 18,
+       "name": "سەرکێشی",
+       "created_at_readable": null
+      }
+     },
+     {
+      "id": 62389,
+      "genre_id": 1814,
+      "title_id": 3058,
+      "genre": {
+       "id": 1814,
+       "name": "مانەوە لە ژیان",
+       "created_at_readable": null
+      }
+     }
+    ],
+    "nmra": [
+     {
+      "title_id": 3058,
+      "nmra_id": 5,
+      "id": 7614,
+      "nmra": "5.3",
+      "nmra_relation": {
+       "id": 5,
+       "name": "IMDb",
+       "icon": "UcaeW151fnPviH4DpzsEehj7IBUE7dHwUsgjSDa3.png",
+       "created_at_readable": null
+      }
+     },
+     {
+      "title_id": 3058,
+      "nmra_id": 6,
+      "id": 7615,
+      "nmra": "54",
+      "nmra_relation": {
+       "id": 6,
+       "name": "Metacritic",
+       "icon": "uDGVpvYUqSrYXnmmWzYSgzOrWwrBB6oVpE4Yno3e.png",
+       "created_at_readable": null
+      }
+     },
+     {
+      "title_id": 3058,
+      "nmra_id": 4,
+      "id": 7616,
+      "nmra": "63%",
+      "nmra_relation": {
+       "id": 4,
+       "name": "Rotten Tomatoes",
+       "icon": "lBIdRAlQzKMFT4A6Fqu1xwHpELC8TICSf9L7vGEe.png",
+       "created_at_readable": null
+      }
+     }
+    ]
+   }
+  ]
+ }
+}

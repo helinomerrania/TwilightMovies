@@ -1,0 +1,480 @@
+{
+ "slide": [
+  {
+   "id": 358,
+   "title": {
+    "id": 697,
+    "backdrop": "storage/media-images/backdrops/Dq95PAXx79wVtKRXsdSs5OTjSCh6VvR7N2rmqfG6.jpg",
+    "description": "بە سرووش وەرگرتن لە سەرکێشییەکانی (ئارسین لوپین؛ دزێکی خانەدان)، (ئاسان دیۆپ) دەستدەکات بەوەی تۆڵەی باوکی بکاتەوە بۆ ئەو تۆمەتەی لەلایەن خێزانێکی دەوڵەمەندەوە دراوەتە پاڵی...",
+    "name": "Lupin",
+    "release_date": "2021-01-08",
+    "runtime": "48",
+    "certification_id": 5,
+    "is_series": 1,
+    "is_4k": false,
+    "watcher_count": 32,
+    "created_at_readable": null,
+    "path_poster": null,
+    "path_backdrop": "/storage/media-images/backdrops/Dq95PAXx79wVtKRXsdSs5OTjSCh6VvR7N2rmqfG6.jpg",
+    "runtime_readable": "47 min",
+    "created_at_readable_full": null,
+    "nmra": [
+     {
+      "title_id": 697,
+      "nmra_id": 5,
+      "id": 2032,
+      "nmra": "7.5",
+      "nmra_relation": {
+       "id": 5,
+       "name": "IMDb",
+       "icon": "UcaeW151fnPviH4DpzsEehj7IBUE7dHwUsgjSDa3.png",
+       "created_at_readable": null
+      }
+     },
+     {
+      "title_id": 697,
+      "nmra_id": 4,
+      "id": 2033,
+      "nmra": "98%",
+      "nmra_relation": {
+       "id": 4,
+       "name": "Rotten Tomatoes",
+       "icon": "lBIdRAlQzKMFT4A6Fqu1xwHpELC8TICSf9L7vGEe.png",
+       "created_at_readable": null
+      }
+     },
+     {
+      "title_id": 697,
+      "nmra_id": 6,
+      "id": 2034,
+      "nmra": "81",
+      "nmra_relation": {
+       "id": 6,
+       "name": "Metacritic",
+       "icon": "uDGVpvYUqSrYXnmmWzYSgzOrWwrBB6oVpE4Yno3e.png",
+       "created_at_readable": null
+      }
+     }
+    ],
+    "genres": [
+     {
+      "id": 62427,
+      "genre_id": 1,
+      "title_id": 697,
+      "genre": {
+       "id": 1,
+       "name": "تاوانکاری",
+       "created_at_readable": null
+      }
+     },
+     {
+      "id": 62428,
+      "genre_id": 2,
+      "title_id": 697,
+      "genre": {
+       "id": 2,
+       "name": "دراما",
+       "created_at_readable": null
+      }
+     },
+     {
+      "id": 62429,
+      "genre_id": 30,
+      "title_id": 697,
+      "genre": {
+       "id": 30,
+       "name": "ئاکشن",
+       "created_at_readable": null
+      }
+     }
+    ],
+    "certification": {
+     "id": 5,
+     "name": "TV-MA",
+     "icon": "m4oRJeivZeEGbkv8RA317cYu1B46qT3YkBwOgC0u.jpg",
+     "description": "بۆ خوار 17 ساڵان گونجاو نییە",
+     "user_id": 6,
+     "created_at": "2023-06-19T02:08:16.000000Z",
+     "updated_at": "2023-06-19T02:08:16.000000Z",
+     "created_at_readable": "2023-06-19"
+    }
+   }
+  }
+ ],
+ "newest_movie": [
+  {
+   "id": 3061,
+   "name": "Animals",
+   "description": "کاتێک کوڕی کاندیدێکی شارەوانی \"لۆس ئەنجڵەس\" دەڕفێنرێت، ئەو و هاوسەرەکەی تەنها چەند کاتژمێرێکیان لەبەردەستدایە بۆ ئەوەی بڕە پارەی داواکراوە ۆ ڕزگارکردنی کوڕەکەیان دابینی بکەن. لەبەر ئەوەی زۆربەی سەروەت و سامانیان لە هەڵمەتی هەڵبژاردنەکەدا خەرج کردووە، ناچار دەبن دەست بۆ کاری نایاسایی بەرن و ڕووخسارێکی ژیانیان ئاشکرا بکەن کە هەرگیز نەیانویستبوو ڕۆژێک بۆ ڕای گشتی ئاشکرا ببێت.",
+   "poster": "storage/media-images/poster/wVafbUZC3RjSmeXLSkkI6xRJ23ApjoYYSj4x5DvI.jpg",
+   "views": 3016,
+   "runtime": "107",
+   "release_date": "2026-10-09",
+   "tagline": "دەسەڵات ناتوانێت بتپارێزێت",
+   "is_series": 0,
+   "watcher_count": 17,
+   "created_at_readable": null,
+   "path_poster": "/storage/media-images/poster/wVafbUZC3RjSmeXLSkkI6xRJ23ApjoYYSj4x5DvI.jpg",
+   "path_backdrop": null,
+   "runtime_readable": "1 h 46 min",
+   "created_at_readable_full": null,
+   "is_4k": false,
+   "genres": [
+    {
+     "id": 62438,
+     "genre_id": 30,
+     "title_id": 3061,
+     "genre": {
+      "id": 30,
+      "name": "ئاکشن",
+      "created_at_readable": null
+     }
+    },
+    {
+     "id": 62439,
+     "genre_id": 1,
+     "title_id": 3061,
+     "genre": {
+      "id": 1,
+      "name": "تاوانکاری",
+      "created_at_readable": null
+     }
+    },
+    {
+     "id": 62440,
+     "genre_id": 2,
+     "title_id": 3061,
+     "genre": {
+      "id": 2,
+      "name": "دراما",
+      "created_at_readable": null
+     }
+    },
+    {
+     "id": 62441,
+     "genre_id": 17,
+     "title_id": 3061,
+     "genre": {
+      "id": 17,
+      "name": "هەستبزوێن",
+      "created_at_readable": null
+     }
+    }
+   ],
+   "nmra": [
+    {
+     "title_id": 3061,
+     "nmra_id": 5,
+     "id": 7623,
+     "nmra": "5.7",
+     "nmra_relation": {
+      "id": 5,
+      "name": "IMDb",
+      "icon": "UcaeW151fnPviH4DpzsEehj7IBUE7dHwUsgjSDa3.png",
+      "created_at_readable": null
+     }
+    },
+    {
+     "title_id": 3061,
+     "nmra_id": 4,
+     "id": 7624,
+     "nmra": "30%",
+     "nmra_relation": {
+      "id": 4,
+      "name": "Rotten Tomatoes",
+      "icon": "lBIdRAlQzKMFT4A6Fqu1xwHpELC8TICSf9L7vGEe.png",
+      "created_at_readable": null
+     }
+    },
+    {
+     "title_id": 3061,
+     "nmra_id": 6,
+     "id": 7625,
+     "nmra": "33",
+     "nmra_relation": {
+      "id": 6,
+      "name": "Metacritic",
+      "icon": "uDGVpvYUqSrYXnmmWzYSgzOrWwrBB6oVpE4Yno3e.png",
+      "created_at_readable": null
+     }
+    }
+   ]
+  },
+  {
+   "id": 3058,
+   "name": "Fall 2: Deadpoint",
+   "description": "بە خەمباربوونی مردنی خوشکەکەی، (جاکس هەنتەر) پەیوەندی لەگەڵ هاوڕێ بوێرەکەی (شایڵۆ)ـدا دروست دەکات، (لوس). پێکەوە بەسەر چیای مەترسیداری (کوان)ـدا سەردەکەون لە (تایلەندا). کاتێک کەوتنەخوارەوەی بەردەکان وایان لێدەکات لەسەر پارچە تەختەدارێکی باریک گیر بخۆن لە بەرزی 1220 مەتر، دەبێت (جاکس) ڕووبەرووی ترسەکانی ببێتەوە تا لە ژیان بمێنێتەوە",
+   "poster": "storage/media-images/poster/Qsbj2CbT7uynXVw9qPN7RarEQmwZP8Td5SukX6ka.jpg",
+   "views": 16390,
+   "runtime": "98",
+   "release_date": "2026-09-02",
+   "tagline": "ئامادەیت ئەم سەرکێشییە بکەیت؟",
+   "is_series": 0,
+   "watcher_count": 14,
+   "created_at_readable": null,
+   "path_poster": "/storage/media-images/poster/Qsbj2CbT7uynXVw9qPN7RarEQmwZP8Td5SukX6ka.jpg",
+   "path_backdrop": null,
+   "runtime_readable": "1 h 37 min",
+   "created_at_readable_full": null,
+   "is_4k": false,
+   "genres": [
+    {
+     "id": 62386,
+     "genre_id": 30,
+     "title_id": 3058,
+     "genre": {
+      "id": 30,
+      "name": "ئاکشن",
+      "created_at_readable": null
+     }
+    },
+    {
+     "id": 62387,
+     "genre_id": 2,
+     "title_id": 3058,
+     "genre": {
+      "id": 2,
+      "name": "دراما",
+      "created_at_readable": null
+     }
+    },
+    {
+     "id": 62388,
+     "genre_id": 18,
+     "title_id": 3058,
+     "genre": {
+      "id": 18,
+      "name": "سەرکێشی",
+      "created_at_readable": null
+     }
+    },
+    {
+     "id": 62389,
+     "genre_id": 1814,
+     "title_id": 3058,
+     "genre": {
+      "id": 1814,
+      "name": "مانەوە لە ژیان",
+      "created_at_readable": null
+     }
+    }
+   ],
+   "nmra": [
+    {
+     "title_id": 3058,
+     "nmra_id": 5,
+     "id": 7614,
+     "nmra": "5.3",
+     "nmra_relation": {
+      "id": 5,
+      "name": "IMDb",
+      "icon": "UcaeW151fnPviH4DpzsEehj7IBUE7dHwUsgjSDa3.png",
+      "created_at_readable": null
+     }
+    },
+    {
+     "title_id": 3058,
+     "nmra_id": 6,
+     "id": 7615,
+     "nmra": "54",
+     "nmra_relation": {
+      "id": 6,
+      "name": "Metacritic",
+      "icon": "uDGVpvYUqSrYXnmmWzYSgzOrWwrBB6oVpE4Yno3e.png",
+      "created_at_readable": null
+     }
+    },
+    {
+     "title_id": 3058,
+     "nmra_id": 4,
+     "id": 7616,
+     "nmra": "63%",
+     "nmra_relation": {
+      "id": 4,
+      "name": "Rotten Tomatoes",
+      "icon": "lBIdRAlQzKMFT4A6Fqu1xwHpELC8TICSf9L7vGEe.png",
+      "created_at_readable": null
+     }
+    }
+   ]
+  }
+ ],
+ "newest_serise": [
+  {
+   "id": 697,
+   "name": "Lupin",
+   "description": "بە سرووش وەرگرتن لە سەرکێشییەکانی (ئارسین لوپین؛ دزێکی خانەدان)، (ئاسان دیۆپ) دەستدەکات بەوەی تۆڵەی باوکی بکاتەوە بۆ ئەو تۆمەتەی لەلایەن خێزانێکی دەوڵەمەندەوە دراوەتە پاڵی...",
+   "poster": "storage/media-images/poster/lMn1N2eMk29XPsAfR96YYVO8dbxn2VYbX96MjvkD.jpg",
+   "views": 3054894,
+   "runtime": "48",
+   "release_date": "2021-01-08",
+   "tagline": "دزیکردن لەپێناو تۆڵەکردنەوەی خێزانەکەیدا",
+   "is_series": 1,
+   "watcher_count": 32,
+   "created_at_readable": null,
+   "path_poster": "/storage/media-images/poster/lMn1N2eMk29XPsAfR96YYVO8dbxn2VYbX96MjvkD.jpg",
+   "path_backdrop": null,
+   "runtime_readable": "47 min",
+   "created_at_readable_full": null,
+   "is_4k": false,
+   "genres": [
+    {
+     "id": 62427,
+     "genre_id": 1,
+     "title_id": 697,
+     "genre": {
+      "id": 1,
+      "name": "تاوانکاری",
+      "created_at_readable": null
+     }
+    },
+    {
+     "id": 62428,
+     "genre_id": 2,
+     "title_id": 697,
+     "genre": {
+      "id": 2,
+      "name": "دراما",
+      "created_at_readable": null
+     }
+    },
+    {
+     "id": 62429,
+     "genre_id": 30,
+     "title_id": 697,
+     "genre": {
+      "id": 30,
+      "name": "ئاکشن",
+      "created_at_readable": null
+     }
+    }
+   ],
+   "nmra": [
+    {
+     "title_id": 697,
+     "nmra_id": 5,
+     "id": 2032,
+     "nmra": "7.5",
+     "nmra_relation": {
+      "id": 5,
+      "name": "IMDb",
+      "icon": "UcaeW151fnPviH4DpzsEehj7IBUE7dHwUsgjSDa3.png",
+      "created_at_readable": null
+     }
+    },
+    {
+     "title_id": 697,
+     "nmra_id": 4,
+     "id": 2033,
+     "nmra": "98%",
+     "nmra_relation": {
+      "id": 4,
+      "name": "Rotten Tomatoes",
+      "icon": "lBIdRAlQzKMFT4A6Fqu1xwHpELC8TICSf9L7vGEe.png",
+      "created_at_readable": null
+     }
+    },
+    {
+     "title_id": 697,
+     "nmra_id": 6,
+     "id": 2034,
+     "nmra": "81",
+     "nmra_relation": {
+      "id": 6,
+      "name": "Metacritic",
+      "icon": "uDGVpvYUqSrYXnmmWzYSgzOrWwrBB6oVpE4Yno3e.png",
+      "created_at_readable": null
+     }
+    }
+   ]
+  },
+  {
+   "id": 3060,
+   "name": "Merry Berry Love",
+   "description": "چیڕۆکی (کارین)، جووتیارە گەنج و دڵسۆزەکەی کێڵگەی شلیک، کە تەنها سێ ڕۆژی لە پێشە بۆ بەرهەمهێنانی %80ـی بەرهەمەکەی و سەرکەوتن لە پشکنینی توندی «گرین نۆڤا» بۆ ڕزگارکردنی کێڵگەکەی. لە بەرامبەردا، هاتنی کرێکارە کۆرییە نوێیەکە (لی یو بین)  بۆ کێڵگەکە و پێکدادانی کەسایەتییەکانیان، دەستپێکی کێبڕکێیەکی پڕ لە گرژی و پێکەنینە، تا وردە وردە ئەم کێبڕکێیە دەگۆڕێت بۆ پەیوەندییەکی قووڵ و نزیک لە نێوانیاندا.",
+   "poster": "storage/media-images/poster/VqDslCfIpiDhC3HrzhUE56Qw2Gm8Xjx1VeiRvMVo.jpg",
+   "views": 6237,
+   "runtime": "56",
+   "release_date": "2026-10-07",
+   "tagline": "کاتێک خۆشەویستی دەچێنرێت، چی گەشە دەکات؟",
+   "is_series": 1,
+   "watcher_count": 13,
+   "created_at_readable": null,
+   "path_poster": "/storage/media-images/poster/VqDslCfIpiDhC3HrzhUE56Qw2Gm8Xjx1VeiRvMVo.jpg",
+   "path_backdrop": null,
+   "runtime_readable": "55 min",
+   "created_at_readable_full": null,
+   "is_4k": false,
+   "genres": [
+    {
+     "id": 62412,
+     "genre_id": 2,
+     "title_id": 3060,
+     "genre": {
+      "id": 2,
+      "name": "دراما",
+      "created_at_readable": null
+     }
+    },
+    {
+     "id": 62413,
+     "genre_id": 37,
+     "title_id": 3060,
+     "genre": {
+      "id": 37,
+      "name": "کۆمیدی",
+      "created_at_readable": null
+     }
+    },
+    {
+     "id": 62414,
+     "genre_id": 87,
+     "title_id": 3060,
+     "genre": {
+      "id": 87,
+      "name": "ڕۆمانسی",
+      "created_at_readable": null
+     }
+    }
+   ],
+   "nmra": [
+    {
+     "title_id": 3060,
+     "nmra_id": 5,
+     "id": 7620,
+     "nmra": "8.2",
+     "nmra_relation": {
+      "id": 5,
+      "name": "IMDb",
+      "icon": "UcaeW151fnPviH4DpzsEehj7IBUE7dHwUsgjSDa3.png",
+      "created_at_readable": null
+     }
+    },
+    {
+     "title_id": 3060,
+     "nmra_id": 7,
+     "id": 7621,
+     "nmra": "8.5",
+     "nmra_relation": {
+      "id": 7,
+      "name": "MyDramaList",
+      "icon": "xFw47LvWsH4jWk6RTXun69vLEM4EkW0LA79CpWqN.jpg",
+      "created_at_readable": null
+     }
+    },
+    {
+     "title_id": 3060,
+     "nmra_id": 4,
+     "id": 7622,
+     "nmra": "88%",
+     "nmra_relation": {
+      "id": 4,
+      "name": "Rotten Tomatoes",
+      "icon": "lBIdRAlQzKMFT4A6Fqu1xwHpELC8TICSf9L7vGEe.png",
+      "created_at_readable": null
+     }
+    }
+   ]
+  }
+ ]
+}

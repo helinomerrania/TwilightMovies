@@ -1,0 +1,145 @@
+{
+ "data": {
+  "id": 697,
+  "name": "Lupin",
+  "name_en": "لوپین",
+  "release_date": "2021-01-08",
+  "description": "بە سرووش وەرگرتن لە سەرکێشییەکانی (ئارسین لوپین؛ دزێکی خانەدان)، (ئاسان دیۆپ) دەستدەکات بەوەی تۆڵەی باوکی بکاتەوە بۆ ئەو تۆمەتەی لەلایەن خێزانێکی دەوڵەمەندەوە دراوەتە پاڵی...",
+  "tagline": "دزیکردن لەپێناو تۆڵەکردنەوەی خێزانەکەیدا",
+  "poster": "storage/media-images/poster/lMn1N2eMk29XPsAfR96YYVO8dbxn2VYbX96MjvkD.jpg",
+  "backdrop": "storage/media-images/backdrops/Dq95PAXx79wVtKRXsdSs5OTjSCh6VvR7N2rmqfG6.jpg",
+  "runtime": "48",
+  "is_series": 1,
+  "is_4k": false,
+  "path_poster": "/storage/media-images/poster/lMn1N2eMk29XPsAfR96YYVO8dbxn2VYbX96MjvkD.jpg",
+  "path_backdrop": "/storage/media-images/backdrops/Dq95PAXx79wVtKRXsdSs5OTjSCh6VvR7N2rmqfG6.jpg",
+  "genres": [
+   {
+    "id": 62427,
+    "genre_id": 1,
+    "title_id": 697,
+    "genre": {
+     "id": 1,
+     "name": "تاوانکاری",
+     "created_at_readable": null
+    }
+   },
+   {
+    "id": 62428,
+    "genre_id": 2,
+    "title_id": 697,
+    "genre": {
+     "id": 2,
+     "name": "دراما",
+     "created_at_readable": null
+    }
+   },
+   {
+    "id": 62429,
+    "genre_id": 30,
+    "title_id": 697,
+    "genre": {
+     "id": 30,
+     "name": "ئاکشن",
+     "created_at_readable": null
+    }
+   }
+  ],
+  "nmra": [
+   {
+    "title_id": 697,
+    "nmra_id": 5,
+    "id": 2032,
+    "nmra": "7.5",
+    "nmra_relation": {
+     "id": 5,
+     "name": "IMDb",
+     "icon": "UcaeW151fnPviH4DpzsEehj7IBUE7dHwUsgjSDa3.png",
+     "created_at_readable": null
+    }
+   },
+   {
+    "title_id": 697,
+    "nmra_id": 4,
+    "id": 2033,
+    "nmra": "98%",
+    "nmra_relation": {
+     "id": 4,
+     "name": "Rotten Tomatoes",
+     "icon": "lBIdRAlQzKMFT4A6Fqu1xwHpELC8TICSf9L7vGEe.png",
+     "created_at_readable": null
+    }
+   },
+   {
+    "title_id": 697,
+    "nmra_id": 6,
+    "id": 2034,
+    "nmra": "81",
+    "nmra_relation": {
+     "id": 6,
+     "name": "Metacritic",
+     "icon": "uDGVpvYUqSrYXnmmWzYSgzOrWwrBB6oVpE4Yno3e.png",
+     "created_at_readable": null
+    }
+   }
+  ],
+  "certification": {
+   "id": 5,
+   "name": "TV-MA",
+   "description": "بۆ خوار 17 ساڵان گونجاو نییە",
+   "created_at_readable": null
+  },
+  "seasons": [
+   {
+    "id": 243,
+    "number": "1",
+    "episodes_count": 10,
+    "episodes": [
+     {
+      "id": 1523,
+      "name": "Chapter 1",
+      "episode_number": "1"
+     },
+     {
+      "id": 1524,
+      "name": "Chapter 2",
+      "episode_number": "2"
+     },
+     {
+      "id": 1528,
+      "name": "Chapter 3",
+      "episode_number": "3"
+     },
+     {
+      "id": 1532,
+      "name": "Chapter 4",
+      "episode_number": "4"
+     },
+     {
+      "id": 1533,
+      "name": "Chapter 5",
+      "episode_number": "5"
+     }
+    ]
+   },
+   {
+    "id": 620,
+    "number": "2",
+    "episodes_count": 5,
+    "episodes": []
+   },
+   {
+    "id": 621,
+    "number": "3",
+    "episodes_count": 7,
+    "episodes": []
+   },
+   {
+    "id": 840,
+    "number": "4",
+    "episodes_count": 8,
+    "episodes": []
+   }
+  ]
+ }
+}
