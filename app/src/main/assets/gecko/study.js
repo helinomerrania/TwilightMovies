@@ -1,6 +1,7 @@
 // In the app's own try only (its pages' messages in Android's log, never on the boxes: the app says so, study, when it
 // connects): what each website's page asks its data feeds, with what it sends and each answer (its first 12000
-// letters), for the Twilight screens' readers (tests/try/study.sh). The log keeps a short line only, so each request
+// letters), and each page itself (its first 60000: a website that sends its films in its pages), for the Twilight
+// screens' readers (tests/try/study.sh). The log keeps a short line only, so each request
 // is a line ("Twilight Movies, data <n>: {...}") and its answer comes after it in pieces ("Twilight Movies, data
 // <n>.<piece>: ..."). The answers go on to the page as they came. A second script of the background page
 // (manifest.json), after background.js: OWN is its own pages' address.
@@ -12,7 +13,8 @@ var PIECE = 300;   // letters a line (Kurdish ones are two bytes each: the log k
 function studyOn() {
   if (studying) return;
   studying = true;
-  browser.webRequest.onBeforeRequest.addListener(studied, {urls: ['<all_urls>'], types: ['xmlhttprequest']}, ['blocking', 'requestBody']);
+  browser.webRequest.onBeforeRequest.addListener(studied, {urls: ['<all_urls>'], types: ['xmlhttprequest', 'main_frame']},
+    ['blocking', 'requestBody']);
   console.info('Twilight Movies, data: the websites\' data feeds are written down');
 }
 
@@ -30,16 +32,17 @@ function studied(d) {
   var f = browser.webRequest.filterResponseData(d.requestId);
   var text = new TextDecoder('utf-8');
   var answer = '';
+  var most = d.type === 'main_frame' ? 60000 : 12000;
   f.ondata = function (e) {
-    if (answer.length < 12000) answer += text.decode(e.data, {stream: true});
+    if (answer.length < most) answer += text.decode(e.data, {stream: true});
     f.write(e.data);
   };
   f.onstop = function () {
     f.close();
     var n = ++studied_n;
-    var body = answer.slice(0, 12000);
-    console.info('Twilight Movies, data ' + n + ': ' + JSON.stringify({page: d.documentUrl || d.originUrl || '', method: d.method,
-      url: d.url, sent: sent.slice(0, PIECE), pieces: Math.ceil(body.length / PIECE)}));
+    var body = answer.slice(0, most);
+    console.info('Twilight Movies, data ' + n + ': ' + JSON.stringify({page: d.documentUrl || d.originUrl || '', type: d.type,
+      method: d.method, url: d.url, sent: sent.slice(0, PIECE), pieces: Math.ceil(body.length / PIECE)}));
     for (var i = 0; i * PIECE < body.length; i++) console.info('Twilight Movies, data ' + n + '.' + i + ': ' + body.substr(i * PIECE, PIECE));
   };
   f.onerror = function () {
