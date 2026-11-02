@@ -65,8 +65,11 @@ key KEYCODE_BACK
 sleep 6
 shot back-again
 
-# Search: the bar's search, the English letters, "spider", what every website found
-tap '^گەڕان$|^Search$' || key KEYCODE_DPAD_UP KEYCODE_DPAD_UP KEYCODE_DPAD_UP
+# Search: up to the bar at the top (the screen's tree has only what's on the screen), its search, the English
+# letters, "spider", what every website found
+key KEYCODE_DPAD_UP KEYCODE_DPAD_UP KEYCODE_DPAD_UP KEYCODE_DPAD_UP KEYCODE_DPAD_UP KEYCODE_DPAD_UP
+shot top
+tap '^گەڕان$|^Search$' || key KEYCODE_DPAD_LEFT KEYCODE_DPAD_LEFT KEYCODE_DPAD_LEFT KEYCODE_DPAD_LEFT KEYCODE_DPAD_LEFT KEYCODE_DPAD_CENTER
 sleep 3
 shot search
 tap '^ABC$' && sleep 2 && shot letters

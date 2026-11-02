@@ -67,20 +67,23 @@ TM.views.home = function (root, part) {
       : h('p', { class: 'empty', text: part === 'mine' ? t.mineEmpty : t.noResults });
   }
 
+  // Drawn again as the websites answer: the remote stays where the viewer put it; until they move it, it goes
+  // where the screen wants it most (the big one's Watch, once there is a big one)
+  const first = () => TM.focus.want(TM.app.was(), part === 'home' ? 'hero:watch' : 'grid:0', 'row:continue:0', 'row:newFilms:0');
   function draw(sites) {
     if (!main.isConnected) return;
     const k = TM.focus.now();
     main.replaceChildren(...[].concat(part === 'home' ? rows(sites) : grid(sites)).filter(Boolean));
-    if (k && !TM.focus.find(k)) TM.focus.want(part === 'home' ? 'hero:watch' : 'grid:0');
-    else if (k) TM.focus.put(TM.focus.find(k));
-    else TM.focus.landed();
+    if (!TM.focus.moved()) first();
+    else if (k && TM.focus.find(k)) TM.focus.put(TM.focus.find(k));
+    else TM.focus.want(part === 'home' ? 'hero:watch' : 'grid:0');
   }
 
   // The remote: where it was, else on the big one's Watch (once it's there); on the part's name if nothing came
   const kept = TM.catalog.homeKept();
   const some = Object.keys(kept.sites).length > 0;
   const nothing = () => { if (!TM.focus.now()) TM.focus.want('bar:' + part); };
-  TM.focus.want(TM.app.was(), part === 'home' ? 'hero:watch' : 'grid:0', 'row:continue:0', 'row:newFilms:0');
+  first();
   if (some || part === 'mine') draw(kept.sites);
   else main.append(h('p', { class: 'empty', text: t.status.wait }));
   if (!kept.old) return nothing();

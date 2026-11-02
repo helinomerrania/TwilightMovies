@@ -107,6 +107,7 @@ TM.parts = (function () {
 /** Where the remote is: what it should go to once that's on the screen (until the viewer moves it themselves). */
 TM.focus = (function () {
   let wanted = null;
+  let moved = false;   // the viewer moved it since the screen asked for it
   const find = (k) => document.querySelector('[data-k="' + CSS.escape(k) + '"]');
   function put(el) {
     el.focus({ focusVisible: true, preventScroll: true });
@@ -115,6 +116,7 @@ TM.focus = (function () {
   /** Go there now, or as soon as it's on the screen (keys: the first of them there is). */
   function want(...keys) {
     wanted = keys.filter(Boolean);
+    moved = false;
     return landed();
   }
   /** Something new on the screen: the remote goes where it was wanted, if that's here now. */
@@ -127,6 +129,6 @@ TM.focus = (function () {
     return true;
   }
   const now = () => (document.activeElement && document.activeElement.getAttribute('data-k')) || '';
-  window.addEventListener('keydown', () => { wanted = null; }, true);   // the viewer moves it: theirs
-  return { want, landed, now, find, put };
+  window.addEventListener('keydown', () => { wanted = null; moved = true; }, true);   // the viewer moves it: theirs
+  return { want, landed, now, find, put, moved: () => moved };
 })();
