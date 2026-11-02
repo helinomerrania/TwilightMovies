@@ -64,7 +64,7 @@ TM.views.home = function (root, part) {
     const list = part === 'mine' ? TM.saved.mine().map(TM.merge.again)
       : got.all.filter(part === 'cartoons' ? TM.merge.cartoon : (e) => e.kind === (part === 'films' ? 'film' : 'series'));
     return list.length ? h('div', { class: 'grid' }, list.map((e, i) => TM.parts.card(e, 'grid:' + i)))
-      : h('p', { class: 'empty', text: t.noResults });
+      : h('p', { class: 'empty', text: part === 'mine' ? t.mineEmpty : t.noResults });
   }
 
   function draw(sites) {
