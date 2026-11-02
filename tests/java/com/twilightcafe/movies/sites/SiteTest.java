@@ -1,5 +1,7 @@
 package com.twilightcafe.movies.sites;
 
+import com.twilightcafe.movies.util.Urls;
+
 import static com.twilightcafe.movies.test.Check.eq;
 import static com.twilightcafe.movies.test.Check.ok;
 
@@ -34,5 +36,7 @@ public final class SiteTest {
         eq("...a website's address as it is", Site.twilightPage("https://krd.watch/", true, "1.9.0"), "https://krd.watch/");
         eq("...and one of their pages already", Site.twilightPage("twilight:ui/index.html#/search", true, "1"),
                 "twilight:ui/index.html#/search");
+        eq("...the Websites panel says which websites they read", own.where("twilight:"), "krd.watch, kurd-movie.com");
+        eq("...and a website's address, short", kurdfilm.where("https://app.kurdfilm.krd/tv"), Urls.shortUrl("https://app.kurdfilm.krd/tv"));
     }
 }

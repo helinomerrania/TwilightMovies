@@ -7,6 +7,7 @@ TM.views.home = function (root, part) {
   const h = TM.h;
   const L = TM.lang;
   const t = L.w;
+  const ROW = 40;   // titles in a row at most (the rest: in the part's grid)
   part = ['films', 'series', 'cartoons', 'mine'].includes(part) ? part : 'home';
   const main = h('main', { class: part === 'home' ? 'home' : 'page' });
   root.append(TM.parts.bar(part), main);
@@ -25,7 +26,8 @@ TM.views.home = function (root, part) {
         h('div', { class: 'meta', text: TM.parts.meta(v, [TM.parts.kinds(v.langs), t.sites(L.num(v.sites))]) }),
         v.overview ? h('p', { class: 'about', dir: v.overviewDir, text: v.overview }) : null,
         h('div', { class: 'actions' },
-          src ? h('button', { class: 'watch', 'data-k': 'hero:watch', onclick: () => TM.catalog.play(e, src) },
+          src ? h('button', { class: 'watch', 'data-k': 'hero:watch',
+            onclick: (ev) => TM.parts.playing(ev.currentTarget, () => TM.catalog.play(e, src)) },
             h('span', { svg: TM.icons.play }), h('span', { text: t.watch })) : null,
           h('button', { class: 'text', 'data-k': 'hero:more', text: t.more, onclick: () => TM.parts.open(e) }))));
   }
@@ -50,11 +52,11 @@ TM.views.home = function (root, part) {
       h('div', { class: 'rows' },
         seen.length ? h('section', { class: 'row' }, h('h2', { text: t.rows.continue }),
           h('div', { class: 'strip' }, seen.map((x, i) => TM.parts.card(x.e, 'row:continue:' + i, x.o)))) : null,
-        TM.parts.row('newFilms', t.rows.newFilms, news),
-        TM.parts.row('newSeries', t.rows.newSeries, got.rows.newSeries || []),
-        TM.parts.row('dubbed', t.rows.dubbed, got.all.filter((e) => TM.merge.has(e, 'dub'))),
-        TM.parts.row('cartoons', t.rows.cartoons, got.all.filter(TM.merge.cartoon)),
-        TM.parts.row('mine', t.rows.mine, mine))];
+        TM.parts.row('newFilms', t.rows.newFilms, news.slice(0, ROW)),
+        TM.parts.row('newSeries', t.rows.newSeries, (got.rows.newSeries || []).slice(0, ROW)),
+        TM.parts.row('dubbed', t.rows.dubbed, got.all.filter((e) => TM.merge.has(e, 'dub')).slice(0, ROW)),
+        TM.parts.row('cartoons', t.rows.cartoons, got.all.filter(TM.merge.cartoon).slice(0, ROW)),
+        TM.parts.row('mine', t.rows.mine, mine.slice(0, ROW)))];
   }
 
   function grid(sites) {

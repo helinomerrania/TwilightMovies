@@ -9,7 +9,6 @@ import com.twilightcafe.movies.R;
 import com.twilightcafe.movies.ui.Palette;
 import com.twilightcafe.movies.ui.Panel;
 import com.twilightcafe.movies.ui.Screen;
-import com.twilightcafe.movies.util.Urls;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +56,7 @@ public final class SitesPanel extends Panel {
         Button focus = buttons.get(0);
         for (int i = 0; i < all.size(); i++) {
             Site site = all.get(i);
-            buttons.get(i).setText(site.name(kurdish) + "  ·  " + Urls.shortUrl(sites.address(site)));
+            buttons.get(i).setText(site.name(kurdish) + "  ·  " + site.where(sites.address(site)));
             if (site == sites.current()) focus = buttons.get(i);
         }
         view.setVisibility(View.VISIBLE);

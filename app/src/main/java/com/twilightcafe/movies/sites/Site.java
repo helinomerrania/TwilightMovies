@@ -45,6 +45,14 @@ public final class Site {
         return Urls.OWN + "ui/index.html?lang=" + (kurdish ? "ckb" : "en") + "&v=" + v;
     }
 
+    /** Where it is, as the Websites panel says: its address now, short; the Twilight screens, the websites they read. */
+    public String where(String address) {
+        if (!twilight()) return Urls.shortUrl(address);
+        StringBuilder b = new StringBuilder();
+        for (String d : domains) b.append(b.length() > 0 ? ", " : "").append(d);
+        return b.toString();
+    }
+
     public String name(boolean kurdish) {
         return kurdish && nameKurdish != null && !nameKurdish.isEmpty() ? nameKurdish : name;
     }

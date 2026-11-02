@@ -87,10 +87,21 @@ TM.parts = (function () {
       v.rating ? '★ ' + L.num(v.rating) : '', v.age ? t.age(String(v.age), L.num) : ''].concat(more || []).filter(Boolean).join(' · ');
   }
 
+  /** Watch pressed: its words say "…" until the website's page opens (a series asks which episode first). */
+  function playing(button, f) {
+    const words = button.lastChild;
+    const was = words.textContent;
+    words.textContent = TM.lang.w.status.wait;
+    Promise.resolve().then(f).catch((e) => {
+      console.warn('Twilight Movies, playing:', e);
+      words.textContent = was;
+    });
+  }
+
   /** Kurdish subtitles, dubbing, or both, in words. */
   const kinds = (langs) => langs.map((l) => TM.lang.w[l]).join(' · ');
 
-  return { bar, card, row, meta, kinds, open, pageOf };
+  return { bar, card, row, meta, kinds, open, pageOf, playing };
 })();
 
 /** Where the remote is: what it should go to once that's on the screen (until the viewer moves it themselves). */
