@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# The Twilight screens on the emulator (by try.yml, after emulator.sh, the app still open): chosen in the menu's
+# The Twilight screens on the emulator (by try.yml, after emulator.sh; the app started again): chosen in the menu's
 # Websites panel; their home as the websites' lists come in; the arrows across it; a film's page and BACK to the
 # home (the remote on the same card again); a series' seasons and episodes; search with the screens' own letters;
 # settings. A screenshot (and the screen's UI tree) at every step, and what the page said, in the log.
@@ -25,9 +25,13 @@ finish() {
   exit 0
 }
 
+# The app afresh (the website's try before may have left its engine in a state of its own), then its menu
+adb shell am force-stop com.twilightcafe.movies
+adb shell am start -W -n com.twilightcafe.movies/.MainActivity
+sleep 20
 key KEYCODE_MENU
-sleep 2
-choose '^ماڵپەڕەکان|^Websites' || finish
+sleep 3
+choose '^ماڵپەڕەکان|^Websites' || { key KEYCODE_MENU; sleep 3; choose '^ماڵپەڕەکان|^Websites'; } || finish
 sleep 2
 shot sites
 choose '^توایڵایت|^Twilight' || { echo "no Twilight among the websites (the box's own engine?)"; key KEYCODE_BACK; finish; }

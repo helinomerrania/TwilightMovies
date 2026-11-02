@@ -1,0 +1,174 @@
+<div wire:snapshot="{&quot;data&quot;:{&quot;movie&quot;:[null,{&quot;class&quot;:&quot;App\\Models\\Movie&quot;,&quot;key&quot;:192,&quot;s&quot;:&quot;mdl&quot;}],&quot;isFavorited&quot;:false,&quot;showType&quot;:false},&quot;memo&quot;:{&quot;id&quot;:&quot;o2c4V9QkwP9xE3EO7lz0&quot;,&quot;name&quot;:&quot;movie-card&quot;,&quot;path&quot;:&quot;movies&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;ku&quot;},&quot;checksum&quot;:&quot;81431a7ec68ea831643406019a944df82df68aca0daa54b5e698f12ade8d8c6f&quot;}" wire:effects="[]" wire:id="o2c4V9QkwP9xE3EO7lz0" class="group relative rounded-xl overflow-hidden shadow-lg transition duration-300 hover:shadow-2xl hover:z-30">
+
+    <!-- Poster. Only the TOP corners are rounded here — the bottom belongs to the card's overall
+         shape (the outer wrapper's rounding + overflow-hidden already clip the name bar below), so
+         the hover wash/blur no longer shows a rounded notch where it meets the square name bar. -->
+    <div class="relative aspect-[2/3] w-full rounded-t-xl overflow-hidden bg-theme-bg-main">
+        <img src="https://www.kartonikurde.com/storage/images/movies/optimized/As528mODm2rbUgr5GEQtH8Bkq86R88VY8DW7MVHz.jpg" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="نیشتیمان">
+
+        <!-- Rest-state legibility gradient, fades out as the hover surface wash takes over.
+             Oversized (-inset-1) so the blur/gradient always fully covers the poster's own
+             rounded corners regardless of sub-pixel antialiasing — the poster's own
+             overflow-hidden does the final clipping, so no image sliver can show through. -->
+        <div class="absolute -inset-1 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-0 transition-opacity duration-300"></div>
+
+        <!-- Hover surface wash: translucent theme surface color over the poster only -->
+        <div class="absolute -inset-1 bg-theme-bg-secondary/0 group-hover:bg-theme-bg-secondary/90 backdrop-blur-0 group-hover:backdrop-blur-sm transition-all duration-300"></div>
+
+        <!-- Rating Badge (Top Right in RTL) - always visible -->
+        <div class="absolute top-2.5 right-2.5 z-20 flex items-center gap-1 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-xl theme-primary-text font-bold text-xs pointer-events-none">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <span>6.5</span>
+        </div>
+
+        <!-- VIP Badge (Top Left in RTL, opposite the rating) - only when the movie/serie itself
+             requires VIP, not merely one of its servers/episodes. -->
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+        <!-- Whole-poster click-through to the detail page (sits under the buttons/text via z-index) -->
+        <a href="https://www.kartonikurde.com/movie/home_2015" class="absolute inset-0 z-10" aria-label="نیشتیمان"></a>
+
+        <!-- Rest-state Views badge (left), solid theme-color pill for clear legibility.
+             Hidden on hover — replaced by the fuller reveal block below. -->
+        <span class="absolute bottom-2.5 left-2.5 z-20 flex items-center gap-1 px-2 py-1 rounded-lg bg-theme-bg-main text-theme-text-main text-[10px] font-bold pointer-events-none opacity-100 group-hover:opacity-0 transition-opacity duration-300">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            <span>2,084</span>
+        </span>
+
+        <!-- Movie/Series type badge (right) — only shown when the caller explicitly opts in via
+             showType, for listings that mix movies and series together (e.g. "most viewed this
+             week" on the homepage), where the type isn't otherwise obvious from context. Hidden on
+             hover just like the views badge. -->
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+        <!-- Hover-reveal block: description, views, year/genre badges, action buttons — hidden at rest,
+             fades + rises in on hover. The movie name lives permanently below the poster now (see
+             below), so it's not repeated here. The description is a flex-1 overflow-hidden child, so it
+             always fills exactly whatever room is actually left — on any card width/breakpoint — and
+             gets clipped cleanly with no scrollbar. -->
+        <div class="absolute inset-x-0 bottom-0 top-[28%] z-20 p-3 flex flex-col text-right opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 ease-out">
+            <!--[if BLOCK]><![endif]-->                <p class="flex-1 min-h-0 overflow-hidden mt-1 text-[10px] text-slate-400 leading-snug">
+                    نامۆیەک لە ڕاکردندایە لە نامۆکانی تری وەک خۆی ، پەنا بۆ ھەسارەی زەوی دەبات و دەبێت بە ھاوڕێی &quot;تێپ&quot; کە کچێکی گەنجی سەرکێشە و لەگەڕاندایە بۆ دۆزینەوەی دایکە ونبوەکەی...
+                </p>
+            <!--[if ENDBLOCK]><![endif]-->
+            <div class="shrink-0 mt-1 flex items-center gap-1 px-2 py-0.5 rounded-md theme-primary-bg theme-on-primary-text text-[9px] font-bold w-fit">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                <span>2,084</span>
+            </div>
+
+            <div class="shrink-0 mt-1 flex flex-wrap items-center gap-1">
+                <span class="px-2 py-0.5 rounded-md theme-primary-bg theme-on-primary-text text-[9px] font-bold">
+                    2015
+                </span>
+                <!--[if BLOCK]><![endif]-->                    <span class="px-2 py-0.5 rounded-md theme-primary-bg theme-on-primary-text text-[9px] font-bold truncate max-w-[90px]">
+                        ئەنیمەیشن
+                    </span>
+                <!--[if ENDBLOCK]><![endif]-->            </div>
+
+            <div class="shrink-0 mt-1.5 mb-3 flex items-center gap-1.5">
+                <a href="https://www.kartonikurde.com/movie/home_2015" class="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg theme-primary-bg theme-on-primary-text text-[11px] font-bold hover:opacity-90 transition">
+                    <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <span>بینینی ئێستا</span>
+                </a>
+                <button wire:click.prevent="toggleFavorite" type="button" class="p-1.5 rounded-lg backdrop-blur-md transition shadow-md cursor-pointer focus:outline-none bg-white/10 text-white/80 hover:theme-primary-text" title="زیادکردن بۆ دڵخوازەکان">
+                    <!--[if BLOCK]><![endif]-->                        <svg class="w-3.5 h-3.5 fill-none stroke-current pointer-events-none" stroke-width="2" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    <!--[if ENDBLOCK]><![endif]-->                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Movie Name: lives below the poster now (full card width, no badge truncation), always visible.
+         Always solid theme "surface" color — distinct from the page's own bg-theme-bg-main body
+         background, so the card footer reads as its own panel rather than blending into the page.
+         Hovering this area also triggers the poster's hover state since both share the same .group. -->
+    <a href="https://www.kartonikurde.com/movie/home_2015"
+       class="block px-2.5 py-2 bg-theme-bg-secondary">
+        <h3 class="text-xs font-bold text-white group-hover:theme-primary-text transition truncate">
+            نیشتیمان
+        </h3>
+</a></div>
+<div wire:snapshot="{&quot;data&quot;:{&quot;movie&quot;:[null,{&quot;class&quot;:&quot;App\\Models\\Movie&quot;,&quot;key&quot;:189,&quot;s&quot;:&quot;mdl&quot;}],&quot;isFavorited&quot;:false,&quot;showType&quot;:false},&quot;memo&quot;:{&quot;id&quot;:&quot;XVJUdZ6mN9prxHtFmXZp&quot;,&quot;name&quot;:&quot;movie-card&quot;,&quot;path&quot;:&quot;movies&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;ku&quot;},&quot;checksum&quot;:&quot;c3c082687472b2fe193039ea56869e117e210f11e59856f90243dbdc1e39adb8&quot;}" wire:effects="[]" wire:id="XVJUdZ6mN9prxHtFmXZp" class="group relative rounded-xl overflow-hidden shadow-lg transition duration-300 hover:shadow-2xl hover:z-30">
+
+    <!-- Poster. Only the TOP corners are rounded here — the bottom belongs to the card's overall
+         shape (the outer wrapper's rounding + overflow-hidden already clip the name bar below), so
+         the hover wash/blur no longer shows a rounded notch where it meets the square name bar. -->
+    <div class="relative aspect-[2/3] w-full rounded-t-xl overflow-hidden bg-theme-bg-main">
+        <img src="https://www.kartonikurde.com/storage/images/movies/optimized/fn0GGAzwQefIoq0h8JZM0DtNAyfCI313Hac1rktA.jpg" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="بکوژی ئەهریمەنەکان (قەڵای بێکۆتا)">
+
+        <!-- Rest-state legibility gradient, fades out as the hover surface wash takes over.
+             Oversized (-inset-1) so the blur/gradient always fully covers the poster's own
+             rounded corners regardless of sub-pixel antialiasing — the poster's own
+             overflow-hidden does the final clipping, so no image sliver can show through. -->
+        <div class="absolute -inset-1 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-0 transition-opacity duration-300"></div>
+
+        <!-- Hover surface wash: translucent theme surface color over the poster only -->
+        <div class="absolute -inset-1 bg-theme-bg-secondary/0 group-hover:bg-theme-bg-secondary/90 backdrop-blur-0 group-hover:backdrop-blur-sm transition-all duration-300"></div>
+
+        <!-- Rating Badge (Top Right in RTL) - always visible -->
+        <div class="absolute top-2.5 right-2.5 z-20 flex items-center gap-1 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-xl theme-primary-text font-bold text-xs pointer-events-none">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <span>8.4</span>
+        </div>
+
+        <!-- VIP Badge (Top Left in RTL, opposite the rating) - only when the movie/serie itself
+             requires VIP, not merely one of its servers/episodes. -->
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+        <!-- Whole-poster click-through to the detail page (sits under the buttons/text via z-index) -->
+        <a href="https://www.kartonikurde.com/movie/demon-slayer-kimetsu-no-yaiba-infinity-castle" class="absolute inset-0 z-10" aria-label="بکوژی ئەهریمەنەکان (قەڵای بێکۆتا)"></a>
+
+        <!-- Rest-state Views badge (left), solid theme-color pill for clear legibility.
+             Hidden on hover — replaced by the fuller reveal block below. -->
+        <span class="absolute bottom-2.5 left-2.5 z-20 flex items-center gap-1 px-2 py-1 rounded-lg bg-theme-bg-main text-theme-text-main text-[10px] font-bold pointer-events-none opacity-100 group-hover:opacity-0 transition-opacity duration-300">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            <span>1,960</span>
+        </span>
+
+        <!-- Movie/Series type badge (right) — only shown when the caller explicitly opts in via
+             showType, for listings that mix movies and series together (e.g. "most viewed this
+             week" on the homepage), where the type isn't otherwise obvious from context. Hidden on
+             hover just like the views badge. -->
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+        <!-- Hover-reveal block: description, views, year/genre badges, action buttons — hidden at rest,
+             fades + rises in on hover. The movie name lives permanently below the poster now (see
+             below), so it's not repeated here. The description is a flex-1 overflow-hidden child, so it
+             always fills exactly whatever room is actually left — on any card width/breakpoint — and
+             gets clipped cleanly with no scrollbar. -->
+        <div class="absolute inset-x-0 bottom-0 top-[28%] z-20 p-3 flex flex-col text-right opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 ease-out">
+            <!--[if BLOCK]><![endif]-->                <p class="flex-1 min-h-0 overflow-hidden mt-1 text-[10px] text-slate-400 leading-snug">
+                    کامادۆ تانجیرۆ و تەواوی بکوژی ئەهریمەنەکان خۆیان لەجەنگێگدا دەببیننەوە لە قەڵای بێکۆتا...
+                </p>
+            <!--[if ENDBLOCK]><![endif]-->
+            <div class="shrink-0 mt-1 flex items-center gap-1 px-2 py-0.5 rounded-md theme-primary-bg theme-on-primary-text text-[9px] font-bold w-fit">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                <span>1,960</span>
+            </div>
+
+            <div class="shrink-0 mt-1 flex flex-wrap items-center gap-1">
+                <span class="px-2 py-0.5 rounded-md theme-primary-bg theme-on-primary-text text-[9px] font-bold">
+                    2025
+                </span>
+                <!--[if BLOCK]><![endif]-->                    <span class="px-2 py-0.5 rounded-md theme-primary-bg theme-on-primary-text text-[9px] font-bold truncate max-w-[90px]">
+                        ئەنیمی
+                    </span>
+                <!--[if ENDBLOCK]><![endif]-->            </div>
+
+            <div class="shrink-0 mt-1.5 mb-3 flex items-center gap-1.5">
+                <a href="https://www.kartonikurde.com/movie/demon-slayer-kimetsu-no-yaiba-infinity-castle" class="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg theme-primary-bg theme-on-primary-text text-[11px] font-bold hover:opacity-90 transition">
+                    <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <span>بینینی ئێستا</span>
+                </a>
+                <button wire:click.prevent="toggleFavorite" type="button" class="p-1.5 rounded-lg backdrop-blur-md transition shadow-md cursor-pointer focus:outline-none bg-white/10 text-white/80 hover:theme-primary-text" title="زیادکردن بۆ دڵخوازەکان">
+                    <!--[if BLOCK]><![endif]-->                        <svg class="w-3.5 h-3.5 fill-none stroke-current pointer-events-none" stroke-width="2" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    <!--[if ENDBLOCK]><![endif]-->                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Movie Name: lives below the poster now (full card width, no badge truncation), always visible.
+         Always solid theme "surface" color — distinct from the page's own bg-theme-bg-main body
+         background, so the card footer reads as its own panel rather than blending into the page.
+         Hovering this area also triggers the poster's hover state since both share the same .group. -->
+    <a href="https://www.kartonikurde.com/movie/demon-slayer-kimetsu-no-yaiba-infinity-castle"
+       class="block px-2.5 py-2 bg-theme-bg-secondary">
+        <h3 class="text-xs font-bold text-white group-hover:theme-primary-text transition truncate">
+            بکوژی ئەهریمەنەکان (قەڵای بێکۆتا)
+        </h3>
+</a></div>

@@ -1,7 +1,7 @@
 // The app's readers (app/src/main/assets/gecko/ui/readers/) against the live websites, on GitHub's machines (by
 // .github/workflows/readers.yml): each one's home lists, a search, a film and a series in full, a season's
 // episodes and the addresses that play them, as the app's screens would ask. What each gave goes to
-// <site>.json, every address asked (with its answer's start) to asked.txt, the pages (HTML) whole to page-NN.html,
+// <site>.json, every address asked (with its answer's start) to asked.txt, the pages (HTML) whole to <site>-page-NN.html,
 // and what went wrong to readers.log.
 // Usage: node tests/try/readers.js OUT_DIR [site-id ...]
 'use strict';
@@ -26,7 +26,8 @@ const TM = vm.runInContext('TM', ctx);
 // The websites asked from here, as the app's page asks them (its cookies kept, as a browser keeps them); the
 // pages (HTML) kept whole, page-NN.html, for the tests' saved copies
 const jar = {};
-let pages = 0;
+const pages = {};   // how many of each website's were kept
+let site = '';
 const web = {
   async get(url, o) {
     o = o || {};
@@ -38,7 +39,10 @@ const web = {
     const set = res.headers.getSetCookie ? res.headers.getSetCookie() : [];
     if (set.length) jar[host] = set.map((c) => c.split(';')[0]).join('; ');
     const text = await res.text();
-    if (/^\s*</.test(text) && pages < 12) fs.writeFileSync(path.join(OUT, 'page-' + String(++pages).padStart(2, '0') + '.html'), url + '\n' + text);
+    pages[site] = pages[site] || 0;
+    if (/^\s*</.test(text) && pages[site] < 8) {
+      fs.writeFileSync(path.join(OUT, site + '-page-' + String(++pages[site]).padStart(2, '0') + '.html'), url + '\n' + text);
+    }
     asked.push(['=== ' + (o.method || 'GET'), res.status, url, (Date.now() - started) + ' ms', text.length + ' characters'].join(' | ')
       + (o.body ? '\n--- sent: ' + String(o.body).slice(0, 500) : '') + '\n' + text.slice(0, 1500) + '\n');
     if (!res.ok) throw new Error(url + ' answered ' + res.status);
@@ -62,12 +66,16 @@ async function step(out, name, f) {
 
 const short = (list) => (Array.isArray(list) ? { count: list.length, first: list.slice(0, 3) } : list);
 
+// What each website is searched for (one it has)
+const WORD = { kartonikurde: 'frozen', kurdsaz: 'love' };
+
 async function tryReader(r) {
+  site = r.id;
   const out = { site: r.id };
   const rows = await step(out, 'rows', () => r.rows(web));
   if (Array.isArray(rows)) out.rows = rows.map((x) => ({ key: x.key, count: x.items.length, first: x.items.slice(0, 3) }));
   const all = Array.isArray(rows) ? [].concat(...rows.map((x) => x.items)) : [];
-  out.search = short(await step(out, 'search', () => r.search(web, 'spider')));
+  out.search = short(await step(out, 'search', () => r.search(web, WORD[r.id] || 'spider')));
   const film = all.find((x) => x.kind === 'film');
   const series = all.find((x) => x.kind === 'series');
   if (film) {
