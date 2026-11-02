@@ -38,6 +38,28 @@ const SITES = {
       '/wp-json/wp/v2/episodes?per_page=3', '/wp-json/wp/v2/seasons?per_page=3',
       '/wp-json/dooplay/search/?keyword=spider&nonce={nonce}', '/wp-json/dooplay/glossary/?term=a&nonce={nonce}&type=all'],
   },
+  kurdcinama: {
+    start: 'https://kurdcinama.com/',
+    pages: ['https://kurdcinama.com/movies.aspx', 'https://kurdcinama.com/drama.aspx',
+      'https://kurdcinama.com/moves-details.aspx?movieid=18470', 'https://kurdcinama.com/episodes.aspx?type=12',
+      'https://kurdcinama.com/Search.aspx'],
+    ask: ['/', '/movies.aspx', '/drama.aspx', '/moves-details.aspx?movieid=18470', '/episodes.aspx?type=12',
+      '/api/TMDBCache.aspx?action=popular&limit=20', '/api/TMDBCache.aspx?action=movie&id=18470', '/Search.aspx'],
+  },
+  kurdsaz: {
+    start: 'https://kurdsaz.com/',
+    pages: ['https://kurdsaz.com/browse?type=movie', 'https://kurdsaz.com/browse?type=series',
+      'https://kurdsaz.com/details?slug=Crystal-Lake', 'https://kurdsaz.com/details?slug=100-Days-of-Deception',
+      'https://kurdsaz.com/watch?slug=100-Days-of-Deception&ep=899', 'https://kurdsaz.com/search'],
+    ask: ['/', '/browse?type=movie', '/browse?type=series', '/details?slug=Crystal-Lake', '/details?slug=100-Days-of-Deception',
+      '/watch?slug=100-Days-of-Deception&ep=899', '/search?q=spider'],
+  },
+  kartonikurde: {
+    start: 'https://www.kartonikurde.com/',
+    pages: ['https://www.kartonikurde.com/movies', 'https://www.kartonikurde.com/series',
+      'https://www.kartonikurde.com/movie/frozen', 'https://www.kartonikurde.com/serie/grendizer'],
+    ask: ['/', '/movies', '/series', '/movie/frozen', '/serie/grendizer', '/search?q=frozen'],
+  },
 };
 const SITE = SITES[ID];
 const API = /\/(api|wp-json|wp-admin\/admin-ajax|ajax|livewire|graphql|feeds)\b/;
