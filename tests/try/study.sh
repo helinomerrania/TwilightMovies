@@ -3,7 +3,7 @@
 # emulator with a TV's screen (by .github/workflows/study.yml): each one opened from the Websites panel (in the
 # panel's order: the remote goes down it), its first page given time for Cloudflare's check, then down and OK twice
 # (a film, its page), with a screenshot (and the UI tree) at each step. What every website's pages asked their data
-# feeds, with the answers' start (assets/gecko/study.js, in this try build only), goes to NAME-data.txt.
+# feeds, with the answers (assets/gecko/study.js, in this try build only, kept by the app), goes to NAME-data.txt.
 # Usage: tests/try/study.sh APK OUT_DIR NAME
 set -uo pipefail
 APK=$1
@@ -48,25 +48,7 @@ done
 
 kill "$logger" 2> /dev/null
 sleep 1
-# Each request with its answer whole again (the log has it in pieces: study.js), one JSON line each
-python3 - "$OUT/$NAME-logcat.txt" > "$OUT/$NAME-data.txt" <<'PY'
-import json, re, sys
-heads, pieces = {}, {}
-for line in open(sys.argv[1], encoding='utf-8', errors='replace'):
-    m = re.search(r'Twilight Movies, data (\d+)(?:\.(\d+))?: (.*)$', line.rstrip('\n'))
-    if not m:
-        continue
-    if m.group(2) is None:
-        try:
-            heads[int(m.group(1))] = json.loads(m.group(3))
-        except ValueError:
-            pass
-    else:
-        pieces.setdefault(int(m.group(1)), {})[int(m.group(2))] = m.group(3)
-for n in sorted(heads):
-    got = pieces.get(n, {})
-    heads[n]['answer'] = ''.join(got[k] for k in sorted(got))
-    print(json.dumps(heads[n], ensure_ascii=False))
-PY
+# What the pages asked, with the answers, as the app kept it (web/gecko/StudyFile: its own folder on the storage)
+adb shell cat /sdcard/Android/data/com.twilightcafe.movies/files/study.jsonl > "$OUT/$NAME-data.txt"
 grep -E "GeckoConsole|TwilightMovies|AndroidRuntime|FATAL" "$OUT/$NAME-logcat.txt" | tail -n 400 > "$OUT/$NAME-log.txt"
 echo "data: $(wc -l < "$OUT/$NAME-data.txt") requests written down; $(ls "$OUT" | wc -l) files"

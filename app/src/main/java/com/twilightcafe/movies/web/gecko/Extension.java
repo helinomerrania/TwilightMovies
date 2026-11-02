@@ -16,6 +16,7 @@ import org.mozilla.geckoview.GeckoResult;
 import org.mozilla.geckoview.GeckoRuntime;
 import org.mozilla.geckoview.WebExtension;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -47,7 +48,7 @@ final class Extension implements WebExtension.MessageDelegate, WebExtension.Port
     private final SparseArray<Page.Result> results = new SparseArray<Page.Result>();
     private boolean ready;
     private volatile String base;        // its pages' address (moz-extension://<its number>/), once it's in
-    private volatile boolean study;      // the app's own try: what the websites ask their data feeds, in the log (study.js)
+    private volatile StudyFile study;    // the app's own try: what the websites ask their data feeds, kept (study.js)
     private WebExtension.Port port;
     private Object page;                 // the page shown now
     private volatile RequestFilter filter;
@@ -69,10 +70,10 @@ final class Extension implements WebExtension.MessageDelegate, WebExtension.Port
         main.postDelayed(this::setReady, 8000);   // pages wait no longer
     }
 
-    /** The app's own try (its pages' messages in Android's log): what the websites ask their data feeds, written down. */
-    void study(boolean on) {
-        study = on;
-        if (on && port != null) port.postMessage(message("study", true));
+    /** The app's own try (its pages' messages in Android's log): what the websites ask their data feeds, kept in folder. */
+    void study(File folder) {
+        study = folder != null ? new StudyFile(folder) : null;
+        if (study != null && port != null) port.postMessage(message("study", true));
     }
 
     /** Where its own pages are (the Twilight screens: ui/index.html), or null if it didn't start. */
@@ -187,7 +188,7 @@ final class Extension implements WebExtension.MessageDelegate, WebExtension.Port
         port = p;
         p.setDelegate(this);
         if (!bridgeName.isEmpty()) p.postMessage(message("bridge", bridgeName));
-        if (study) p.postMessage(message("study", true));
+        if (study != null) p.postMessage(message("study", true));
         List<JSONObject> now = new ArrayList<JSONObject>(unsent);
         unsent.clear();
         for (JSONObject m : now) p.postMessage(m);
@@ -199,6 +200,8 @@ final class Extension implements WebExtension.MessageDelegate, WebExtension.Port
     public void onPortMessage(Object message, WebExtension.Port p) {
         if (!(message instanceof JSONObject)) return;
         JSONObject m = (JSONObject) message;
+        JSONObject studied = m.optJSONObject("studied");
+        if (studied != null && study != null) study.add(studied.toString());
         int id = m.optInt("done", -1);
         Page.Result r = results.get(id);
         if (r == null) return;
