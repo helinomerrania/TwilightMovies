@@ -1,7 +1,8 @@
 // The app's readers (app/src/main/assets/gecko/ui/readers/) against the live websites, on GitHub's machines (by
 // .github/workflows/readers.yml): each one's home lists, a search, a film and a series in full, a season's
 // episodes and the addresses that play them, as the app's screens would ask. What each gave goes to
-// <site>.json, every address asked (with its answer's start) to asked.txt, and what went wrong to readers.log.
+// <site>.json, every address asked (with its answer's start) to asked.txt, the pages (HTML) whole to page-NN.html,
+// and what went wrong to readers.log.
 // Usage: node tests/try/readers.js OUT_DIR [site-id ...]
 'use strict';
 const fs = require('fs');
@@ -22,8 +23,10 @@ const ctx = vm.createContext({ console, URL, URLSearchParams, setTimeout, clearT
 });
 const TM = vm.runInContext('TM', ctx);
 
-// The websites asked from here, as the app's page asks them (its cookies kept, as a browser keeps them)
+// The websites asked from here, as the app's page asks them (its cookies kept, as a browser keeps them); the
+// pages (HTML) kept whole, page-NN.html, for the tests' saved copies
 const jar = {};
+let pages = 0;
 const web = {
   async get(url, o) {
     o = o || {};
@@ -35,6 +38,7 @@ const web = {
     const set = res.headers.getSetCookie ? res.headers.getSetCookie() : [];
     if (set.length) jar[host] = set.map((c) => c.split(';')[0]).join('; ');
     const text = await res.text();
+    if (/^\s*</.test(text) && pages < 12) fs.writeFileSync(path.join(OUT, 'page-' + String(++pages).padStart(2, '0') + '.html'), url + '\n' + text);
     asked.push(['=== ' + (o.method || 'GET'), res.status, url, (Date.now() - started) + ' ms', text.length + ' characters'].join(' | ')
       + (o.body ? '\n--- sent: ' + String(o.body).slice(0, 500) : '') + '\n' + text.slice(0, 1500) + '\n');
     if (!res.ok) throw new Error(url + ' answered ' + res.status);

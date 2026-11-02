@@ -1,60 +1,76 @@
 // Kurd Movie (kurd-movie.com): a WordPress website (the DooPlay theme) with Kurdish subtitles; its dubbed films say
 // "doblaj" in their names. Its lists, a title's details and a series' episodes come from its pages (the theme's
-// markup, the same on every page); its search from WordPress (/wp-json/dooplay/search/, with the number its pages
-// carry). It plays on its own pages: a film's, or an episode's.
+// markup, the same on every page, read whichever quotes and order its attributes come in); its search from
+// WordPress (/wp-json/dooplay/search/, with the number its pages carry). It plays on its own pages: a film's, or an
+// episode's.
 'use strict';
 TM.readers['kurd-movie'] = (function () {
   const SITE = 'https://www.kurd-movie.com';
   const GENRES = /^(Action|Adventure|Animation|Comedy|Crime|Documentary|Drama|Family|Fantasy|History|Horror|Music|Mystery|Romance|Science Fiction|Thriller|War|Western|Sci-Fi & Fantasy|Action & Adventure)$/;
+  const quotes = (h) => String(h || '').replace(/=\s*'([^'<>]*)'/g, '="$1"');   // every attribute in double quotes
   const one = (re, s) => { const m = re.exec(s); return m ? m[1] : ''; };
   const all = (re, s) => { const out = []; let m; while ((m = re.exec(s))) out.push(m[1]); return out; };
+  const has = (cls) => '[^>]*\\bclass="[^"]*\\b' + cls + '\\b[^"]*"[^>]*';   // a tag with that class, attributes in any order
+  const box = (tag, cls) => new RegExp('<' + tag + has(cls) + '>([\\s\\S]*?)</' + tag + '>');
   const dubbed = (t) => /\b(doblaj|dublaj|dubbed)\b|دۆبلاژ/i.test(t);
   const plain = (t) => TM.text(t).replace(/\s*\b(doblaj|dublaj)\b\s*/i, ' ').trim();
   const refOf = (url) => String(url).replace(/^https?:\/\/[^/]+\//, '').replace(/\/$/, '');   // "movies/onslaught"
   const kindOf = (url) => (/\/tvshows\//.test(url) ? 'series' : 'film');
-  const genres = (s) => all(/rel="tag">([^<]+)</g, s).map(TM.decode).filter((g) => GENRES.test(g));
+  const genres = (s) => all(/rel="tag"[^>]*>([^<]+)</g, s).map(TM.decode).filter((g) => GENRES.test(g));
   const pages = {};   // a title's page, read once a while: its episodes are on it
 
   // One title of a list (an <article> of the theme)
   function article(a) {
-    const url = one(/<h3><a href="([^"]+)"/, a);
+    const url = one(/<h3>\s*<a[^>]*\bhref="([^"]+)"/, a);
     if (!url) return null;
-    const name = one(/<h3><a href="[^"]+">([\s\S]*?)<\/a>/, a);
-    const genreBox = one(/<div class="genres">([\s\S]*?)<\/div>\s*<\/div>/, a);
+    const name = one(/<h3>\s*<a[^>]*>([\s\S]*?)<\/a>/, a);
     return TM.item({
       site: 'kurd-movie', ref: refOf(url), kind: kindOf(url), title: plain(name),
-      year: Number(one(/<div class="metadata">\s*<span>(\d{4})<\/span>/, a) || one(/(\d{4})<\/span>\s*<\/div>/, a)) || 0,
-      minutes: Number(one(/<span>(\d+) min<\/span>/, a)) || 0, overview: TM.text(one(/<div class="texto">([\s\S]*?)<\/div>/, a)),
-      genres: genres(genreBox), poster: TM.size(one(/<img[^>]+src="([^"]+)"/, a), 'w342'),
-      quality: TM.text(one(/<span class="dt-resolution-badge">([^<]*)</, a)), langs: [dubbed(name) ? 'dub' : 'sub'],
+      year: Number(one(new RegExp('<div' + has('metadata') + '>\\s*<span>(\\d{4})</span>'), a)) || 0,
+      minutes: Number(one(/<span>(\d+) min<\/span>/, a)) || 0, overview: TM.text(one(box('div', 'texto'), a)),
+      genres: genres(one(new RegExp('<div' + has('genres') + '>([\\s\\S]*?)</div>\\s*</div>'), a)),
+      poster: TM.size(one(/<img[^>]*\b(?:data-src|src)="([^"]+)"/, a), 'w342'),
+      quality: TM.text(one(new RegExp('<span' + has('dt-resolution-badge') + '>([^<]*)<'), a)), langs: [dubbed(name) ? 'dub' : 'sub'],
     });
   }
-  const list = (html) => (html.match(/<article id="post-\d+" class="item [^"]*">[\s\S]*?<\/article>/g) || []).map(article).filter(Boolean);
+  const list = (html) => (quotes(html).match(/<article[^>]*\bid="post-\d+"[^>]*>[\s\S]*?<\/article>/g) || []).map(article).filter(Boolean);
+
+  // A series' seasons, each with its episodes and their pages
+  function seasons(html) {
+    const out = [];
+    const each = new RegExp('<span' + has('se-t') + '>\\s*(\\d+)\\s*</span>[\\s\\S]*?<ul' + has('episodios') + '>([\\s\\S]*?)</ul>', 'g');
+    const ep = new RegExp('<div' + has('numerando') + '>\\s*(\\d+)\\s*-\\s*(\\d+)\\s*</div>\\s*<div' + has('episodiotitle')
+      + '>\\s*<a[^>]*\\bhref="([^"]+)"[^>]*>([\\s\\S]*?)</a>', 'g');
+    let m;
+    while ((m = each.exec(html))) {
+      const eps = [];
+      let e;
+      ep.lastIndex = 0;
+      while ((e = ep.exec(m[2]))) eps.push(TM.item({ n: Number(e[2]), title: TM.text(e[4]), url: e[3] }));
+      out.push({ n: Number(m[1]), episodes: eps });
+    }
+    return out;
+  }
 
   // A title's own page: its details, and a series' seasons with their episodes
-  function page(html, ref) {
-    const head = one(/<div class="sheader">([\s\S]*?)<div class="single_tabs">/, html) || html;
-    const name = one(/<h1>([\s\S]*?)<\/h1>/, head);
-    const backdrop = one(/<div class="g-item"><a href="([^"]+)"/, html);
-    const seasons = [];
-    const box = /<span class="se-t[^"]*">(\d+)<\/span>[\s\S]*?<ul class="episodios">([\s\S]*?)<\/ul>/g;
-    let m;
-    while ((m = box.exec(html))) {
-      const eps = [];
-      const ep = /<div class="numerando">\s*(\d+)\s*-\s*(\d+)\s*<\/div>\s*<div class="episodiotitle">\s*<a href="([^"]+)">([\s\S]*?)<\/a>/g;
-      let e;
-      while ((e = ep.exec(m[2]))) eps.push(TM.item({ n: Number(e[2]), title: TM.text(e[4]), url: e[3] }));
-      seasons.push({ n: Number(m[1]), episodes: eps });
-    }
+  function page(raw, ref) {
+    const html = quotes(raw);
+    const head = one(new RegExp('<div' + has('sheader') + '>([\\s\\S]*?)<div' + has('single_tabs') + '>'), html) || html;
+    const name = one(/<h1[^>]*>([\s\S]*?)<\/h1>/, head);
+    const poster = one(/<img([^>]*\bitemprop="image"[^>]*)>/, head);
+    const backdrop = one(new RegExp('<div' + has('g-item') + '>\\s*<a[^>]*\\bhref="([^"]+)"'), html);
+    const found = seasons(html);
     return TM.item({
-      site: 'kurd-movie', ref, kind: kindOf(SITE + '/' + ref + '/'), title: plain(name), tagline: TM.text(one(/<span class="tagline">([\s\S]*?)<\/span>/, head)),
-      year: Number(one(/<span class="date"[^>]*>[^<]*?(\d{4})<\/span>/, head)) || 0,
-      minutes: Number(one(/<span itemprop="duration" class="runtime">(\d+)/, head)) || 0,
-      age: TM.text(one(/<span itemprop="contentRating"[^>]*>([^<]*)</, head)), genres: genres(one(/<div class="sgeneros">([\s\S]*?)<\/div>/, head)),
-      overview: TM.text(one(/<div itemprop="description" class="wp-content">\s*<p>([\s\S]*?)<\/p>/, html)),
-      rating: Number(one(/<b id="repimdb"><strong>([\d.]+)<\/strong>/, html)) || 0, poster: TM.size(one(/<img itemprop="image" src="([^"]+)"/, head), 'w342'),
-      backdrop: backdrop ? TM.size(backdrop, 'w1280') : '', langs: [dubbed(name) ? 'dub' : 'sub'],
-      seasons: seasons.map((s) => ({ n: s.n, count: s.episodes.length })), episodesBySeason: seasons,
+      site: 'kurd-movie', ref, kind: kindOf(SITE + '/' + ref + '/'), title: plain(name),
+      tagline: TM.text(one(box('span', 'tagline'), head)),
+      year: Number(one(new RegExp('<span' + has('date') + '>[^<]*?(\\d{4})\\s*<'), head)) || 0,
+      minutes: Number(one(new RegExp('<span' + has('runtime') + '>\\s*(\\d+)'), head)) || 0,
+      age: TM.text(one(/<span[^>]*\bitemprop="contentRating"[^>]*>([^<]*)</, head)),
+      genres: genres(one(box('div', 'sgeneros'), head)),
+      overview: TM.text(one(/<div[^>]*\bitemprop="description"[^>]*>\s*<p>([\s\S]*?)<\/p>/, html).replace(/<iframe[\s\S]*$/, '')),
+      rating: Number(one(/\bid="repimdb"[^>]*>\s*<strong>([\d.]+)<\/strong>/, html)) || 0,
+      poster: TM.size(one(/\b(?:data-src|src)="([^"]+)"/, poster), 'w342'), backdrop: backdrop ? TM.size(backdrop, 'w1280') : '',
+      langs: [dubbed(name) ? 'dub' : 'sub'], seasons: found.map((s) => ({ n: s.n, count: s.episodes.length })), episodesBySeason: found,
     });
   }
 
