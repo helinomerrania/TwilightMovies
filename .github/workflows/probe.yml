@@ -1,0 +1,43 @@
+name: Probe the websites' data
+
+# For the app's readers (app/src/main/assets/gecko/ui/readers/): what the websites' own scripts ask their data
+# feeds for, with what they send, and the answers to the addresses the readers need (tests/try/probe.js), on
+# GitHub's machines. Each website on a machine of its own; what it saw goes to the pre-release "try", under
+# probe-<its id>-. Runs on a push to a branch named probe/..., or by hand from the Actions tab.
+on:
+  push:
+    branches: ['probe/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: probe
+  cancel-in-progress: true
+
+jobs:
+  site:
+    name: ${{ matrix.site }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        site: [krd-watch, beenar, kurd-movie]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright@1.49.1
+          npx playwright install --with-deps chromium
+      - name: What its scripts ask for, and what it answers
+        timeout-minutes: 10
+        run: node tests/try/probe.js out/probe "${{ matrix.site }}"
+      - name: Publish what it saw
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash tests/try/publish.sh out/probe "probe-${{ matrix.site }}-"
