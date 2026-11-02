@@ -1,4 +1,4 @@
-// The app's own screens' scripts (app/src/main/assets/gecko/ui/), each file in a context of its own as the page
+// The Twilight screens' scripts (app/src/main/assets/gecko/ui/), each file in a context of its own as the page
 // loads them, and websites that answer from their saved copies (tests/js/fixtures/readers/<site>/), saying what
 // they were asked.
 'use strict';

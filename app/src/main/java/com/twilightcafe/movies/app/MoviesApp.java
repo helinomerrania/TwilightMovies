@@ -86,6 +86,7 @@ public final class MoviesApp {
 
         BlockerLink link = new BlockerLink(blocker);
         page = Engines.make(a, screen.main, settings, new PageEvents(this), link);
+        if (!page.inApp()) sites.withoutTwilight();   // the Twilight screens need Firefox's engine
         page.expose(link, blocker.bridgeName);
         screen.add(page.view());
         target = new PageTarget(page);
@@ -113,6 +114,7 @@ public final class MoviesApp {
         pointer.setEnabled(sites.pointer());
 
         String resume = state != null ? state.getString(STATE_URL) : null;
+        if (resume != null && !page.inApp() && !resume.startsWith("http")) resume = null;   // an own page, in Firefox's engine
         nav.load(resume != null ? resume : sites.address());
         target.focus();
         if (!settings.guideShown()) guide.firstTime(panelActions, panelActions::firstGuide);

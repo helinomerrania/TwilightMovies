@@ -3,9 +3,11 @@ package com.twilightcafe.movies.web.gecko;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.twilightcafe.movies.util.Urls;
 import com.twilightcafe.movies.web.Bridge;
 import com.twilightcafe.movies.web.History;
 import com.twilightcafe.movies.web.Page;
@@ -127,7 +129,15 @@ public final class GeckoPage implements Page {
         extension.whenReady(openWaiting);
     }
 
-    private void open(final String url) {
+    /** Whether url is one of the app's own pages (the extension's: the Twilight screens). */
+    boolean own(String url) {
+        String base = extension.base();
+        return base != null && url != null && url.startsWith(base);
+    }
+
+    private void open(String address) {
+        final String url = ownPage(address);
+        if (url == null) return;
         Extension.WORK.execute(new Runnable() {
             @Override
             public void run() {
@@ -142,6 +152,14 @@ public final class GeckoPage implements Page {
                 });
             }
         });
+    }
+
+    /** The Twilight screens' address ("twilight:..."): the extension's page; null if it didn't start. */
+    private String ownPage(String url) {
+        if (!Urls.isOwn(url)) return url;
+        String base = extension.base();
+        if (base == null) Log.w("TwilightMovies", "the Twilight screens need its extension, which didn't start");
+        return base == null ? null : base + url.substring(Urls.OWN.length());
     }
 
     /** What the ad blocker shows in place of an ad page. */

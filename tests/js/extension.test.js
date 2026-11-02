@@ -33,6 +33,7 @@ function background(app, frames) {
         return a instanceof Error ? now(a, true) : now(JSON.stringify(a));
       },
       connectNative: (name) => { b.nativeApp = name; return port; },
+      getURL: (path) => 'moz-extension://the-app/' + (path || ''),
       onMessage: { addListener: (f) => { b.fromPage = f; } },
     },
     webRequest: { onBeforeRequest: { addListener: (f, filter, extra) => { b.onRequest = f; b.filter = filter; b.extra = extra; } } },
@@ -84,6 +85,8 @@ check('every address of every page is held until the app answers', [x.filter.url
 check('the page itself isn\'t asked about here (the app does as it opens)',
   [x.onRequest({ type: 'main_frame', url: 'https://ads.example/', tabId: 1, frameId: 0 }), x.asked.length], [{}, 0]);
 check('nor the engine\'s own requests (no tab)', [x.onRequest({ type: 'script', url: 'https://ads.example/a.js', tabId: -1 }), x.asked.length], [{}, 0]);
+check('nor what the Twilight screens ask the websites for (the app\'s own page)', [x.onRequest({ type: 'xmlhttprequest',
+  url: 'https://krd.watch/api/feed', tabId: 3, frameId: 0, originUrl: 'moz-extension://the-app/ui/index.html' }), x.asked.length], [{}, 0]);
 let r = x.onRequest({ type: 'script', url: 'https://ads.example/a.js', tabId: 3, frameId: 0, documentUrl: 'https://films.example/watch' });
 check('a script of the page: the app is asked, with the page it\'s for', x.asked[0],
   ['twilight', { check: 'https://ads.example/a.js', type: 'script', frame: 'https://films.example/watch', page: 'https://films.example/watch' }]);

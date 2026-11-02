@@ -46,6 +46,10 @@ While a film plays full screen, OK pauses and plays it, and Back leaves full scr
 
 Under the app's name, the menu shows the page, the app's build number and the web engine with its version (useful when something needs fixing), and how many rules the ad blocker has and from when.
 
+## Twilight: every website in one
+
+**Twilight** in the Websites panel (with Firefox's engine) shows the films and series of KRD WATCH, Beenar and Kurd Movie together, in one plain look made for the remote: new films and series from each website in turn, Continue watching, dubbed films, cartoons, My list; search on all of them at once; a film's page with the websites it's on; a series' seasons and episodes. A film plays on the website's own page, and BACK comes back. Its own **Settings** (at the top, beside search): its language, which websites and in what order, what plays first when a film is on several (Kurdish subtitles, dubbing, or the best picture), and its colours. The websites themselves stay in the Websites panel as they are.
+
 ## The ad blocker
 
 It's built in and on from the start.

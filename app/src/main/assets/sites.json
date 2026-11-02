@@ -1,11 +1,19 @@
 {
-  "about": "The app's websites, in the order the Websites panel shows them (it's in the menu once there are two or more); a new box opens the first. Each: id (letters, numbers and -; never changed, the box keeps its settings under it), name (and name_ckb, the name in Kurdish if it's written differently), address (where it opens), domains (the website's own, with every subdomain: pages go between them as they like, and the ad blocker never blocks them), pointer (true: the mouse pointer is on at first, for a website without a TV interface of its own). ARCHITECTURE.md: Adding a website.",
+  "about": "The app's websites, in the order the Websites panel shows them (it's in the menu once there are two or more); a new box opens the first. Each: id (letters, numbers and -; never changed, the box keeps its settings under it), name (and name_ckb, the name in Kurdish if it's written differently), address (where it opens), domains (the website's own, with every subdomain: pages go between them as they like, and the ad blocker never blocks them), pointer (true: the mouse pointer is on at first, for a website without a TV interface of its own). The address twilight: is the Twilight screens (assets/gecko/ui/, in Firefox's engine only), with the websites they read as their domains. ARCHITECTURE.md: Adding a website.",
   "sites": [
     {
       "id": "kurdfilm",
       "name": "KurdFilm",
       "address": "https://app.kurdfilm.krd/tv",
       "domains": ["kurdfilm.krd"],
+      "pointer": false
+    },
+    {
+      "id": "twilight",
+      "name": "Twilight",
+      "name_ckb": "توایڵایت",
+      "address": "twilight:",
+      "domains": ["krd.watch", "beenar.net", "kurd-movie.com"],
       "pointer": false
     },
     {

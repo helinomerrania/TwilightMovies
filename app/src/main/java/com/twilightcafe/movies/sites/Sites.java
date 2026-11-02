@@ -25,6 +25,14 @@ public final class Sites {
         if (current == null) current = first;
     }
 
+    /** Without the Twilight screens (the web engine is the box's own, which can't show them). */
+    public void withoutTwilight() {
+        for (int i = all.size() - 1; i >= 0; i--) {
+            if (all.get(i).twilight()) all.remove(i);
+        }
+        if (!all.contains(current)) current = all.get(0);
+    }
+
     public List<Site> all() {
         return Collections.unmodifiableList(all);
     }
@@ -75,7 +83,7 @@ public final class Sites {
     public String[] ownHosts() {
         List<String> hosts = new ArrayList<String>();
         for (Site s : all) {
-            hosts.add(Urls.hostOf(address(s)));
+            if (!s.twilight()) hosts.add(Urls.hostOf(address(s)));
             Collections.addAll(hosts, s.domains());
         }
         return hosts.toArray(new String[0]);

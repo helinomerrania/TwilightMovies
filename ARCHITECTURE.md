@@ -40,6 +40,7 @@ app/src/main/assets/sites.json              the app's websites
 app/src/main/assets/scripts/                the small scripts the app runs inside the websites
 app/src/main/assets/gecko/                  the app's extension inside Firefox's engine (its ad blocker and scripts there, and
                                             the remote's arrows: arrows*.js, which the engine hasn't of its own)
+app/src/main/assets/gecko/ui/               the Twilight screens: the films and series of the websites it reads, in one look
 app/src/main/res/values/strings.xml         the app's texts in English; values-b+ckb/ has them in Kurdish
 tools/filters/                              the ad blocker's lists, its own rules, the checks, and the compiler (src/)
 tests/java/                                 the Java tests (run.sh)
@@ -50,6 +51,7 @@ art/                                        draws the banner, the icon and the s
 .github/workflows/filters.yml               makes the filters every day, and publishes them
 .github/workflows/try.yml                   tries the app on Android TV emulators
 .github/workflows/sites.yml                 tries every website of sites.json in Chromium, each on a machine of its own
+.github/workflows/readers.yml               tries the Twilight screens' readers on the live websites, every day
 ```
 
 ## The app's parts
@@ -113,6 +115,16 @@ The compiler that makes the filter file is in `tools/filters/src` (package `adbl
 
 With two or more websites, the menu has **Websites**: the list, each with its address. The website shown last opens at the next start. Each website keeps its own address (**Website address** in the menu) and its own mouse pointer. If a website needs rules of its own (an ad that gets through, a box to hide), they go in `tools/filters/twilight.txt` (see README.md).
 
+## The Twilight screens
+
+The website `twilight` in `sites.json` (its address is `twilight:`) is the Twilight screens: the films and series of several websites in one plain look, made for the remote (`assets/gecko/ui/`). It's a page of the app's extension in Firefox's engine (`GeckoPage` opens `twilight:` there, and `Navigation` gives it the app's language); with the box's own engine it isn't in the Websites panel. Its parts, each a small file:
+
+- **Readers** (`ui/readers/<id>.js`): one for each website, reading its own data (its feed, or its pages), each with the same five: `rows` (its home's lists), `search`, `title` (a film or series in full), `episodes` (a season's) and `watch` (the website's page that plays it). They give every title the same fields (`tm.js`: `TM.item`).
+- **The catalogue** (`catalog.js`) asks them as the screens need: the home's lists kept a while, a search on all of them at once, a title from each of its websites. `merge.js` makes the same title on several websites one (by TMDB's number, else its name and year), and says which website plays first (the viewer's choice: Kurdish subtitles, dubbing, or the best picture; then the websites' order). `saved.js` keeps the settings, what was watched, My list and the titles opened, in the page's own storage.
+- **The screens**: home and its parts (`view-home.js`), a title (`view-title.js`), search with its own letters (`view-search.js`), settings (`view-settings.js`); `parts.js` has the pieces they share, `words.js` every word (in Kurdish and English), `ui.css` the look (Vazirmatn, three colourings). `app.js` goes between them by the address after `#`, each a step in the page's history, so BACK goes back through them. A film plays on the website's own page; BACK from there comes back to its title.
+
+A website for the screens: its reader (the five, as the others), its hosts in the `twilight` website's `domains`, saved copies of what it answers (`tests/js/fixtures/readers/<id>/`) and a test with them (`tests/js/reader-<id>.test.js`). `tests/try/readers.js` asks the live websites as the screens would (**Try the readers**, on GitHub: every day, and on a push to `try/...` or `probe/...`), and keeps their pages for new saved copies.
+
 ## The page scripts
 
 The app runs these inside the websites (`web/PageScripts` names them; each file is one function). In Firefox's engine they run in the app's extension's own part of the page (`assets/gecko/background.js` puts them there), where the website's own scripts can't see them or the app's bridge.
@@ -138,7 +150,9 @@ There are two sets, and GitHub runs both on every push before anything is built.
 | `media`, `scroll`, `hide-ads`, `ad-layers` | Each script on stand-in pages: the video keys, scrolling, hiding ad boxes, click traps |
 | `extension` | The app's extension in Firefox's engine: every address asked about (not the page itself, not the engine's own), the answers, the app's scripts in the page and their values, the bridge, the remote between frames, the keyboard; the manifest; the same name for the app on both sides |
 | `arrows`, `arrows-reach`, `arrows-frames` | The remote's arrows in Firefox's engine, on KurdFilm's TV page as the engine lays it out and on stand-in pages: where each arrow goes, the search and its keyboard, the website's own keys first, OK, what can't be gone to, windows over the page, full screen, fields, frames |
-| `sites` | sites.json: every website with an id, a name, an https address and its own domains |
+| `sites` | sites.json: every website with an id, a name, an https address and its own domains; the Twilight screens once, with every website their readers read |
+| `reader-krd-watch`, `reader-beenar`, `reader-kurd-movie` | The Twilight screens' readers, with their websites' saved answers: the home's lists, search, a film and a series in full, a season's episodes, where each plays |
+| `screens-catalog` | The Twilight screens' catalogue: the same title on several websites as one, what it shows in each language, which website plays first, what the box keeps, the home's rows |
 | `strings` | The texts: every one the app asks for exists, none is unused, and the Kurdish ones keep each `%1$s` |
 
 **`tests/java/run.sh`** (Java 17 or newer, nothing to install; `tests/java/run.sh SiteTest` runs only one):

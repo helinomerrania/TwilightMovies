@@ -1,6 +1,6 @@
-// Twilight's own screens, in Firefox's engine: a page of the app's extension (ui/index.html) that shows the films and
-// series of the websites the app reads (ui/readers/), as one catalogue in one plain look (ARCHITECTURE.md: The app's
-// own screens). This file: the namespace every part adds to, and the small things they all use.
+// The Twilight screens, in Firefox's engine: a page of the app's extension (ui/index.html) that shows the films and
+// series of the websites the app reads (ui/readers/), as one catalogue in one plain look (ARCHITECTURE.md: The
+// Twilight screens). This file: the namespace every part adds to, and the small things they all use.
 'use strict';
 var TM = { readers: {}, views: {} };
 

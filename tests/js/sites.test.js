@@ -1,5 +1,6 @@
 // The app's websites (app/src/main/assets/sites.json): each one with an id, a name, a web address and its own
-// domains, ids that differ, nothing misspelt, and only what the app reads (sites/SiteCatalog.java).
+// domains, ids that differ, nothing misspelt, and only what the app reads (sites/SiteCatalog.java); the app's own
+// screens (the address twilight:) once, not first, with every website their readers read as their domains.
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -10,6 +11,8 @@ const FILE = path.join(ROOT, 'app', 'src', 'main', 'assets', 'sites.json');
 const CATALOG = path.join(ROOT, 'app', 'src', 'main', 'java', 'com', 'twilightcafe', 'movies', 'sites', 'SiteCatalog.java');
 const KEYS = ['id', 'name', 'name_ckb', 'address', 'domains', 'pointer'];
 const HOST = /^(?=.{1,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z][a-z0-9-]{0,62}$/;
+const READERS = path.join(ROOT, 'app', 'src', 'main', 'assets', 'gecko', 'ui', 'readers');
+const OWN = 'twilight:';
 
 let doc = null;
 try {
@@ -33,6 +36,16 @@ for (const s of sites) {
   ok(name + ': only what the app reads (' + KEYS.join(', ') + ')', unknown.length === 0, 'not: ' + unknown.join(', '));
   ok(name + ': a name', typeof s.name === 'string' && s.name.trim() !== '');
   ok(name + ': name_ckb, if there is one, is a name', s.name_ckb === undefined || (typeof s.name_ckb === 'string' && s.name_ckb.trim() !== ''));
+  if (s.address === OWN) {
+    const hosts = [].concat(...fs.readdirSync(READERS).map((f) => {
+      const m = /hosts:\s*\[([^\]]*)\]/.exec(fs.readFileSync(path.join(READERS, f), 'utf8'));
+      return m ? m[1].split(',').map((h) => h.trim().replace(/^'|'$/g, '')).filter(Boolean) : [];
+    }));
+    const missing = hosts.filter((h) => !(s.domains || []).some((d) => h === d || h.endsWith('.' + d)));
+    ok(name + ': the Twilight screens, with every website their readers read as their domains', hosts.length && !missing.length,
+      'not: ' + missing.join(', '));
+    continue;
+  }
   let url = null;
   try {
     url = new URL(s.address);
@@ -50,6 +63,9 @@ for (const s of sites) {
   }
   ok(name + ': pointer, if given, is true or false', s.pointer === undefined || typeof s.pointer === 'boolean');
 }
+
+const own = sites.filter((s) => s.address === OWN);
+ok('the Twilight screens: once, and not first (a new box opens the first)', own.length === 1 && sites[0].address !== OWN);
 
 const catalog = fs.readFileSync(CATALOG, 'utf8');
 const read = KEYS.filter((k) => catalog.includes('"' + k + '"'));

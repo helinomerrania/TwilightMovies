@@ -2,7 +2,8 @@ name: Try the app
 
 # On GitHub's machines, which reach the websites: the app itself on two emulators with a TV's screen
 # (tests/try/emulator.sh): Android 9, with a web engine from 2018 like the café's box (so the app uses Firefox's,
-# inside it), and Android 14, with a new one (the box's own). The screenshots and logs go to the pre-release "try".
+# inside it), and Android 14, with a new one (the box's own); then the Twilight screens (tests/try/twilight.sh, in
+# Firefox's engine only). The screenshots and logs go to the pre-release "try".
 # Runs on a push to a branch named try/..., or by hand from the Actions tab. (The websites themselves, each in
 # Chromium, with what their scripts need and what the ad blocker would block: sites.yml, on the same pushes.)
 on:
@@ -74,7 +75,7 @@ jobs:
           profile: tv_1080p
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-boot-anim
-          script: bash tests/try/emulator.sh twilight-movies.apk out ${{ matrix.name }}
+          script: bash tests/try/emulator.sh twilight-movies.apk out ${{ matrix.name }}; bash tests/try/twilight.sh out ${{ matrix.name }}
       - name: Publish what it saw
         if: always()
         env:

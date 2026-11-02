@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * Where the page goes, in Firefox's engine. Each page it opens by itself is asked about first: PageListener
- * .mayGo, then the ad blocker, which shows its own page in place of an ad page. A window the page opens goes
+ * .mayGo, then the ad blocker, which shows its own page in place of an ad page (the app's own pages, never). A window the page opens goes
  * to PageListener.popup and never opens. A page that can't load says why (failed, or insecure); the app's
  * error screen shows it, not the engine's.
  */
@@ -39,6 +39,7 @@ final class GeckoNavigation implements GeckoSession.NavigationDelegate {
             l.popup(url, r.hasUserGesture);
             return GeckoResult.deny();
         }
+        if (page.own(url)) return null;                                             // the Twilight screens
         if (!Urls.isWebScheme(url) || !l.mayGo(url)) return GeckoResult.deny();   // intent:, market:...: never
         return url.startsWith("http:") || url.startsWith("https:") ? adPage(url) : null;
     }

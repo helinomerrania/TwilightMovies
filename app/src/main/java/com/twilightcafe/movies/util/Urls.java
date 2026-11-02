@@ -2,9 +2,16 @@ package com.twilightcafe.movies.util;
 
 import java.util.Locale;
 
-/** Web addresses: their host, a short form for the screen, and what someone typed made into one. Plain Java. */
+/** Web addresses (and the app's own pages'): their host, a short form for the screen, and what someone typed made into one. Plain Java. */
 public final class Urls {
     private Urls() {
+    }
+
+    /** The address of the app's own pages (the Twilight screens, assets/gecko/ui/): "twilight:" and the page's path. */
+    public static final String OWN = "twilight:";
+
+    public static boolean isOwn(String url) {
+        return url != null && url.startsWith(OWN);
     }
 
     /** Whether a page may load this address itself (not intent:, market: and the like: ads love them). */

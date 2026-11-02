@@ -7,7 +7,9 @@ import java.util.Locale;
 /**
  * One of the app's websites (assets/sites.json): its names, the address it opens at, the domains that are its
  * own (pages and pop-ups go between them as they like, and the ad blocker never blocks them), and whether it
- * needs the mouse pointer (a website without a TV interface of its own). Plain Java.
+ * needs the mouse pointer (a website without a TV interface of its own). Or the Twilight screens (the address
+ * "twilight:"), which show the films of the websites they read (their domains) in one look: in Firefox's engine
+ * only (a page of the app's extension there, assets/gecko/ui/). Plain Java.
  */
 public final class Site {
     public final String id;
@@ -26,6 +28,21 @@ public final class Site {
         this.address = address;
         this.domains = domains != null && domains.length > 0 ? lower(domains) : new String[]{domainOf(address)};
         this.pointer = pointer;
+    }
+
+    /** Whether this is the Twilight screens (they need Firefox's engine). */
+    public boolean twilight() {
+        return Urls.isOwn(address);
+    }
+
+    /** The Twilight screens' page, in the app's language, saying the app's version ("twilight:" as sites.json has it). */
+    public static String twilightPage(String address, boolean kurdish, String version) {
+        if (!Urls.OWN.equals(address)) return address;
+        StringBuilder v = new StringBuilder();
+        for (char c : (version == null ? "" : version).toCharArray()) {
+            if (Character.isLetterOrDigit(c) && c < 128 || c == '.' || c == '-' || c == '_') v.append(c);
+        }
+        return Urls.OWN + "ui/index.html?lang=" + (kurdish ? "ckb" : "en") + "&v=" + v;
     }
 
     public String name(boolean kurdish) {

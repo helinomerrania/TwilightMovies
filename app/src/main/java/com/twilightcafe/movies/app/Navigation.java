@@ -2,6 +2,7 @@ package com.twilightcafe.movies.app;
 
 import android.os.SystemClock;
 
+import com.twilightcafe.movies.BuildConfig;
 import com.twilightcafe.movies.R;
 import com.twilightcafe.movies.loading.ErrorScreen;
 import com.twilightcafe.movies.sites.Site;
@@ -24,9 +25,10 @@ final class Navigation implements ErrorScreen.Host, Fullscreen.Listener {
         this.app = app;
     }
 
+    /** The Twilight screens ("twilight:") in the app's language, saying its version; a website as it is. */
     void load(String url) {
         app.errors.hide();
-        app.page.load(url);
+        app.page.load(Site.twilightPage(url, app.screen.texts.kurdish(), BuildConfig.VERSION_NAME));
     }
 
     void home() {
@@ -62,7 +64,8 @@ final class Navigation implements ErrorScreen.Host, Fullscreen.Listener {
         app.panels.close();
         app.fullscreen.leave();
         load(url);
-        app.osd.show(app.screen.t(R.string.osd_opening, Urls.shortUrl(url)), 2000);
+        String shown = Urls.isOwn(url) ? app.sites.current().name(app.screen.texts.kurdish()) : Urls.shortUrl(url);
+        app.osd.show(app.screen.t(R.string.osd_opening, shown), 2000);
     }
 
     /** BACK: a panel closes, a film leaves full screen, the page goes back; on the first page, twice ends the app. */

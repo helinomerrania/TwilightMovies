@@ -3,7 +3,7 @@ package com.twilightcafe.movies.sites;
 import static com.twilightcafe.movies.test.Check.eq;
 import static com.twilightcafe.movies.test.Check.ok;
 
-/** A website's names and its own domains (where its pages go freely, and the ad blocker never blocks). */
+/** A website's names and its own domains (where its pages go freely, and the ad blocker never blocks); the Twilight screens. */
 public final class SiteTest {
     private SiteTest() {
     }
@@ -24,5 +24,15 @@ public final class SiteTest {
         ok("...and only those", !other.owns("example"));
         ok("the mouse pointer from sites.json", other.pointer);
         eq("the domain of an address with no dot", Site.domainOf("http://localhost:8080/"), "localhost");
+
+        Site own = new Site("twilight", "Twilight", "توایڵایت", "twilight:", new String[]{"krd.watch", "kurd-movie.com"}, false);
+        ok("the Twilight screens are known by their address", own.twilight() && !kurdfilm.twilight());
+        ok("...the websites they read are their own", own.owns("krd.watch") && own.owns("www.kurd-movie.com") && !own.owns("twilight"));
+        eq("...their page: in the app's language, with its version", Site.twilightPage("twilight:", true, "1.9.0"),
+                "twilight:ui/index.html?lang=ckb&v=1.9.0");
+        eq("...in English", Site.twilightPage("twilight:", false, "2.0 (test)"), "twilight:ui/index.html?lang=en&v=2.0test");
+        eq("...a website's address as it is", Site.twilightPage("https://krd.watch/", true, "1.9.0"), "https://krd.watch/");
+        eq("...and one of their pages already", Site.twilightPage("twilight:ui/index.html#/search", true, "1"),
+                "twilight:ui/index.html#/search");
     }
 }

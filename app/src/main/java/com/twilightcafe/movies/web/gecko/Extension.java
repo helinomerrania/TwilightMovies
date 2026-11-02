@@ -46,6 +46,7 @@ final class Extension implements WebExtension.MessageDelegate, WebExtension.Port
     private final List<JSONObject> unsent = new ArrayList<JSONObject>();
     private final SparseArray<Page.Result> results = new SparseArray<Page.Result>();
     private boolean ready;
+    private volatile String base;        // its pages' address (moz-extension://<its number>/), once it's in
     private WebExtension.Port port;
     private Object page;                 // the page shown now
     private volatile RequestFilter filter;
@@ -56,6 +57,7 @@ final class Extension implements WebExtension.MessageDelegate, WebExtension.Port
     /** Installed again at every start of the engine, so it's always the one in this version of the app. */
     Extension(GeckoRuntime runtime) {
         runtime.getWebExtensionController().installBuiltIn(FOLDER).accept(e -> {
+            base = e.metaData.baseUrl;
             e.setMessageDelegate(this, APP);
             Log.i(TAG, "the app's extension is in Firefox's engine");
             setReady();
@@ -64,6 +66,11 @@ final class Extension implements WebExtension.MessageDelegate, WebExtension.Port
             setReady();
         });
         main.postDelayed(this::setReady, 8000);   // pages wait no longer
+    }
+
+    /** Where its own pages are (the Twilight screens: ui/index.html), or null if it didn't start. */
+    String base() {
+        return base;
     }
 
     /** r runs (on the main thread) once the extension is ready, or now if it is. */
