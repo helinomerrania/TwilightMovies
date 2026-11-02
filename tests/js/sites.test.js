@@ -70,3 +70,4 @@ ok('the Twilight screens: once, and not first (a new box opens the first)', own.
 const catalog = fs.readFileSync(CATALOG, 'utf8');
 const read = KEYS.filter((k) => catalog.includes('"' + k + '"'));
 check('SiteCatalog.java reads every key a website may have', read, KEYS);
+ok('SiteCatalog.java keeps the Twilight screens (their address, twilight:, isn\'t a web address)', /Urls\.OWN\.equals\(address\)/.test(catalog));

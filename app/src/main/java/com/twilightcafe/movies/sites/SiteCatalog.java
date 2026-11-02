@@ -43,7 +43,10 @@ public final class SiteCatalog {
         return Collections.singletonList(KURDFILM);
     }
 
-    /** The websites in json; one without an id or a web address is left out, and so is an id seen before. */
+    /**
+     * The websites in json; one without an id or a web address (or the Twilight screens' twilight:) is left out,
+     * and so is an id seen before.
+     */
     static List<Site> parse(String json) throws JSONException {
         JSONArray list = new JSONObject(json).getJSONArray("sites");
         List<Site> out = new ArrayList<Site>();
@@ -52,7 +55,8 @@ public final class SiteCatalog {
             JSONObject o = list.getJSONObject(i);
             String id = o.optString("id", "");
             String address = o.optString("address", "");
-            if (id.isEmpty() || Urls.normalize(address) == null || !ids.add(id)) continue;
+            boolean known = Urls.OWN.equals(address) || Urls.normalize(address) != null;
+            if (id.isEmpty() || !known || !ids.add(id)) continue;
             JSONArray d = o.optJSONArray("domains");
             String[] domains = new String[d != null ? d.length() : 0];
             for (int j = 0; j < domains.length; j++) domains[j] = d.getString(j);
