@@ -1,0 +1,56 @@
+name: Survey the websites
+
+# What each website in the app (app/src/main/assets/sites.json) has for the app's own screens, and where its pages
+# get it from (tests/try/survey.js), on GitHub's machines, which reach most of them: its first page, a search, a
+# film and its player, a series and one of its episodes, with the data its pages fetched. Each website on a machine
+# of its own; what it saw goes to the pre-release "try", under survey-<its id>-. Runs on a push to a branch named
+# survey/..., or by hand from the Actions tab.
+on:
+  push:
+    branches: ['survey/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: survey
+  cancel-in-progress: true
+
+jobs:
+  list:
+    runs-on: ubuntu-24.04
+    outputs:
+      sites: ${{ steps.read.outputs.sites }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: The websites in the app
+        id: read
+        run: |
+          echo "sites=$(jq -c '[.sites[] | {id, address}]' app/src/main/assets/sites.json)" >> "$GITHUB_OUTPUT"
+
+  site:
+    name: ${{ matrix.site.id }}
+    needs: list
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        site: ${{ fromJSON(needs.list.outputs.sites) }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright@1.49.1
+          npx playwright install --with-deps chromium
+      - name: What the website has, and where its pages get it
+        timeout-minutes: 10
+        run: node tests/try/survey.js out/survey "${{ matrix.site.address }}"
+      - name: Publish what it saw
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash tests/try/publish.sh out/survey "survey-${{ matrix.site.id }}-"
