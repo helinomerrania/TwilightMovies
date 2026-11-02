@@ -29,7 +29,7 @@ cat "$OUT/$NAME-device.txt"
 
 adb shell am start -W -n com.twilightcafe.movies/.MainActivity
 sleep 15
-adb shell uiautomator dump /sdcard/ui.xml > /dev/null 2>&1   # so Firefox's engine shows its page to the UI tree too
+tree   # so Firefox's engine shows its page to the UI tree too
 sleep 25
 shot start
 key KEYCODE_DPAD_CENTER   # the remote guide shows once, at the first start: its Close button has the remote

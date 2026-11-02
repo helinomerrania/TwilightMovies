@@ -1,15 +1,23 @@
 #!/usr/bin/env bash
 # What the tries on the emulator do with it (emulator.sh and twilight.sh source this): a screenshot with the
-# screen's UI tree (shot), the remote's keys (key), a tap on what the screen says (tap), and a button of the app's
-# menu (choose). They write to $OUT, each file named $NAME-<step number>-<step>.
+# screen's UI tree (shot; tree: the tree alone), the remote's keys (key), a tap on what the screen says (tap), and a
+# button of the app's menu (choose). They write to $OUT, each file named $NAME-<step number>-<step>.
 n=${n:-0}
+
+# The screen's UI tree (in /sdcard/ui.xml), waited for 30 seconds at most: on a page that never stops moving (a
+# spinner, a film playing) it would wait for ever
+tree() {
+  timeout 30 adb shell uiautomator dump /sdcard/ui.xml > /dev/null 2>&1 && return 0
+  adb shell pkill -f uiautomator > /dev/null 2>&1
+  return 1
+}
 
 shot() {
   n=$((n + 1))
   local f
   f=$(printf '%s/%s-%02d-%s' "$OUT" "$NAME" "$n" "$1")
   adb exec-out screencap -p > "$f.png"
-  adb shell uiautomator dump /sdcard/ui.xml > /dev/null 2>&1 && adb shell cat /sdcard/ui.xml > "$f.xml"
+  tree && adb shell cat /sdcard/ui.xml > "$f.xml"
   echo "screenshot $f.png"
 }
 
@@ -52,7 +60,7 @@ PY
 choose() {
   local i
   for i in $(seq 1 14); do
-    adb shell uiautomator dump /sdcard/ui.xml > /dev/null 2>&1
+    tree
     if adb shell cat /sdcard/ui.xml | python3 -c '
 import re, sys
 xml = sys.stdin.read()
