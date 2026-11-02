@@ -151,7 +151,7 @@ There are two sets, and GitHub runs both on every push before anything is built.
 | `extension` | The app's extension in Firefox's engine: every address asked about (not the page itself, not the engine's own), the answers, the app's scripts in the page and their values, the bridge, the remote between frames, the keyboard; the manifest; the same name for the app on both sides |
 | `arrows`, `arrows-reach`, `arrows-frames` | The remote's arrows in Firefox's engine, on KurdFilm's TV page as the engine lays it out and on stand-in pages: where each arrow goes, the search and its keyboard, the website's own keys first, OK, what can't be gone to, windows over the page, full screen, fields, frames |
 | `sites` | sites.json: every website with an id, a name, an https address and its own domains; the Twilight screens once, with every website their readers read |
-| `reader-krd-watch`, `reader-beenar`, `reader-kurd-movie` | The Twilight screens' readers, with their websites' saved answers: the home's lists, search, a film and a series in full, a season's episodes, where each plays |
+| `reader-krd-watch`, `reader-beenar`, `reader-kurd-movie`, `reader-kurdcinama`, `reader-kurdsaz`, `reader-kartonikurde` | The Twilight screens' readers, with their websites' saved answers: the home's lists, search, a film and a series in full, a season's episodes, where each plays |
 | `screens-catalog` | The Twilight screens' catalogue: the same title on several websites as one, what it shows in each language, which website plays first, what the box keeps, the home's rows |
 | `strings` | The texts: every one the app asks for exists, none is unused, and the Kurdish ones keep each `%1$s` |
 
