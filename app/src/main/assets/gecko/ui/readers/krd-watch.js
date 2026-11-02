@@ -5,6 +5,7 @@
 'use strict';
 TM.readers['krd-watch'] = (function () {
   const SITE = 'https://krd.watch';
+  const SLOW = { timeout: 25000 };   // its feed is slow at times: longer than the others' 15 seconds
   const pic = (p) => (!p ? '' : p.charAt(0) === '/' ? SITE + p : p);
   const split = (g) => String(g || '').split(',').map((s) => s.trim()).filter(Boolean);
   const playable = (x) => x && x.playable !== false;
@@ -39,7 +40,7 @@ TM.readers['krd-watch'] = (function () {
     id: 'krd-watch', name: 'KRD WATCH', home: SITE + '/', hosts: ['krd.watch'],
 
     async rows(web) {
-      const [films, feed] = await Promise.all([web.json(SITE + '/api/discover?kind=movie&page=1'), web.json(SITE + '/api/feed')]);
+      const [films, feed] = await Promise.all([web.json(SITE + '/api/discover?kind=movie&page=1', SLOW), web.json(SITE + '/api/feed', SLOW)]);
       return [
         { key: 'newFilms', items: (films.items || []).filter(playable).map(item) },
         { key: 'newSeries', items: added(feed) },
@@ -47,14 +48,14 @@ TM.readers['krd-watch'] = (function () {
     },
 
     async search(web, q) {
-      const r = await web.json(SITE + '/api/search?q=' + encodeURIComponent(q));
+      const r = await web.json(SITE + '/api/search?q=' + encodeURIComponent(q), SLOW);
       return (r.results || []).filter(playable).map(item);
     },
 
     // A title in full: its name, summary and genres in Kurdish (the English name: originalTitle), a series' seasons
     async title(web, ref) {
       const [kind, id] = ref.split(':');
-      const x = await web.json(SITE + '/api/title/' + kind + '/' + id);
+      const x = await web.json(SITE + '/api/title/' + kind + '/' + id, SLOW);
       const english = x.originalTitle || x.title;
       return Object.assign(item({ kind: x.kind || kind, tmdbId: x.tmdbId || Number(id), title: english, year: x.year,
         titleKu: x.title !== english ? x.title : '', rating: x.rating, runtime: x.runtime, poster: x.poster,
@@ -65,7 +66,7 @@ TM.readers['krd-watch'] = (function () {
     },
 
     async episodes(web, ref, season) {
-      const list = await web.json(SITE + '/api/season/' + ref.split(':')[1] + '/' + season);
+      const list = await web.json(SITE + '/api/season/' + ref.split(':')[1] + '/' + season, SLOW);
       return (Array.isArray(list) ? list : []).map((e) => TM.item({ n: e.episode, title: e.name, minutes: e.runtime,
         overview: e.overview, overviewKu: e.overviewKu }));
     },
