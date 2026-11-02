@@ -8,7 +8,7 @@ TM.readers['kurd-movie'] = (function () {
   const SITE = 'https://www.kurd-movie.com';
   const GENRES = /^(Action|Adventure|Animation|Comedy|Crime|Documentary|Drama|Family|Fantasy|History|Horror|Music|Mystery|Romance|Science Fiction|Thriller|War|Western|Sci-Fi & Fantasy|Action & Adventure)$/;
   const quotes = (h) => String(h || '').replace(/=\s*'([^'<>]*)'/g, '="$1"');   // every attribute in double quotes
-  const one = (re, s) => { const m = re.exec(s); return m ? m[1] : ''; };
+  const one = (re, s) => { const m = re.exec(s); return m ? (m[1] || '').trim() : ''; };
   const all = (re, s) => { const out = []; let m; while ((m = re.exec(s))) out.push(m[1]); return out; };
   const has = (cls) => '[^>]*\\bclass="[^"]*\\b' + cls + '\\b[^"]*"[^>]*';   // a tag with that class, attributes in any order
   const box = (tag, cls) => new RegExp('<' + tag + has(cls) + '>([\\s\\S]*?)</' + tag + '>');
@@ -18,6 +18,7 @@ TM.readers['kurd-movie'] = (function () {
   const kindOf = (url) => (/\/tvshows\//.test(url) ? 'series' : 'film');
   const genres = (s) => all(/rel="tag"[^>]*>([^<]+)</g, s).map(TM.decode).filter((g) => GENRES.test(g));
   const pages = {};   // a title's page, read once a while: its episodes are on it
+  const picture = (url, size) => (/\/wp-includes\/images\/media\//.test(url) ? '' : TM.size(url, size));   // its stand-in: none
 
   // One title of a list (an <article> of the theme)
   function article(a) {
@@ -29,11 +30,13 @@ TM.readers['kurd-movie'] = (function () {
       year: Number(one(new RegExp('<div' + has('metadata') + '>\\s*<span>(\\d{4})</span>'), a)) || 0,
       minutes: Number(one(/<span>(\d+) min<\/span>/, a)) || 0, overview: TM.text(one(box('div', 'texto'), a)),
       genres: genres(one(new RegExp('<div' + has('genres') + '>([\\s\\S]*?)</div>\\s*</div>'), a)),
-      poster: TM.size(one(/<img[^>]*\b(?:data-src|src)="([^"]+)"/, a), 'w342'),
+      poster: picture(one(/<img[^>]*\b(?:data-src|src)="([^"]+)"/, a), 'w342'),
       quality: TM.text(one(new RegExp('<span' + has('dt-resolution-badge') + '>([^<]*)<'), a)), langs: [dubbed(name) ? 'dub' : 'sub'],
     });
   }
-  const list = (html) => (quotes(html).match(/<article[^>]*\bid="post-\d+"[^>]*>[\s\S]*?<\/article>/g) || []).map(article).filter(Boolean);
+  // A list's own titles (class "item movies" or "item tvshows"; not the pictures that slide by above it)
+  const listed = new RegExp('<article' + has('(?:movies|tvshows)') + '>[\\s\\S]*?</article>', 'g');
+  const list = (html) => (quotes(html).match(listed) || []).map(article).filter(Boolean);
 
   // A series' seasons, each with its episodes and their pages
   function seasons(html) {
@@ -67,9 +70,9 @@ TM.readers['kurd-movie'] = (function () {
       minutes: Number(one(new RegExp('<span' + has('runtime') + '>\\s*(\\d+)'), head)) || 0,
       age: TM.text(one(/<span[^>]*\bitemprop="contentRating"[^>]*>([^<]*)</, head)),
       genres: genres(one(box('div', 'sgeneros'), head)),
-      overview: TM.text(one(/<div[^>]*\bitemprop="description"[^>]*>\s*<p>([\s\S]*?)<\/p>/, html).replace(/<iframe[\s\S]*$/, '')),
+      overview: TM.text(one(/\bid="info"[\s\S]*?\bwp-content\b[^>]*>\s*<p[^>]*>([\s\S]*?)<\/p>/, html).replace(/<iframe[\s\S]*$/, '')),
       rating: Number(one(/\bid="repimdb"[^>]*>\s*<strong>([\d.]+)<\/strong>/, html)) || 0,
-      poster: TM.size(one(/\b(?:data-src|src)="([^"]+)"/, poster), 'w342'), backdrop: backdrop ? TM.size(backdrop, 'w1280') : '',
+      poster: picture(one(/\b(?:data-src|src)="([^"]+)"/, poster), 'w342'), backdrop: picture(backdrop, 'w1280'),
       langs: [dubbed(name) ? 'dub' : 'sub'], seasons: found.map((s) => ({ n: s.n, count: s.episodes.length })), episodesBySeason: found,
     });
   }
@@ -103,7 +106,7 @@ TM.readers['kurd-movie'] = (function () {
       return Object.keys(r && typeof r === 'object' ? r : {}).map((id) => r[id]).filter((x) => x && x.url).map((x) => TM.item({
         site: 'kurd-movie', ref: refOf(x.url), kind: kindOf(x.url), title: plain(x.title),
         year: Number(String((x.extra && x.extra.date) || '').slice(-4)) || 0, rating: Number(x.extra && x.extra.imdb) || 0,
-        poster: TM.size(x.img, 'w342'), langs: [dubbed(x.title) ? 'dub' : 'sub'],
+        poster: picture(x.img, 'w342'), langs: [dubbed(x.title) ? 'dub' : 'sub'],
       }));
     },
 
