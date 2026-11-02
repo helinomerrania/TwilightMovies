@@ -88,9 +88,11 @@ TM.readers.kartonikurde = (function () {
       const html = await find(web, q);
       const seen = {};
       return Array.from(html.matchAll(new RegExp(LINK.source + '[\\s\\S]*?<img[^>]*\\bsrc="([^"]+)"[^>]*\\balt="([^"]*)"', 'g')))
-        .filter((m) => !seen[m[1]] && (seen[m[1]] = true)).map((m) => TM.item({
-          site: 'kartonikurde', ref: m[1], kind: kindOf(m[1]), title: english(m[1]), titleKu: TM.decode(m[4]), poster: m[3], langs: ['dub'],
-        }));
+        .filter((m) => !seen[m[1]] && (seen[m[1]] = true)).map((m) => {
+          const name = TM.decode(m[4]);   // "فرۆزن (Frozen)": its Kurdish name, then its English one
+          return TM.item({ site: 'kartonikurde', ref: m[1], kind: kindOf(m[1]), title: one(/\(([^)]+)\)\s*$/, name) || english(m[1]),
+            titleKu: name.replace(/\s*\([^)]*\)\s*$/, ''), poster: m[3], langs: ['dub'] });
+        });
     },
 
     async title(web, ref) {

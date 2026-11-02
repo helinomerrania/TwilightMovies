@@ -37,4 +37,14 @@ module.exports = (async () => {
   check('...each with its own number', await r.episodes(w, 'serie/grendizer', 1), [{ n: 1, id: '503' }, { n: 2, id: '504' }, { n: 3, id: '505' }]);
   check('...its page read once for both', w.asked.filter((a) => /serie\//.test(a)).length, 1);
   check('where a title plays: its own page', r.watch('serie/grendizer', { n: 2 }), SITE + '/serie/grendizer');
+
+  // Search: the search box's state from a page (its snapshot, the page's token), then the words, to Livewire. The
+  // answer here is a stand-in, in the shape the website answers (what it found, as the box shows it)
+  w = saved('kartonikurde', [[/\/series$/, 'series.html'], [/\/livewire\/update$/, 'search-frozen.json']]);
+  const found = await r.search(w, 'frozen');
+  const sent = JSON.parse(w.asked[1].replace(/^POST \S+ /, ''));
+  check('search: a page first, then the search box\'s own state with the words', [w.asked.length, sent.components[0].updates,
+    /&quot;|search-form/.test(sent.components[0].snapshot), sent._token.length > 10], [2, { searchText: 'frozen' }, true, true]);
+  check('...what it found: its Kurdish name, and its English one from the brackets', pick(found[0], ['ref', 'kind', 'title', 'titleKu', 'langs']),
+    { ref: 'movie/frozen', kind: 'film', title: 'Frozen', titleKu: 'فرۆزن', langs: ['dub'] });
 })();
