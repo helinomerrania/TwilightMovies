@@ -61,7 +61,8 @@ const manifest = JSON.parse(read('manifest.json'));
 check('the manifest: version 2, so requests can be held while the app answers', manifest.manifest_version, 2);
 ok('...it may hold and change every request, and talk to the app',
   ['<all_urls>', 'webRequest', 'webRequestBlocking', 'nativeMessaging', 'geckoViewAddons'].every((p) => manifest.permissions.includes(p)));
-check('...its background script', manifest.background.scripts, ['background.js']);
+check('...its background scripts: the app\'s side, then (in the app\'s own try only) the data feeds written down',
+  manifest.background.scripts, ['background.js', 'study.js']);
 const cs = manifest.content_scripts[0];
 check('...its page script: in the page itself, from the very start', [cs.js, cs.run_at, cs.all_frames], [['page.js'], 'document_start', false]);
 ok('...and an id of its own', /^[\w.-]+@[\w.-]+$/.test(manifest.browser_specific_settings.gecko.id));

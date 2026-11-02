@@ -45,6 +45,7 @@ function connect() {
   port.onMessage.addListener(function (m) {
     if (typeof m.bridge === 'string') bridge = m.bridge;
     if (typeof m.run === 'number') run(m.run, m.code);
+    if (m.study === true) studyOn();   // the app's own try: what the websites ask their data feeds (study.js)
   });
   port.onDisconnect.addListener(function () {
     port = null;

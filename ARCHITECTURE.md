@@ -52,6 +52,7 @@ art/                                        draws the banner, the icon and the s
 .github/workflows/try.yml                   tries the app on Android TV emulators
 .github/workflows/sites.yml                 tries every website of sites.json in Chromium, each on a machine of its own
 .github/workflows/readers.yml               tries the Twilight screens' readers on the live websites, every day
+.github/workflows/study.yml                 studies websites in the app's own engine, for new readers (what their pages ask)
 ```
 
 ## The app's parts
@@ -123,7 +124,7 @@ The website `twilight` in `sites.json` (its address is `twilight:`) is the Twili
 - **The catalogue** (`catalog.js`) asks them as the screens need: the home's lists kept a while, a search on all of them at once, a title from each of its websites. `merge.js` makes the same title on several websites one (by TMDB's number, else its name and year), and says which website plays first (the viewer's choice: Kurdish subtitles, dubbing, or the best picture; then the websites' order). `saved.js` keeps the settings, what was watched, My list and the titles opened, in the page's own storage.
 - **The screens**: home and its parts (`view-home.js`), a title (`view-title.js`), search with its own letters (`view-search.js`), settings (`view-settings.js`); `parts.js` has the pieces they share, `words.js` every word (in Kurdish and English), `ui.css` the look (Vazirmatn, three colourings). `app.js` goes between them by the address after `#`, each a step in the page's history, so BACK goes back through them. A film plays on the website's own page; BACK from there comes back to its title.
 
-A website for the screens: its reader (the five, as the others), its hosts in the `twilight` website's `domains`, saved copies of what it answers (`tests/js/fixtures/readers/<id>/`) and a test with them (`tests/js/reader-<id>.test.js`). `tests/try/readers.js` asks the live websites as the screens would (**Try the readers**, on GitHub: every day, and on a push to `try/...` or `probe/...`), and keeps their pages for new saved copies.
+A website for the screens: its reader (the five, as the others), its hosts in the `twilight` website's `domains`, saved copies of what it answers (`tests/js/fixtures/readers/<id>/`) and a test with them (`tests/js/reader-<id>.test.js`). A website that stops GitHub's plain browser (Cloudflare's check) is studied in the app's own engine instead: **Study the websites** (`.github/workflows/study.yml`, on a push to `study/...`) opens each in the app on an emulator, and the app's try build writes down what its pages ask their data feeds (`assets/gecko/study.js`, `tests/try/study.sh`). `tests/try/readers.js` asks the live websites as the screens would (**Try the readers**, on GitHub: every day, and on a push to `try/...` or `probe/...`), and keeps their pages for new saved copies.
 
 ## The page scripts
 
@@ -148,6 +149,7 @@ There are two sets, and GitHub runs both on every push before anything is built.
 |---|---|
 | `scripts` | Each page script is one function, in plain old JavaScript, and PageScripts names every one |
 | `media`, `scroll`, `hide-ads`, `ad-layers` | Each script on stand-in pages: the video keys, scrolling, hiding ad boxes, click traps |
+| `study` | The app's try build writing down what the websites' pages ask their data feeds, the answers passed on as they came |
 | `extension` | The app's extension in Firefox's engine: every address asked about (not the page itself, not the engine's own), the answers, the app's scripts in the page and their values, the bridge, the remote between frames, the keyboard; the manifest; the same name for the app on both sides |
 | `arrows`, `arrows-reach`, `arrows-frames` | The remote's arrows in Firefox's engine, on KurdFilm's TV page as the engine lays it out and on stand-in pages: where each arrow goes, the search and its keyboard, the website's own keys first, OK, what can't be gone to, windows over the page, full screen, fields, frames |
 | `sites` | sites.json: every website with an id, a name, an https address and its own domains; the Twilight screens once, with every website their readers read |

@@ -82,6 +82,7 @@ public final class GeckoPage implements Page {
         });
         view.setSession(session);
         extension.attach(this, filter);
+        extension.study(pageLog);
     }
 
     @Override

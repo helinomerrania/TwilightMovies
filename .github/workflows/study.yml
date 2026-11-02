@@ -1,0 +1,80 @@
+name: Study the websites in the app's engine
+
+# On GitHub's machines: the app itself on an emulator with a TV's screen and Firefox's engine (Android 9, like the
+# café's box), opening each website the Twilight screens can't read from GitHub's own machines yet (Cloudflare's
+# check stops a plain browser there; the app's engine passes it), with what each website's pages ask their data
+# feeds written down (assets/gecko/study.js, in this try build only): tests/try/study.sh. What it saw goes to the
+# pre-release "try", under study-. Runs on a push to a branch named study/..., or by hand from the Actions tab.
+on:
+  push:
+    branches: ['study/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: study
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: The pre-release for what it sees
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release view try > /dev/null 2>&1 || gh release create try --prerelease --latest=false \
+            --title "Tried on GitHub" \
+            --notes "Screenshots and logs of the app and its websites, from .github/workflows/try.yml. Nothing to install."
+
+  emulator:
+    name: The app on Android ${{ matrix.api }} (${{ matrix.name }})
+    needs: prepare
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: study   # Android 9: a web engine from 2018, like the café's box (the app uses Firefox's)
+            api: 28
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Build the app
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p app/src/main/assets
+          gh release download filters -p filters.bin -D app/src/main/assets --clobber
+          chmod +x gradlew
+          # Firefox's engine for the emulators' processor (the boxes get the one for ARM), with the pages' own
+          # messages in Android's log (never on the boxes)
+          ./gradlew --no-daemon assembleRelease -Pgeckoabi=x86_64 -Ppagelog
+          cp app/build/outputs/apk/release/app-release.apk twilight-movies.apk
+          ls -l twilight-movies.apk
+      - name: Let the emulator use the processor's virtualization
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: The app, step by step
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api }}
+          target: google_apis   # 64-bit, as Firefox's engine is (Android TV's own emulators are 32-bit)
+          arch: x86_64
+          profile: tv_1080p
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-boot-anim
+          script: bash tests/try/study.sh twilight-movies.apk out ${{ matrix.name }}
+      - name: Publish what it saw
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash tests/try/publish.sh out
