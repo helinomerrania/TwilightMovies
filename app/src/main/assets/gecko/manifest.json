@@ -17,12 +17,12 @@
     "geckoViewAddons"
   ],
   "background": {
-    "scripts": ["background.js", "study.js"]
+    "scripts": ["background.js", "study.js", "alone.js"]
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["page.js"],
+      "js": ["page.js", "player.js"],
       "run_at": "document_start",
       "all_frames": false
     },

@@ -31,6 +31,7 @@ function ask(m, ms) {
 // what the Twilight screens ask the websites for (ui/: their lists, their pictures)
 var OWN = browser.runtime.getURL('');
 browser.webRequest.onBeforeRequest.addListener(function (d) {
+  if (d.type === 'main_frame') aloneFor(d);   // the Twilight screens' Watch: its player alone (alone.js)
   if (d.type === 'main_frame' || d.tabId < 0 || String(d.originUrl || d.documentUrl || '').indexOf(OWN) === 0) return {};
   var up = d.frameAncestors, page = d.frameId === 0 ? d.documentUrl : (up && up.length ? up[up.length - 1].url : '');
   return ask({check: d.url, type: d.type, frame: d.documentUrl || '', page: page || ''}).then(function (r) {

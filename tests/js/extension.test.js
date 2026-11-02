@@ -11,6 +11,7 @@ const { SyncPromise, now, valueOf } = require('./lib/promise');
 
 const DIR = path.join(ROOT, 'app', 'src', 'main', 'assets', 'gecko');
 const read = (f) => fs.readFileSync(path.join(DIR, f), 'utf8');
+const manifest = JSON.parse(read('manifest.json'));
 const NEVER = {};   // an app that never answers
 
 function background(app, frames) {
@@ -18,7 +19,9 @@ function background(app, frames) {
   const posted = [];
   const ran = [];
   const sent = [];
-  const b = { onRequest: null, filter: null, extra: null, fromPort: null, fromPage: null, nativeApp: null };
+  const pageListeners = [];
+  const b = { onRequest: null, filter: null, extra: null, fromPort: null, nativeApp: null,
+    fromPage: (m, sender) => pageListeners.reduce((r, f) => (r !== undefined ? r : f(m, sender)), undefined) };
   const port = {
     onMessage: { addListener: (f) => { b.fromPort = f; } },
     onDisconnect: { addListener: () => {} },
@@ -34,7 +37,8 @@ function background(app, frames) {
       },
       connectNative: (name) => { b.nativeApp = name; return port; },
       getURL: (path) => 'moz-extension://the-app/' + (path || ''),
-      onMessage: { addListener: (f) => { b.fromPage = f; } },
+      // every script's listener, as the background page has them; the first that answers is the answer
+      onMessage: { addListener: (f) => { pageListeners.push(f); } },
     },
     webRequest: { onBeforeRequest: { addListener: (f, filter, extra) => { b.onRequest = f; b.filter = filter; b.extra = extra; } } },
     // frames: {frameId: [the frame around it, what its arrows.js answers (or a function of the message)]}
@@ -52,19 +56,20 @@ function background(app, frames) {
   b.script = () => now(['ok']);
   const timers = [];
   b.timers = timers;
-  vm.runInContext(read('background.js'), vm.createContext({ browser, JSON, Promise: SyncPromise,
-    setTimeout: (f) => { timers.push(f); return timers.length; }, clearTimeout: (n) => { timers[n - 1] = null; } }));
+  const ctx = vm.createContext({ browser, JSON, Promise: SyncPromise, URL, console,
+    setTimeout: (f) => { timers.push(f); return timers.length; }, clearTimeout: (n) => { timers[n - 1] = null; } });
+  for (const f of manifest.background.scripts) vm.runInContext(read(f), ctx);   // one background page, in order
   return Object.assign(b, { asked, posted, ran, sent });
 }
 
-const manifest = JSON.parse(read('manifest.json'));
 check('the manifest: version 2, so requests can be held while the app answers', manifest.manifest_version, 2);
 ok('...it may hold and change every request, and talk to the app',
   ['<all_urls>', 'webRequest', 'webRequestBlocking', 'nativeMessaging', 'geckoViewAddons'].every((p) => manifest.permissions.includes(p)));
-check('...its background scripts: the app\'s side, then (in the app\'s own try only) the data feeds written down',
-  manifest.background.scripts, ['background.js', 'study.js']);
+check('...its background scripts: the app\'s side, (in the app\'s own try only) the data feeds written down, the Twilight screens\' player alone',
+  manifest.background.scripts, ['background.js', 'study.js', 'alone.js']);
 const cs = manifest.content_scripts[0];
-check('...its page script: in the page itself, from the very start', [cs.js, cs.run_at, cs.all_frames], [['page.js'], 'document_start', false]);
+check('...its page scripts: in the page itself (its top frame), from the very start; the player alone', [cs.js, cs.run_at, cs.all_frames],
+  [['page.js', 'player.js'], 'document_start', false]);
 ok('...and an id of its own', /^[\w.-]+@[\w.-]+$/.test(manifest.browser_specific_settings.gecko.id));
 const keys = manifest.content_scripts[1] || {};
 check('...the remote\'s arrows: in every frame of the page, from the very start, with their ring',

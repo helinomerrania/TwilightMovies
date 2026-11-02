@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # The Twilight screens on the emulator (by try.yml, after emulator.sh; the app started again): chosen in the menu's
-# Websites panel; their home as the websites' lists come in; the arrows across it; a film's page and BACK to the
-# home (the remote on the same card again); a series' seasons and episodes; search with the screens' own letters;
-# settings. A screenshot (and the screen's UI tree) at every step, and what the page said, in the log.
+# Websites panel; their home as the websites' lists come in; the arrows across it; a film's page, Watch (the
+# website's player alone) and BACK to it, BACK to the home (the remote on the same card again); a series' episodes,
+# one played; search with the screens' own letters; settings. A screenshot (and the screen's UI tree) at every step, and what the page said, in the log.
 # Usage: tests/try/twilight.sh OUT_DIR NAME
 set -uo pipefail
 OUT=$1
@@ -46,6 +46,12 @@ shot row-on
 key KEYCODE_DPAD_CENTER
 sleep 10
 shot film
+key KEYCODE_DPAD_CENTER   # Watch: the website's player, alone on the screen
+sleep 25
+shot playing
+key KEYCODE_BACK
+sleep 8
+shot back-to-title
 key KEYCODE_DPAD_DOWN
 shot film-down
 key KEYCODE_BACK
@@ -61,6 +67,11 @@ shot series
 key KEYCODE_DPAD_DOWN KEYCODE_DPAD_DOWN KEYCODE_DPAD_DOWN
 sleep 4
 shot episodes
+key KEYCODE_DPAD_CENTER   # an episode, its player alone
+sleep 25
+shot episode-playing
+key KEYCODE_BACK
+sleep 8
 key KEYCODE_BACK
 sleep 6
 shot back-again
