@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        site: [kurdsubtitle]
+        site: [beenar, krd-watch]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7

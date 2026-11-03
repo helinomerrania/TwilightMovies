@@ -8,6 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright');
+const players = require('./probe-players');
 
 const [OUT, ID] = process.argv.slice(2);
 const UA = 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36';
@@ -15,6 +16,7 @@ const UA = 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like G
 // ({nonce}: the one in the start page, which WordPress's search wants)
 const SITES = {
   'krd-watch': {
+    players: 20000,
     start: 'https://krd.watch/',
     pages: ['https://krd.watch/movie/634649', 'https://krd.watch/tv/259909', 'https://krd.watch/movies',
       'https://krd.watch/shows', 'https://krd.watch/watch/634649', 'https://krd.watch/watch/tv/259909?s=1&e=1'],
@@ -23,6 +25,7 @@ const SITES = {
       '/api/random?kind=movie', '/api/collections?q=spider', '/api/search?q=%D8%B3%D9%BE%D8%A7%DB%8C%D8%AF%DB%95%D8%B1'],
   },
   beenar: {
+    players: 20000,
     start: 'https://beenar.net/',
     pages: ['https://beenar.net/title-detail/3057?series=false', 'https://beenar.net/title-detail/697?series=true',
       'https://beenar.net/title/1?page=1&type&lang', 'https://beenar.net/title/2?page=1&type&lang',
@@ -170,6 +173,10 @@ async function open(page, name, address) {
   fs.writeFileSync(path.join(OUT, name + '.html'), html.slice(0, 600000));
   snip(html);
   note('PAGE', name, page.url(), JSON.stringify(await page.title().catch(() => '')), html.length + ' characters');
+  if (SITE.players) {
+    await page.waitForTimeout(SITE.players);   // the players have this long to start
+    note('PLAYERS', await players(page, name));
+  }
   return html;
 }
 
