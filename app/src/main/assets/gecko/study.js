@@ -1,6 +1,6 @@
 // In the app's own study build only (-Pstudy, never on the boxes: the app says so, study, when it
-// connects): what each website's page asks its data feeds, with what it sends and each answer (its first 12000
-// letters), and each page itself (its first 60000: a website that sends its films in its pages), for the Twilight
+// connects): what each website's page asks its data feeds, with what it sends and each answer (its first 60000
+// letters), and each page itself (its first 400000: a website that sends its films in its pages), for the Twilight
 // screens' readers (tests/try/study.sh). Each goes to the app, which keeps it in a file (web/gecko/StudyFile), with a
 // short line in the log; the answers go on to the page as they came. A second script of the background page
 // (manifest.json), after background.js: OWN is its own pages' address, port the app's.
@@ -32,7 +32,7 @@ function studied(d) {
   var f = browser.webRequest.filterResponseData(d.requestId);
   var text = new TextDecoder('utf-8');
   var answer = '';
-  var most = d.type === 'main_frame' ? 60000 : 12000;
+  var most = d.type === 'main_frame' ? 400000 : 60000;
   var kept = false;
   function keep() {
     if (kept) return;

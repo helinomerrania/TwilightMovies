@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Studies the websites the Twilight screens can't read from GitHub's own machines yet, in the app's own engine on an
-# emulator with a TV's screen (by .github/workflows/study.yml): each one opened from the Websites panel, its first
-# page given time for Cloudflare's check, then down and OK twice (a film, its page), with a screenshot at each step
-# (not the UI tree: reading it on a website's page froze the emulator). What every website's pages asked their data
-# feeds, with the answers (assets/gecko/study.js, in this try build only, kept by the app), goes to NAME-data.txt,
-# after each website (if the emulator freezes on one, what came before stays). Kurd Subtitle last: its page froze
-# the emulator before. Awena Film, Beenama, ShaFilm and Kurd Doblazh aren't studied: they show GitHub's machines a
-# check instead (their pages come from the café's box).
+# Studies the websites the Twilight screens can't read from GitHub's own machines yet (Mars Cinema, Kurd
+# Subtitle), in the app's own engine on an emulator with a TV's screen (by .github/workflows/study.yml): each one
+# opened from the Websites panel, its first page given time for Cloudflare's check, then down and OK twice; then
+# their pages for a film, a series, and where one plays, by address. A screenshot at each step (not the UI tree:
+# reading it on a website's page froze the emulator). What their pages asked their data feeds, with the answers
+# (assets/gecko/study.js, in this try build only, kept by the app), goes to NAME-data.txt after each page (if the
+# emulator freezes on one, what came before stays). Kurdbin, Awena Film, Beenama, ShaFilm and Kurd Doblazh aren't
+# studied: they show GitHub's machines a check instead (their pages come from the café's box).
 # Usage: tests/try/study.sh APK OUT_DIR NAME
 set -uo pipefail
 APK=$1
@@ -27,6 +27,13 @@ adb shell am start -W -n com.twilightcafe.movies/.MainActivity
 sleep 15
 key KEYCODE_DPAD_CENTER   # the remote guide's Close (it shows at the first start)
 
+# What the pages asked so far, with the answers, as the app keeps it (web/gecko/StudyFile: its own folder); not
+# in place of what came before if the emulator gives nothing (frozen)
+save() {
+  timeout 30 adb shell cat /sdcard/Android/data/com.twilightcafe.movies/files/study.jsonl > "$OUT/data.new"
+  if [ -s "$OUT/data.new" ]; then mv "$OUT/data.new" "$OUT/$NAME-data.txt"; else rm -f "$OUT/data.new"; fi
+}
+
 # A website, as the app shows it: its first page, then down and OK twice
 look() {
   sleep 45
@@ -37,20 +44,43 @@ look() {
   key KEYCODE_DPAD_DOWN KEYCODE_DPAD_DOWN KEYCODE_DPAD_CENTER
   sleep 15
   picture "$1-then"
-  # What the pages asked so far, with the answers, as the app keeps it (web/gecko/StudyFile: its own folder); not
-  # in place of what came before if the emulator gives nothing (frozen)
-  timeout 30 adb shell cat /sdcard/Android/data/com.twilightcafe.movies/files/study.jsonl > "$OUT/data.new"
-  if [ -s "$OUT/data.new" ]; then mv "$OUT/data.new" "$OUT/$NAME-data.txt"; else rm -f "$OUT/data.new"; fi
+  save
+}
+
+# A website's page by its address (the menu's Website address, as emulator.sh opens one), its picture once it's there
+visit() {
+  key KEYCODE_MENU
+  sleep 3
+  choose '^ناونیشانی ماڵپەڕ$|^Website address$' || { key KEYCODE_BACK; return 1; }
+  sleep 3
+  adb shell input keyevent KEYCODE_MOVE_END
+  # shellcheck disable=SC2046  # one key each
+  adb shell input keyevent $(for i in $(seq 1 120); do printf 'KEYCODE_DEL '; done)
+  adb shell input text "$2"
+  sleep 1
+  # the on-screen keyboard covers the panel: it goes, and Open (under the address) is chosen
+  if adb shell dumpsys input_method | grep -q "mInputShown=true"; then key KEYCODE_BACK; fi
+  sleep 2
+  key KEYCODE_DPAD_DOWN KEYCODE_DPAD_CENTER
+  sleep 40
+  picture "$1"
+  save
 }
 
 look kurdfilm   # the website a new box opens
-for site in 'kurdbin:^Kurdbin' 'marscinema:^Mars Cinema' 'kurdsubtitle:^Kurd Subtitle'; do
+for site in 'marscinema:^Mars Cinema' 'kurdsubtitle:^Kurd Subtitle'; do
   key KEYCODE_MENU
   sleep 3
   choose '^ماڵپەڕەکان|^Websites' || { key KEYCODE_BACK; continue; }
   sleep 2
   if choose "${site#*:}"; then look "${site%%:*}"; else key KEYCODE_BACK; fi
 done
+# Their pages for a film, a series, and where a series plays (the addresses their home pages link to)
+visit mars-film https://marscinema.net/movie/dark-city
+visit mars-series https://marscinema.net/series/barry
+visit mars-watch https://marscinema.net/watch/barry
+visit subtitle-film https://kurdsubtitle.net/movies/779410-The-Paradise
+visit subtitle-series https://kurdsubtitle.net/tvshows/467300-Lupin
 
 kill "$logger" 2> /dev/null
 sleep 1

@@ -41,10 +41,10 @@ check('...and to the app to keep: the page, the address, what it sent, the answe
   type: 'xmlhttprequest', method: 'POST', url: 'https://films.example/api/list', sent: '{"page":1}', answer: '{"items":[1,2,3]}' } });
 check('...a short line in the log', said[1], 'Twilight Movies, data: POST https://films.example/api/list');
 listener({ requestId: 10, tabId: 2, type: 'main_frame', method: 'GET', url: 'https://films.example/films', originUrl: 'https://films.example/' });
-filters[10].ondata({ data: bytes('<html>' + 'x'.repeat(70000)) });
+filters[10].ondata({ data: bytes('<html>' + 'x'.repeat(450000)) });
 filters[10].onstop();
-check('...a page itself too: its first 60000 letters, and the rest let go by', [kept[1].studied.type, kept[1].studied.answer.length,
-  !!filters[10].disconnected], ['main_frame', 60000, true]);
+check('...a page itself too: its first 400000 letters, and the rest let go by', [kept[1].studied.type, kept[1].studied.answer.length,
+  !!filters[10].disconnected], ['main_frame', 400000, true]);
 check('a film\'s pieces: never held', [listener({ requestId: 11, tabId: 2, type: 'xmlhttprequest', url: 'https://cdn.example/seg-12.ts?t=1',
   originUrl: 'https://films.example/' }), !!filters[11]], [{}, false]);
 check('never the app\'s own pages\' requests, nor the engine\'s own', [
