@@ -7,14 +7,16 @@
 'use strict';
 var player = {
   // host: what its player is (tag; src: its address; id; box: the class of the box around its video), what to press
-  // first if it isn't there yet (press: a class of the website's servers' buttons)
+  // first if it isn't there yet (press: its tag, with a class of its own or in a box with a class: the website's
+  // first server, its player's start)
   SITES: {
     'krd.watch': {tag: 'VIDEO', box: /(^|\s)fixed(\s|$)/},
     'beenar.net': {tag: 'IFRAME', src: /\.uns\.bio\//},
-    'www.kurd-movie.com': {tag: 'IFRAME', press: 'dooplay_player_option'},
+    'www.kurd-movie.com': {tag: 'IFRAME', press: {tag: 'li', cls: 'dooplay_player_option'}},
     'www.kartonikurde.com': {tag: 'IFRAME'},
     'kurdsaz.com': {id: 'player-wrapper'},
     'kurdcinama.com': {},
+    'marscinema.net': {tag: 'IFRAME', press: {tag: 'button', in: 'aspect-backdrop'}},
   },
   TRAILER: /\/\/(www\.)?(youtube\.com|youtube-nocookie\.com|youtu\.be)\//,
 
@@ -43,14 +45,17 @@ var player = {
     return best;
   },
 
-  // A website's first server, chosen (the player comes once it is); not its trailer, which can come first (Kurd
-  // Movie's does: player-option-trailer, data-nume="trailer")
+  // A website's first server, or its player's start, pressed (the player comes once it is); not a trailer, which can
+  // come first (Kurd Movie's does: player-option-trailer, data-nume="trailer")
   press: function (doc, host) {
-    var site = player.SITES[host] || {};
-    if (!site.press) return false;
-    var first = Array.prototype.filter.call(doc.querySelectorAll('li'), function (li) {
-      return (' ' + (li.getAttribute('class') || '') + ' ').indexOf(' ' + site.press + ' ') >= 0
-        && !/trailer/i.test((li.getAttribute('id') || '') + ' ' + (li.getAttribute('data-nume') || ''));
+    var how = (player.SITES[host] || {}).press;
+    if (!how) return false;
+    var has = function (el, cls) {
+      return !!el && (' ' + (el.getAttribute('class') || '') + ' ').indexOf(' ' + cls + ' ') >= 0;
+    };
+    var first = Array.prototype.filter.call(doc.querySelectorAll(how.tag), function (el) {
+      return (!how.cls || has(el, how.cls)) && (!how.in || has(el.parentElement, how.in))
+        && !/trailer/i.test((el.getAttribute('id') || '') + ' ' + (el.getAttribute('data-nume') || ''));
     })[0];
     if (first) first.click();
     return !!first;

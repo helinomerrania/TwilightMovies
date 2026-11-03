@@ -83,6 +83,11 @@ module.exports = (async () => {
   check('no player yet: Kurd Movie\'s first server chosen, not its trailer', [player.find(d, 'www.kurd-movie.com'),
     player.press(d, 'www.kurd-movie.com'), options.map((o) => o.calls)], [null, true, [[], [['click']], []]]);
   check('...nothing pressed where there\'s nothing to press', player.press(d, 'beenar.net'), false);
+  const start = E('button', { attrs: { type: 'button', class: 'grid size-full place-items-center' } });
+  const server = E('button', { attrs: { type: 'button', class: 'server' } });
+  d = doc([E('div', { attrs: { class: 'relative aspect-backdrop w-full' } }, [start]), E('div', {}, [server])]);
+  check('Mars Cinema: its player\'s start pressed (the button in its box), not another', [player.press(d, 'marscinema.net'),
+    start.calls, server.calls], [true, [['click']], []]);
 
   const frame = E('iframe', { name: 'frame', attrs: { src: 'https://beenar.uns.bio/' }, rect: big });
   const around = E('div', { name: 'around' }, [frame]);
