@@ -41,5 +41,6 @@ allow script  https://cdn.jwplayer.com/libraries/abcd1234.js                    
 allow media   https://cdn.example-videos.com/hls/movie/index.m3u8                   app.kurdfilm.krd
 allow xhr     https://api.github.com/repos/helinomerrania/TwilightMovies/releases/latest  app.kurdfilm.krd
 allow xhr     https://googleads.g.doubleclick.net/pagead/id                         vidmoly.biz
+allow xhr     https://googleads.g.doubleclick.net/pagead/id                         vidmoly.org
 block xhr     https://googleads.g.doubleclick.net/pagead/id                         app.kurdfilm.krd
 allow page    https://github.com/helinomerrania/TwilightMovies

@@ -91,8 +91,10 @@ const asks = (tab, m) => listener(m, { tab: { id: tab } });
 module.exports = (async () => {
   opening(3, 'https://beenar.net/detail-cowatching/3057?series=false', 'moz-extension://the-app/ui/index.html#/title/beenar/f%3A3057');
   await asks(3, { aloneStyle: 1 });
-  ok('the row\'s style: at the top of the screen, the player below it', /\[data-tm-servers\] \{ position: fixed !important; top: 0/.test(css[0])
-    && /\[data-tm-with-servers\] \[data-tm-player\] \{ top: 7vh !important; height: 93vh/.test(css[0]));
+  ok('the row\'s style: at the top of the screen, the player below it; its names in the app\'s look, not Android\'s buttons',
+    /\[data-tm-servers\] \{ position: fixed !important; top: 0/.test(css[0])
+    && /\[data-tm-with-servers\] \[data-tm-player\] \{ top: 7vh !important; height: 93vh/.test(css[0])
+    && /\[data-tm-servers\] button \{ -moz-appearance: none !important; appearance: none !important;/.test(css[0]));
   check('a frame of the page asks before the row shows: no', await asks(3, { lifted: 1 }), { lift: false });
   await asks(3, { lift: 1 });
   check('the row shows: every frame of the page told the remote goes up to it', told, [[3, { arrows: 'lift' }, undefined]]);

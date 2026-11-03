@@ -15,4 +15,4 @@
 
 ! Vidmoly's player (a server of Kurd Subtitle's and Beenar's): it asks for Google's ad id to see whether ads are
 ! blocked, and covers the film with "AdBlock detected" when the asking fails. Let through there, nothing else.
-@@||googleads.g.doubleclick.net/pagead/id$xmlhttprequest,domain=vidmoly.biz|vidmoly.net|vidmoly.me|vidmoly.to
+@@||googleads.g.doubleclick.net/pagead/id$xmlhttprequest,domain=vidmoly.*
