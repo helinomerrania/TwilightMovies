@@ -65,8 +65,8 @@ function background(app, frames) {
 check('the manifest: version 2, so requests can be held while the app answers', manifest.manifest_version, 2);
 ok('...it may hold and change every request, and talk to the app',
   ['<all_urls>', 'webRequest', 'webRequestBlocking', 'nativeMessaging', 'geckoViewAddons'].every((p) => manifest.permissions.includes(p)));
-check('...its background scripts: the app\'s side, (in the app\'s own try only) the data feeds written down, the Twilight screens\' player alone',
-  manifest.background.scripts, ['background.js', 'study.js', 'alone.js']);
+check('...its background scripts: the app\'s side, (in the app\'s own try only) the data feeds written down, the Twilight screens\' player alone, '
+  + 'its film started by itself', manifest.background.scripts, ['background.js', 'study.js', 'alone.js', 'alone-play.js']);
 const cs = manifest.content_scripts[0];
 check('...its page scripts: in the page itself (its top frame), from the very start; the player alone', [cs.js, cs.run_at, cs.all_frames],
   [['page.js', 'player-steps.js', 'player-servers.js', 'player.js'], 'document_start', false]);
@@ -76,6 +76,9 @@ check('...the remote\'s arrows: in every frame of the page, from the very start,
   [keys.js, keys.css, keys.run_at, keys.all_frames], [['arrows.js', 'arrows-reach.js', 'arrows-move.js', 'arrows-frames.js',
     'arrows-keys.js'], ['arrows.css'], 'document_start', true]);
 ok('...and it may follow a page\'s frames, to pass the remote between them', manifest.permissions.includes('webNavigation'));
+const plays = manifest.content_scripts[2] || {};
+check('...the Watch\'s film started by itself: in every frame of the page (its player\'s are told), from the very start',
+  [plays.js, plays.run_at, plays.all_frames], [['player-play.js'], 'document_start', true]);
 
 const java = fs.readFileSync(path.join(ROOT, 'app', 'src', 'main', 'java', 'com', 'twilightcafe', 'movies', 'web', 'gecko',
   'Extension.java'), 'utf8');

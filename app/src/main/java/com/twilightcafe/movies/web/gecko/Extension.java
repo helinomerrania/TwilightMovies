@@ -41,6 +41,8 @@ final class Extension implements WebExtension.MessageDelegate, WebExtension.Port
             "websocket", "csp_report", "speculative", "object_subrequest", "other"));
     /** The ad blocker's threads (it may still be loading its rules when the first page asks). */
     static final ExecutorService WORK = Executors.newFixedThreadPool(3);
+    /** The page shown is the Twilight screens' Watch (alone.js says): a window it opens is an ad's. */
+    volatile boolean watching;
 
     private final Handler main = new Handler(Looper.getMainLooper());
     private final List<Runnable> waiting = new ArrayList<Runnable>();
@@ -202,6 +204,7 @@ final class Extension implements WebExtension.MessageDelegate, WebExtension.Port
         JSONObject m = (JSONObject) message;
         JSONObject studied = m.optJSONObject("studied");
         if (studied != null && study != null) study.add(studied.toString());
+        if (m.has("watch")) watching = m.optBoolean("watch", false);
         int id = m.optInt("done", -1);
         Page.Result r = results.get(id);
         if (r == null) return;

@@ -35,8 +35,8 @@ final class GeckoNavigation implements GeckoSession.NavigationDelegate {
     @Override
     public GeckoResult<AllowOrDeny> onLoadRequest(GeckoSession s, LoadRequest r) {
         String url = r.uri;
-        if (r.target == TARGET_WINDOW_NEW) {
-            l.popup(url, r.hasUserGesture);
+        if (r.target == TARGET_WINDOW_NEW) {   // in the Watch, always an ad's: dropped without a word
+            l.popup(url, r.hasUserGesture && !page.extension.watching);
             return GeckoResult.deny();
         }
         if (page.own(url)) return null;                                             // the Twilight screens

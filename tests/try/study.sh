@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Studies the websites the Twilight screens can't read from GitHub's own machines yet, in the app's own engine on an
 # emulator with a TV's screen (by .github/workflows/study.yml): a website opened from the Websites panel, its first
-# page given time for Cloudflare's check, then down and OK twice (look); a page by its address (visit). Now: Kurd
-# Subtitle's and Beenar's Watch, as the Twilight screens open it. A screenshot at each step (not the UI tree:
+# page given time for Cloudflare's check, then down and OK twice (look); a page by its address (visit). Now: the
+# Watch on every website with servers, as the Twilight screens open it. A screenshot at each step (not the UI tree:
 # reading it on a website's page froze the emulator). What their pages asked their data feeds, with the answers
 # (assets/gecko/study.js, in this try build only, kept by the app), goes to NAME-data.txt after each page (if the
 # emulator freezes on one, what came before stays). Kurdbin, Awena Film, Beenama, ShaFilm and Kurd Doblazh aren't
@@ -72,21 +72,26 @@ visit() {
   save
 }
 
-# The Watch as the Twilight screens open it (this build takes these addresses as theirs): Kurd Subtitle's episode
-# (season 2, episode 3: its season and episode chosen on its page, then a free server, player-steps.js); then Beenar's
-# film, its servers' names in a row over its player (player-servers.js): up to the row, the next one, OK. A picture of
-# each as it goes, and the page as drawn (player.js sends it, in this build).
-visit subtitle-episode 'https://kurdsubtitle.net/tvshows/467300-Lupin#tm-play=2-3'
-sleep 30
-picture subtitle-episode-later
-visit beenar 'https://beenar.net/detail-cowatching/3057?series=false#tm-alone'
-key KEYCODE_DPAD_UP
-picture beenar-up
+# The Watch as the Twilight screens open it (this build takes these addresses as theirs), on every website whose
+# films have more than one server: the servers' row over the player (player-servers.js), up to it (a picture); on
+# Beenar, the next one too, and OK. The film starts by itself (player-play.js: what it tried, in the log; this
+# emulator plays no film). A picture of each, and the page as drawn (player.js sends it, in this build).
+up() {
+  key KEYCODE_DPAD_UP
+  picture "$1-up"
+}
+visit subtitle-episode 'https://kurdsubtitle.net/tvshows/467300-Lupin#tm-play=2-3' && up subtitle-episode
+visit beenar 'https://beenar.net/detail-cowatching/3057?series=false#tm-alone' && up beenar
 key KEYCODE_DPAD_LEFT
 picture beenar-next
 key KEYCODE_DPAD_CENTER
-sleep 30
+sleep 20
 picture beenar-pressed
+visit kurd-movie 'https://www.kurd-movie.com/movies/onslaught/#tm-alone' && up kurd-movie
+visit kurdsaz 'https://kurdsaz.com/watch.php?slug=100-Days-of-Deception&ep=899#tm-alone' && up kurdsaz
+visit kartonikurde 'https://www.kartonikurde.com/movie/frozen#tm-alone' && up kartonikurde
+visit kurdcinama 'https://kurdcinama.com/online.aspx?movieid=19786#tm-alone' && up kurdcinama
+visit marscinema 'https://marscinema.net/watch/barry?ep=279#tm-alone' && up marscinema
 save
 
 kill "$logger" 2> /dev/null

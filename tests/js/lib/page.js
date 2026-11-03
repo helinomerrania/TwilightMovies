@@ -16,14 +16,16 @@ const STYLE = { visibility: 'visible', overflowX: 'visible', overflowY: 'visible
 const CODES = { ArrowLeft: 37, ArrowUp: 38, ArrowRight: 39, ArrowDown: 40, Enter: 13 };
 const NEVER = {};   // a frame (or the app) that never answers
 
-// What the stand-in page understands of a selector: tags (h2 too), [attribute], [attribute="value"], :modal, :disabled
+// What the stand-in page understands of a selector: tags (h2 too), .class, [attribute], [attribute="value"], :modal,
+// :disabled
 function matches(e, selector) {
   return selector.split(',').some((one) => {
     const m = /^([a-z0-9*]*)(.*)$/i.exec(one.trim());
     if (m[1] && m[1] !== '*' && e.tagName !== m[1].toUpperCase()) return false;
-    return (m[2].match(/\[[^\]]+\]|:[a-z-]+/gi) || []).every((p) => {
+    return (m[2].match(/\[[^\]]+\]|:[a-z-]+|\.[\w-]+/gi) || []).every((p) => {
       if (p === ':modal') return e.modal;
       if (p === ':disabled') return e.disabled;
+      if (p.charAt(0) === '.') return (' ' + (e.attrs.class || '') + ' ').indexOf(' ' + p.slice(1) + ' ') >= 0;
       const a = /^\[([\w-]+)(?:="([^"]*)")?\]$/.exec(p);
       if (!a) throw new Error('the stand-in page can\'t read ' + p);
       return a[2] === undefined ? a[1] in e.attrs : e.attrs[a[1]] === a[2];
@@ -70,6 +72,7 @@ function E(tag, o, kids) {
     return false;
   };
   e.querySelectorAll = (s) => all(e, []).filter((x) => matches(x, s));
+  e.querySelector = (s) => e.querySelectorAll(s)[0] || null;
   e.getRootNode = () => e.doc;
   e.focus = (opts) => {
     e.calls.push(['focus', opts]);

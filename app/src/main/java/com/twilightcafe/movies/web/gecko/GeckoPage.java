@@ -30,7 +30,7 @@ public final class GeckoPage implements Page {
 
     final Handler main;
     final RequestFilter filter;
-    private final Extension extension;
+    final Extension extension;          // GeckoNavigation asks it whether the page is the Watch's
     private final GeckoKeyboard keyboard;
     private GeckoView view;
     private GeckoSession session;

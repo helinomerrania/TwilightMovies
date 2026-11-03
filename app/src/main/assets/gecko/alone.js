@@ -7,6 +7,7 @@
 'use strict';
 var alone = {};    // a tab's number: the host its page is on
 var lifted = {};   // a tab's number: its page shows its servers' row over the player
+var plays = {};    // a tab's number: the frames its player alone is in, where its film starts by itself (alone-play.js)
 
 var ALONE_STYLE = 'html[data-tm-alone], html[data-tm-alone] body { overflow: hidden !important; background: #000 !important; }\n' +
   'html[data-tm-alone] body * { visibility: hidden !important; }\n' +
@@ -49,9 +50,16 @@ function hostOf(url) {
 function aloneFor(d) {
   if (d.tabId < 0) return;
   delete lifted[d.tabId];
+  delete plays[d.tabId];
   var from = String(d.originUrl || '');
   if (from.indexOf(OWN) === 0) alone[d.tabId] = hostOf(d.url);
   else if (alone[d.tabId] && !sameSite(hostOf(from), alone[d.tabId])) delete alone[d.tabId];
+  watching(d.tabId);
+}
+
+// The app told whether the page shown is the Watch's: a window it opens then is an ad's, dropped without a word
+function watching(tab) {
+  if (typeof port !== 'undefined' && port) port.postMessage({watch: !!alone[tab]});
 }
 
 browser.runtime.onMessage.addListener(function (m, sender) {
@@ -59,6 +67,7 @@ browser.runtime.onMessage.addListener(function (m, sender) {
   if (typeof m.alone === 'string' && tab >= 0 && typeof studying !== 'undefined' && studying
       && /#tm-(play|alone)\b/.test(String(sender.url || ''))) {
     alone[tab] = m.alone;   // the study build (study.js): an address as the screens open one, opened by the study
+    watching(tab);
   }
   if (typeof m.alone === 'string') return Promise.resolve(tab >= 0 && sameSite(m.alone, alone[tab]));
   if (m.lift && tab >= 0 && alone[tab]) {   // the servers' row shows: every frame of the page told

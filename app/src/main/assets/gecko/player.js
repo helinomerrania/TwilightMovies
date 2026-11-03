@@ -70,6 +70,28 @@ var player = {
     return false;
   },
 
+  // Its film started by itself (player-play.js, through alone-play.js): in the frames in the player alone, or by its
+  // own video in the page; each told once (a frame that comes after, another server's player, asks)
+  told: [],
+  play: function (el) {
+    var tell = function (id) {
+      if (player.told.indexOf(id) >= 0) return;
+      player.told.push(id);
+      browser.runtime.sendMessage({play: id});
+    };
+    if (el.tagName === 'VIDEO' || el.querySelector('video')) tell(0);
+    var frames = el.tagName === 'IFRAME' ? [el] : Array.prototype.slice.call(el.querySelectorAll('iframe'));
+    frames.forEach(function (f) {
+      var id = -1;
+      try {
+        id = browser.runtime.getFrameId(f);
+      } catch (e) {
+        // not one the engine knows yet: the next time
+      }
+      if (id > 0) tell(id);
+    });
+  },
+
   // The player alone: it (and what's in it) marked, the boxes around it too (so it can fill the screen), the page
   // marked; the background script's style (alone.js) does the rest
   isolate: function (doc, el) {
@@ -90,9 +112,9 @@ var player = {
 
   // From the page's start: asked whether it's the Twilight screens'; then looked for twice a second for two minutes
   // (players come late), and again whenever the website puts another in its place. A website with steps of its own
-  // (player-steps.js): those first, every two seconds, until they say its player is there. Once it shows, its
-  // servers' row (player-servers.js), and the player's frames told the remote goes up to it (lift). Another server
-  // pressed there: its player looked for two minutes more, and nothing pressed for it.
+  // (player-steps.js): those first, every two seconds, until they say its player is there. Once it shows, its film
+  // started by itself (play), its servers' row (player-servers.js), and the player's frames told the remote goes up
+  // to it (lift). Another server pressed there: its player looked for two minutes more, and nothing pressed for it.
   start: function () {
     if (window.top !== window || typeof browser === 'undefined') return;
     var host = location.host;
@@ -119,6 +141,7 @@ var player = {
         if (ticks === 20 || ticks === 60 || ticks === 120 || ticks === 240) snapshot('after ' + ticks / 2 + ' seconds');
         if (!document.body) return;
         if (shown && document.contains(shown)) {
+          player.play(shown);
           if (site.servers && playerServers.show(document, site.servers, again) && !lifted) {
             lifted = true;
             browser.runtime.sendMessage({lift: 1});
