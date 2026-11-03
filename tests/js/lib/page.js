@@ -16,10 +16,10 @@ const STYLE = { visibility: 'visible', overflowX: 'visible', overflowY: 'visible
 const CODES = { ArrowLeft: 37, ArrowUp: 38, ArrowRight: 39, ArrowDown: 40, Enter: 13 };
 const NEVER = {};   // a frame (or the app) that never answers
 
-// What the stand-in page understands of a selector: tags, [attribute], [attribute="value"], :modal, :disabled
+// What the stand-in page understands of a selector: tags (h2 too), [attribute], [attribute="value"], :modal, :disabled
 function matches(e, selector) {
   return selector.split(',').some((one) => {
-    const m = /^([a-z*]*)(.*)$/i.exec(one.trim());
+    const m = /^([a-z0-9*]*)(.*)$/i.exec(one.trim());
     if (m[1] && m[1] !== '*' && e.tagName !== m[1].toUpperCase()) return false;
     return (m[2].match(/\[[^\]]+\]|:[a-z-]+/gi) || []).every((p) => {
       if (p === ':modal') return e.modal;

@@ -111,7 +111,8 @@ module.exports = (async () => {
   const seasonTwo = E('button', { text: '2 وەرزی دوو 5 ئەڵقە' }, [E('div', { text: '2' }), E('div', { text: 'وەرزی دوو 5 ئەڵقە' })]);
   const seasonOne = E('button', { text: '1 وەرزی یەک 5 ئەڵقە' }, [E('div', { text: '1' }), E('div', { text: 'وەرزی یەک 5 ئەڵقە' })]);
   const block = E('div', { attrs: { class: 'rounded-xl overflow-hidden border' } }, [seasonTwo]);
-  d = doc([E('div', {}, [seasonOne]), block]);
+  const heading = E('h2', { text: 'لوپین - وەرزی 1 - ئەڵقەی 1' });   // what the page plays first
+  d = doc([heading, E('div', {}, [seasonOne]), block]);
   const want = { season: 2, n: 3 };
   check('Kurd Subtitle: its episode\'s season opened first, not another', [steps(d, want), seasonTwo.calls, seasonOne.calls],
     [false, [['click']], []]);
@@ -119,13 +120,13 @@ module.exports = (async () => {
   const epThree = E('button', { text: '2-3 Chapter 3', attrs: { class: 'border-b px-2 hover:bg-primary/5' } }, [E('div', { text: '2-3' })]);
   [epTwo, epThree].forEach((x) => { block.children.push(x); x.parentElement = block; });
   check('...then its episode, once there', [steps(d, want), epThree.calls, epTwo.calls, seasonTwo.calls.length], [false, [['click']], [], 1]);
-  epThree.attrs.class = 'border-b px-2 bg-primary/5 text-primary';
+  heading.textContent = 'لوپین - وەرزی 2 - ئەڵقەی 3';   // its button looks the same, chosen or not
   const later = E('button', { text: 'بینینی سێرڤەرە ئاساییەکان (7)', disabled: true });
   const free = E('button', { text: 'سێرڤەری Vstreamer', attrs: { class: 'md:w-full md:border-b py-4 text-right px-6 shrink-0' } });
   block.children.push(later, free);
   later.parentElement = free.parentElement = block;
-  check('...chosen: a free server (its own needs signing in), not a button that can\'t be pressed yet', [steps(d, want), later.calls,
-    free.calls], [false, [], [['click']]]);
+  check('...the page plays it (its heading says so): a free server (its own needs signing in), not a button that can\'t be pressed yet, '
+    + 'nor the episode again', [steps(d, want), later.calls, free.calls, epThree.calls.length], [false, [], [['click']], 1]);
   const area = E('div', { name: 'area', attrs: { class: 'grow bg-white/10 rounded-2xl overflow-hidden border relative' } }, [
     E('iframe', { name: 'frame', attrs: { id: 'player-frame', src: 'https://streamer.vstreamer.store/stream/17674' }, rect: big })]);
   d = doc([area]);

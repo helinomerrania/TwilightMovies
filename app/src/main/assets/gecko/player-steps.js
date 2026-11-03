@@ -20,7 +20,13 @@ var playerSteps = {
       return Array.prototype.some.call(b.querySelectorAll('div'), function (d) { return playerSteps.text(d) === words; });
     });
   },
+  // The episode the page plays, as its heading says it ("لوپین - وەرزی 2 - ئەڵقەی 3": "2-3"); its button looks the same
+  playing: function (doc) {
+    var m = /وەرزی (\d+) - ئەڵقەی (\d+)/.exec(Array.prototype.map.call(doc.querySelectorAll('h2'), playerSteps.text).join(' | '));
+    return m ? m[1] + '-' + m[2] : '';
+  },
   opened: 0,   // how often a season was opened (once more if its episodes didn't come)
+  chose: 0,    // how often the episode was chosen (a few times at most, if the heading never says it)
 
   'kurdsubtitle.net': function (doc, want) {
     var s = playerSteps;
@@ -38,7 +44,8 @@ var playerSteps = {
         }
         return false;
       }
-      if (!s.has(ep, 'text-primary') && !s.has(ep, 'bg-white/15')) {   // not the one chosen yet
+      if (s.playing(doc) !== want.season + '-' + want.n && s.chose < 3) {   // not the one it plays yet
+        s.chose++;
         ep.click();
         return false;
       }
