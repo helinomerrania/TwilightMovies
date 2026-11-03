@@ -28,11 +28,11 @@ function frame(body, o) {
   o = o || {};
   const html = E('html', {}, [E('body', { rect: [0, 0, 1280, 720] }, body)]);
   const all = () => [html].concat(html.querySelectorAll('*'));
-  const doc = { documentElement: html, body: html.children[0], querySelectorAll: (s) => html.querySelectorAll(s),
+  const doc = { documentElement: html, body: html.children[0], readyState: 'complete', querySelectorAll: (s) => html.querySelectorAll(s),
     querySelector: (s) => html.querySelectorAll(s)[0] || null,
     elementFromPoint: (x, y) => all().filter((e) => e.rect && x >= e.rect[0] && x < e.rect[2] && y >= e.rect[1] && y < e.rect[3]).pop() || null };
   const f = { doc, timers: [], sent: [], notes: [], listener: null };
-  const win = { innerWidth: 1280, innerHeight: 720 };
+  const win = { innerWidth: 1280, innerHeight: 720, wrappedJSObject: o.page };
   win.top = o.top ? win : {};
   const browser = { runtime: { onMessage: { addListener: (l) => { f.listener = l; } },
     sendMessage: (m) => { f.sent.push(m); return now(o.answer ? o.answer(m) : undefined); } } };
@@ -59,16 +59,29 @@ f.tick(10);
 check('...once it plays, never again by itself (the viewer may pause it)', [v.played, f.notes.slice(-1)[0]], [1, 'Twilight Movies, play: vidmoly.biz plays']);
 
 // JW Player, its film loaded only once it's started: its own start pressed, now and then, a few times at most
-const jw = E('div', { name: 'start', attrs: { class: 'jw-display-icon-display jw-reset' }, rect: [600, 320, 680, 400] });
+const jw = E('div', { name: 'start', attrs: { class: 'jw-icon jw-icon-display jw-reset', role: 'button' }, rect: [600, 320, 680, 400] });
 v = video({});
-f = frame([E('div', { attrs: { class: 'jwplayer' }, rect: [0, 0, 1280, 720] }, [v, jw])]);
+f = frame([E('div', { attrs: { class: 'jwplayer' }, rect: [0, 0, 1280, 720] }, [v, E('div', {
+  attrs: { class: 'jw-display-icon-container jw-display-icon-display' }, rect: [600, 320, 680, 400] }, [jw])])]);
+f.doc.readyState = 'interactive';
 f.tell();
 f.tick();
-check('a player with nothing to play yet: its own start pressed', jw.calls, [['click']]);
+check('a player with nothing to play yet, still loading: nothing pressed', jw.calls, []);
+f.doc.readyState = 'complete';
+f.tick(3);
+check('...loaded: its own start pressed (JW Player\'s button itself, not the box around it)', jw.calls, [['click']]);
 f.tick(2);
 check('...not again at once (a press on what plays pauses it)', jw.calls.length, 1);
 f.tick(30);
 check('...and four times at most', jw.calls.length, 4);
+
+// JW Player's own scripts, which the frame's page has: they start it
+let started = 0;
+const start2 = E('div', { attrs: { class: 'jw-icon jw-icon-display' }, rect: [600, 320, 680, 400] });
+f = frame([video({}), start2], { page: { jwplayer: () => ({ play: () => { started++; } }) } });
+f.tell();
+f.tick();
+check('...or its own scripts start it, where the page has them (JW Player\'s), rather than a press', [started, start2.calls], [1, []]);
 
 // No start of a known player's: what's in the middle (a veil that takes the first press), not an ad's link
 const veil = E('div', { name: 'veil', rect: [0, 0, 1280, 720] });

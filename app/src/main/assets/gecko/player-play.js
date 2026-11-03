@@ -2,14 +2,14 @@
 // player's first click often opens an ad's window, and the click is lost on it: none is made). In the player
 // alone's frames, and in the page itself for a player of its own (alone.js says where: play); never in another
 // frame of the page (a trailer's). Its film: the biggest video there, played; or, while it has nothing to play yet
-// (a player that loads its film only once it's started), the player's own start pressed, else what's in the middle
-// of the player (often a veil over it that takes the first press). Once its film plays, it's never started again by
-// itself: the viewer may pause it.
+// (a player that loads its film only once it's started), the player started by its own scripts (JW Player's,
+// Video.js's), else its own start pressed, else what's in the middle of the player (often a veil over it that takes
+// the first press). Once its film plays, it's never started again by itself: the viewer may pause it.
 'use strict';
 var playerPlay = {
   // The big start of the players the websites use (JW Player, Video.js, Plyr, Flowplayer, Fluid, MediaElement,
   // DPlayer, ArtPlayer), and the ones that say so
-  STARTS: '.jw-display-icon-display, .vjs-big-play-button, .plyr__control--overlaid, .fp-play, .fluid_initial_play, ' +
+  STARTS: '.jw-icon-display, .vjs-big-play-button, .plyr__control--overlaid, .fp-play, .fluid_initial_play, ' +
     '.mejs__overlay-button, .dplayer-mobile-play, .art-state, [aria-label="Play"], [aria-label="play"], [title="Play"]',
   on: false,      // told to start the film here
   done: false,    // its film played: never started again by itself
@@ -35,6 +35,31 @@ var playerPlay = {
     return best;
   },
 
+  // The page's player started as its own scripts would (JW Player's, Video.js's: the page's own, which this script
+  // may reach in Firefox's engine): true if one was
+  own: function (win) {
+    var page = win.wrappedJSObject, done = false;
+    if (!page) return false;
+    try {
+      if (typeof page.jwplayer === 'function' && page.jwplayer() && typeof page.jwplayer().play === 'function') {
+        page.jwplayer().play();
+        done = true;
+      }
+      if (page.videojs && typeof page.videojs.getPlayers === 'function') {
+        var all = page.videojs.getPlayers();
+        Object.keys(all).forEach(function (k) {
+          if (all[k] && typeof all[k].play === 'function') {
+            all[k].play();
+            done = true;
+          }
+        });
+      }
+    } catch (e) {
+      // not one it can start
+    }
+    return done;
+  },
+
   // What to press to start it: the player's own start, if one shows; else what's in the middle of the player (the
   // frame's middle; in the page, its player's), not a link (an ad's)
   start: function (doc, scope, top) {
@@ -47,7 +72,7 @@ var playerPlay = {
   },
 
   // A second's try: true once it's over (it plays, or long enough). Its film played if it has something to play;
-  // else, every third second, a press (four at most)
+  // else, once the frame has loaded, a press every third second (four at most)
   tick: function (doc, top) {
     var p = playerPlay, scope = p.scope(doc, top);
     if (!scope) return ++p.tries > 60;
@@ -61,10 +86,14 @@ var playerPlay = {
     if (v && (v.currentSrc || v.getAttribute('src')) && p.tries % 2 === 1) {
       var r = v.play();
       if (r && r.catch) r.catch(function (e) { console.info('Twilight Movies, play: ' + location.host + ' ' + e.name); });
-    } else if (p.tries % 3 === 1 && p.presses < 4) {
+    } else if (p.tries % 3 === 1 && p.presses < 4 && doc.readyState === 'complete') {   // once its player is drawn
+      p.presses++;
+      if (!top && p.own(window)) {
+        console.info('Twilight Movies, play: ' + location.host + ' started its player');
+        return false;
+      }
       var b = p.start(doc, scope, top);
       if (b) {
-        p.presses++;
         console.info('Twilight Movies, play: ' + location.host + ' pressed ' + String(b.tagName).toLowerCase() + '.' +
           String(b.getAttribute('class') || '').split(' ')[0]);
         b.click();
