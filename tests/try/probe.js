@@ -69,6 +69,12 @@ const SITES = {
       '/api/titles/latest', '/api/search?q=spider'],
   },
   kurdsubtitle: {
+    // a series' episodes (Lupin's, by its own id and by its address's name), its lists and its search
+    direct: ['https://api.kurdsubtitle.net/api/v1/tvshows/60005e7b64d2e47956145ba7/seasons/1/episodes',
+      'https://api.kurdsubtitle.net/api/v1/tvshows/467300-Lupin/seasons/1/episodes',
+      'https://api.kurdsubtitle.net/api/v1/tvshows/60005e7b64d2e47956145ba7', 'https://api.kurdsubtitle.net/api/v1/movies?page=1',
+      'https://api.kurdsubtitle.net/api/v1/tvshows?page=1', 'https://api.kurdsubtitle.net/api/v1/search?q=spider',
+      'https://kurdsubtitle.net/movies', 'https://kurdsubtitle.net/tvshows/467300-Lupin'],
     // its series page's scripts: its episodes come in the viewer's browser, from where they say
     scripts: ['/_next/static/chunks/0e5ce63c-c8c4232ec35b660a.js',
       '/_next/static/chunks/1055-295a9ec4eb73d2b7.js',
@@ -199,7 +205,7 @@ async function open(page, name, address) {
     const u = new URL(s, SITE.start).href;
     const body = await fetch(u, { headers: { 'User-Agent': UA } }).then((r) => r.text()).catch((e) => String(e));
     note('SCRIPT', u, body.length + ' characters');
-    const re = /\/v1\/|episode|season|api\.kurdsubtitle/gi;
+    const re = /\/v1\/|episode|season|api\.kurdsubtitle|\.(get|post|put|patch|delete)\(\s*"\//gi;
     let m;
     let last = -1000;
     while ((m = re.exec(body)) && found.length < 600) {
@@ -209,6 +215,16 @@ async function open(page, name, address) {
     }
   }
   if (found.length) fs.writeFileSync(path.join(OUT, 'scripts.txt'), found.join('\n\n'));
+  // Its data feed asked straight, as the app's reader would (addresses its pages ask in the viewer's browser)
+  for (let i = 0; i < (SITE.direct || []).length; i++) {
+    const u = SITE.direct[i];
+    const r = await fetch(u, { headers: { 'User-Agent': UA, Accept: 'application/json, text/plain, */*' } })
+      .then(async (x) => ({ status: x.status, type: x.headers.get('content-type'), body: await x.text() }))
+      .catch((e) => ({ status: 0, type: '', body: String(e) }));
+    const name = 'direct-' + String(i + 1).padStart(2, '0') + '.txt';
+    fs.writeFileSync(path.join(OUT, name), u + '\n' + r.status + ' ' + r.type + '\n\n' + r.body.slice(0, 300000));
+    note('DIRECT', name, r.status, u, r.body.length + ' characters');
+  }
 })().catch((e) => note('STOPPED', e.stack)).finally(() => {
   fs.writeFileSync(path.join(OUT, 'data.txt'), data.join('\n'));
   fs.writeFileSync(path.join(OUT, 'snippets.txt'), Array.from(snippets).join('\n\n'));
