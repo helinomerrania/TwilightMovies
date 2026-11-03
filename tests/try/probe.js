@@ -69,6 +69,52 @@ const SITES = {
       '/api/titles/latest', '/api/search?q=spider'],
   },
   kurdsubtitle: {
+    // its series page's scripts: its episodes come in the viewer's browser, from where they say
+    scripts: ['/_next/static/chunks/0e5ce63c-c8c4232ec35b660a.js',
+      '/_next/static/chunks/1055-295a9ec4eb73d2b7.js',
+      '/_next/static/chunks/1255-a64e6a44d24cb2f6.js',
+      '/_next/static/chunks/1351-eda1d500cabc9c13.js',
+      '/_next/static/chunks/1514-7104fc1d6cd8efb2.js',
+      '/_next/static/chunks/1691-0d641d4ab66863e7.js',
+      '/_next/static/chunks/16dc9863-4a50cf98c2b27890.js',
+      '/_next/static/chunks/1812-508a629d53460619.js',
+      '/_next/static/chunks/191-7bfb387751127963.js',
+      '/_next/static/chunks/2619-df0b05096f172bf7.js',
+      '/_next/static/chunks/2650-46e93507e53e4a62.js',
+      '/_next/static/chunks/2660-2f745528300eb612.js',
+      '/_next/static/chunks/30a37ab2-9b8acb2a07381dd6.js',
+      '/_next/static/chunks/3371-1d9f9eeeb6e18d17.js',
+      '/_next/static/chunks/4347-ae6358066554b45c.js',
+      '/_next/static/chunks/4457-f04e96331eb7917f.js',
+      '/_next/static/chunks/4577-fe0275c9c3d71273.js',
+      '/_next/static/chunks/4628-425c7d358f61801c.js',
+      '/_next/static/chunks/4823-73e9a41fb7720cce.js',
+      '/_next/static/chunks/4988-6de9b8b3c72e8d34.js',
+      '/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js',
+      '/_next/static/chunks/5059-30ebec42879984ef.js',
+      '/_next/static/chunks/5125-6dea62ec41269dc1.js',
+      '/_next/static/chunks/5408-c071d2a30b437863.js',
+      '/_next/static/chunks/5414-5ed60d3ea0e4df99.js',
+      '/_next/static/chunks/5667-030dacfc3b0a8eb9.js',
+      '/_next/static/chunks/5682-f1a55780f73119e2.js',
+      '/_next/static/chunks/5907-cb4bd7186620bc0d.js',
+      '/_next/static/chunks/7913-27c6b82f80a5284c.js',
+      '/_next/static/chunks/8657-5a46d0d1371917b1.js',
+      '/_next/static/chunks/8720-620d52e50cfa914f.js',
+      '/_next/static/chunks/9138-f5ca7413fbbbd050.js',
+      '/_next/static/chunks/94730671-fa9ac1cf0535af1a.js',
+      '/_next/static/chunks/9601-7c72b8044ae1bfe3.js',
+      '/_next/static/chunks/9825-09a8479b7b5c5cec.js',
+      '/_next/static/chunks/a4634e51-c4bd651267baabfd.js',
+      '/_next/static/chunks/app/error-f18ab9f02ef7d458.js',
+      '/_next/static/chunks/app/global-error-d74b955f20861b49.js',
+      '/_next/static/chunks/app/layout-84c9689e2779c953.js',
+      '/_next/static/chunks/app/tvshows/%5Bslug%5D/page-1139efafe0247f5c.js',
+      '/_next/static/chunks/ed9f2dc4-fb9c3f5325ea0485.js',
+      '/_next/static/chunks/f97e080b-a536e50d7fa9f157.js',
+      '/_next/static/chunks/main-app-49958bbb287c729c.js',
+      '/_next/static/chunks/polyfills-42372ed130431b0a.js',
+      '/_next/static/chunks/webpack-37d64f41ae614ed1.js'],
     start: 'https://kurdsubtitle.net/',
     pages: ['https://kurdsubtitle.net/movies', 'https://kurdsubtitle.net/series', 'https://kurdsubtitle.net/search?q=spider'],
     ask: ['https://api.kurdsubtitle.net/api/v1/genres?excludeManga=true',
@@ -147,6 +193,22 @@ async function open(page, name, address) {
   }
   for (let i = 0; i < SITE.pages.length; i++) await open(page, String(i + 1).padStart(2, '0') + '-page', SITE.pages[i]);
   await browser.close();
+  // Its scripts, where they name a data address or the episodes (the places, each with what's around it)
+  const found = [];
+  for (const s of SITE.scripts || []) {
+    const u = new URL(s, SITE.start).href;
+    const body = await fetch(u, { headers: { 'User-Agent': UA } }).then((r) => r.text()).catch((e) => String(e));
+    note('SCRIPT', u, body.length + ' characters');
+    const re = /\/v1\/|episode|season|api\.kurdsubtitle/gi;
+    let m;
+    let last = -1000;
+    while ((m = re.exec(body)) && found.length < 600) {
+      if (m.index - last < 300) continue;
+      last = m.index;
+      found.push(u.split('/').pop() + ': ' + body.slice(Math.max(0, m.index - 300), m.index + 300).replace(/\s+/g, ' '));
+    }
+  }
+  if (found.length) fs.writeFileSync(path.join(OUT, 'scripts.txt'), found.join('\n\n'));
 })().catch((e) => note('STOPPED', e.stack)).finally(() => {
   fs.writeFileSync(path.join(OUT, 'data.txt'), data.join('\n'));
   fs.writeFileSync(path.join(OUT, 'snippets.txt'), Array.from(snippets).join('\n\n'));
