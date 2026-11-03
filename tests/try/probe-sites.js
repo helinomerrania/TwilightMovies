@@ -3,6 +3,20 @@
 // scripts (where they name a data address), scripts kept whole, addresses asked straight, their players.
 'use strict';
 const SITES = {
+  // The players' pages the Watch opens, for their servers (press: a button with these words pressed on each page,
+  // and the page kept again: what it shows then)
+  'kurdcinama-watch': {
+    players: 12000,
+    start: 'https://kurdcinama.com/online.aspx?movieid=19786',
+    pages: ['https://kurdcinama.com/Episodes2.aspx?type=440&Stype=698&name=01'],
+    ask: [],
+  },
+  'marscinema-watch': {
+    press: 'بینینی سێرڤەرە ئاساییەکان',
+    start: 'https://marscinema.net/watch/barry',
+    pages: ['https://marscinema.net/watch/barry?ep=279'],
+    ask: [],
+  },
   // A film's player in a frame of the website's page (referer: the page's own), with what an ad blocker stops
   // stopped (abort): what it shows then. Not Google's ad id, which it asks to see whether ads are blocked (the
   // app lets it through there: tools/filters/twilight.txt)

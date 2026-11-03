@@ -60,6 +60,16 @@ async function open(page, name, address) {
     await page.waitForTimeout(SITE.players);   // the players have this long to start
     note('PLAYERS', await players(page, name));
   }
+  if (SITE.press) {   // a button with these words pressed, and the page kept again
+    const pressed = await page.evaluate((words) => {
+      const b = Array.from(document.querySelectorAll('button')).find((x) => x.textContent.includes(words));
+      if (b) b.click();
+      return !!b;
+    }, SITE.press).catch(() => false);
+    await page.waitForTimeout(4000);
+    fs.writeFileSync(path.join(OUT, name + '-pressed.html'), (await page.content().catch(() => '')).slice(0, 600000));
+    note('PRESSED', name, pressed);
+  }
   return html;
 }
 
