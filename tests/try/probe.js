@@ -69,6 +69,7 @@ const SITES = {
       '/api/titles/latest', '/api/search?q=spider'],
   },
   kurdsubtitle: {
+    whole: ['/_next/static/chunks/5408-c071d2a30b437863.js', '/_next/static/chunks/3371-1d9f9eeeb6e18d17.js'],
     // a series' episodes (Lupin's, by its own id and by its address's name), its lists and its search
     direct: ['https://api.kurdsubtitle.net/api/v1/search?query=spider', 'https://api.kurdsubtitle.net/api/v1/search?query=lupin',
       'https://api.kurdsubtitle.net/api/v1/movies/779410-The-Paradise', 'https://api.kurdsubtitle.net/api/v1/tvshows/467300-Lupin',
@@ -214,6 +215,12 @@ async function open(page, name, address) {
     }
   }
   if (found.length) fs.writeFileSync(path.join(OUT, 'scripts.txt'), found.join('\n\n'));
+  // Scripts kept whole (the parts that draw a player, or a series' seasons and episodes)
+  for (const s of SITE.whole || []) {
+    const u = new URL(s, SITE.start).href;
+    const body = await fetch(u, { headers: { 'User-Agent': UA } }).then((r) => r.text()).catch((e) => String(e));
+    fs.writeFileSync(path.join(OUT, 'whole-' + u.split('/').pop().split('-')[0] + '.txt'), u + '\n\n' + body);
+  }
   // Its data feed asked straight, as the app's reader would (addresses its pages ask in the viewer's browser)
   for (let i = 0; i < (SITE.direct || []).length; i++) {
     const u = SITE.direct[i];
