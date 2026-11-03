@@ -33,6 +33,9 @@ android {
         // the boxes: some websites take a browser that hands their messages on for one with its tools open, and
         // go blank; and a website that writes a lot of them is slower
         buildConfigField "boolean", "PAGE_LOG", project.hasProperty('pagelog') ? 'true' : 'false'
+        // -Pstudy (the websites' study on GitHub's emulators, study.yml): what the websites' pages ask their data feeds,
+        // kept by the app (assets/gecko/study.js, web/gecko/StudyFile). Never on the boxes either
+        buildConfigField "boolean", "STUDY", project.hasProperty('study') ? 'true' : 'false'
         ndk {
             abiFilters.add(geckoAbi)
         }

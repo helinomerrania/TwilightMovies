@@ -11,7 +11,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 
 /**
- * The app's own try only (its pages' messages in Android's log, never on the boxes): what the websites' pages ask their
+ * The app's own study build only (-Pstudy, never on the boxes): what the websites' pages ask their
  * data feeds and the pages themselves (assets/gecko/study.js), a line of JSON each, in a file the try takes from the
  * emulator (tests/try/study.sh): the app's own folder on its storage, study.jsonl. Written on the extension's threads.
  */

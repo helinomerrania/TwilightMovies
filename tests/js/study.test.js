@@ -17,7 +17,8 @@ const filters = {};
 const browser = {
   webRequest: {
     onBeforeRequest: { addListener: (f, filter, extra) => { listener = f; options = [filter, extra]; } },
-    filterResponseData: (id) => (filters[id] = { write: (d) => passed.push(d), close() { this.closed = true; } }),
+    filterResponseData: (id) => (filters[id] = { write: (d) => passed.push(d), close() { this.closed = true; },
+      disconnect() { this.disconnected = true; } }),
   },
 };
 const kept = [];
@@ -42,7 +43,10 @@ check('...a short line in the log', said[1], 'Twilight Movies, data: POST https:
 listener({ requestId: 10, tabId: 2, type: 'main_frame', method: 'GET', url: 'https://films.example/films', originUrl: 'https://films.example/' });
 filters[10].ondata({ data: bytes('<html>' + 'x'.repeat(70000)) });
 filters[10].onstop();
-check('...a page itself too: its first 60000 letters', [kept[1].studied.type, kept[1].studied.answer.length], ['main_frame', 60000]);
+check('...a page itself too: its first 60000 letters, and the rest let go by', [kept[1].studied.type, kept[1].studied.answer.length,
+  !!filters[10].disconnected], ['main_frame', 60000, true]);
+check('a film\'s pieces: never held', [listener({ requestId: 11, tabId: 2, type: 'xmlhttprequest', url: 'https://cdn.example/seg-12.ts?t=1',
+  originUrl: 'https://films.example/' }), !!filters[11]], [{}, false]);
 check('never the app\'s own pages\' requests, nor the engine\'s own', [
   listener({ requestId: 8, tabId: 2, url: 'https://films.example/api', originUrl: 'moz-extension://the-app/ui/index.html' }),
   listener({ requestId: 9, tabId: -1, url: 'https://films.example/api' })], [{}, {}]);

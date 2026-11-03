@@ -32,7 +32,7 @@ final class Engines {
         int own = WebViewPage.engineVersion(a);
         if (firefox(a, settings, own)) {
             try {
-                Page p = new GeckoPage(a, main, listener, filter, BuildConfig.PAGE_LOG);
+                Page p = new GeckoPage(a, main, listener, filter, BuildConfig.PAGE_LOG, BuildConfig.STUDY);
                 Log.i(TAG, "web engine: Firefox " + p.engineVersion() + ", inside the app (the box's own: " + own + ")");
                 return p;
             } catch (Throwable e) {   // it didn't start: the box's own

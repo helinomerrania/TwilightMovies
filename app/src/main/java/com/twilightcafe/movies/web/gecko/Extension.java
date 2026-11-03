@@ -48,7 +48,7 @@ final class Extension implements WebExtension.MessageDelegate, WebExtension.Port
     private final SparseArray<Page.Result> results = new SparseArray<Page.Result>();
     private boolean ready;
     private volatile String base;        // its pages' address (moz-extension://<its number>/), once it's in
-    private volatile StudyFile study;    // the app's own try: what the websites ask their data feeds, kept (study.js)
+    private volatile StudyFile study;    // the app's own study build: what the websites ask their data feeds, kept (study.js)
     private WebExtension.Port port;
     private Object page;                 // the page shown now
     private volatile RequestFilter filter;
@@ -70,7 +70,7 @@ final class Extension implements WebExtension.MessageDelegate, WebExtension.Port
         main.postDelayed(this::setReady, 8000);   // pages wait no longer
     }
 
-    /** The app's own try (its pages' messages in Android's log): what the websites ask their data feeds, kept in folder. */
+    /** The app's own study build (-Pstudy): what the websites ask their data feeds, kept in folder (null: not). */
     void study(File folder) {
         study = folder != null ? new StudyFile(folder) : null;
         if (study != null && port != null) port.postMessage(message("study", true));

@@ -55,7 +55,7 @@ jobs:
           chmod +x gradlew
           # Firefox's engine for the emulators' processor (the boxes get the one for ARM), with the pages' own
           # messages in Android's log (never on the boxes)
-          ./gradlew --no-daemon assembleRelease -Pgeckoabi=x86_64 -Ppagelog
+          ./gradlew --no-daemon assembleRelease -Pgeckoabi=x86_64 -Ppagelog -Pstudy
           cp app/build/outputs/apk/release/app-release.apk twilight-movies.apk
           ls -l twilight-movies.apk
       - name: Let the emulator use the processor's virtualization

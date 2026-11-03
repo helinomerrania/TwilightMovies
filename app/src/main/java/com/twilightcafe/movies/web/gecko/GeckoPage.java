@@ -47,8 +47,11 @@ public final class GeckoPage implements Page {
         }
     };
 
-    /** pageLog: the pages' own messages in Android's log (only for trying the app: see BuildConfig.PAGE_LOG). */
-    public GeckoPage(Context c, Handler main, PageListener listener, RequestFilter filter, boolean pageLog) {
+    /**
+     * pageLog: the pages' own messages in Android's log; study: what the websites' pages ask their data feeds, kept in
+     * the app's folder (both only for trying the app: see BuildConfig.PAGE_LOG and STUDY).
+     */
+    public GeckoPage(Context c, Handler main, PageListener listener, RequestFilter filter, boolean pageLog, boolean study) {
         this.main = main;
         this.filter = filter;
         GeckoRuntime runtime = GeckoEngine.runtime(c, pageLog);
@@ -82,7 +85,7 @@ public final class GeckoPage implements Page {
         });
         view.setSession(session);
         extension.attach(this, filter);
-        extension.study(pageLog ? c.getExternalFilesDir(null) : null);
+        extension.study(study ? c.getExternalFilesDir(null) : null);
     }
 
     @Override
