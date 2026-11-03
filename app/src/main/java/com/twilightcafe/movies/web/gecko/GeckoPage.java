@@ -207,9 +207,12 @@ public final class GeckoPage implements Page {
         return History.stepsBack(history, historyAt);
     }
 
+    /** One step: the engine's own Back (the place kept here can be a step behind, and was: BACK opened the same page). */
     @Override
     public void go(int steps) {
-        if (session != null && steps != 0) session.gotoHistoryIndex(historyAt + steps);
+        if (session == null || steps == 0) return;
+        if (steps == -1) session.goBack();
+        else session.gotoHistoryIndex(historyAt + steps);
     }
 
     @Override
