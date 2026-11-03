@@ -76,8 +76,8 @@ public final class GeckoEngine {
     /**
      * Its settings at the start: a film's picture is never put to sleep, for being out of sight or paused a
      * while (on TV boxes it can stay frozen when it plays again, while the sound goes on; Twilight TV saw it). On
-     * GitHub's emulators (their screen drawn in software): pages drawn ten times a second at most, and films not
-     * started by themselves (more kept the emulator's graphics so busy that it froze).
+     * GitHub's emulators (their screen drawn in software): pages drawn ten times a second at most, films not started
+     * by themselves, and not Android's own film decoders (a website's player readying one froze the emulator).
      */
     private static String writeConfig(Context c, boolean emulator) {
         String yaml = "prefs:\n"
@@ -86,7 +86,8 @@ public final class GeckoEngine {
         if (emulator) {
             yaml += "  layout.frame_rate: 10\n"
                     + "  media.autoplay.default: 5\n"
-                    + "  media.geckoview.autoplay.request: false\n";
+                    + "  media.geckoview.autoplay.request: false\n"
+                    + "  media.android-media-codec.enabled: false\n";
         }
         File f = new File(c.getFilesDir(), "gecko-config.yaml");
         FileOutputStream out = null;

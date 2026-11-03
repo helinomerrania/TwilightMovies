@@ -23,7 +23,7 @@ shot() {
 
 key() {
   for k in "$@"; do
-    adb shell input keyevent "$k"
+    timeout 20 adb shell input keyevent "$k"
     sleep 1
   done
 }
