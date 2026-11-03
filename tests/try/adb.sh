@@ -1,20 +1,21 @@
 #!/usr/bin/env bash
-# What the tries on the emulator do with it (emulator.sh and twilight.sh source this): a screenshot with the
-# screen's UI tree (shot; tree: the tree alone), the remote's keys (key), a tap on what the screen says (tap), and a
-# button of the app's menu (choose). They write to $OUT, each file named $NAME-<step number>-<step>.
+# What the tries on the emulator do with it (emulator.sh, twilight.sh and study.sh source this): a screenshot
+# with the screen's UI tree (shot; picture: the screenshot alone; tree: the tree alone), the remote's keys (key), a
+# tap on what the screen says (tap), and a button of the app's menu (choose). They write to $OUT, each file named
+# $NAME-<step number>-<step>.
 n=${n:-0}
 
 # The screen's UI tree (in /sdcard/ui.xml), waited for 30 seconds at most: on a page that never stops moving (a
 # spinner, a film playing) it would wait for ever
 tree() {
   timeout 30 adb shell uiautomator dump /sdcard/ui.xml > /dev/null 2>&1 && return 0
-  adb shell pkill -f uiautomator > /dev/null 2>&1
+  timeout 10 adb shell pkill -f uiautomator > /dev/null 2>&1
   return 1
 }
 
 # A screenshot from the emulator itself (what its screen shows), not from Android: Android making one while
 # Firefox's engine drew a website's player froze the emulator. Android's own only if the emulator gave none.
-shot() {
+picture() {
   n=$((n + 1))
   local f dir
   f=$(printf '%s/%s-%02d-%s' "$OUT" "$NAME" "$n" "$1")
@@ -27,8 +28,14 @@ shot() {
     timeout 30 adb exec-out screencap -p > "$f.png"
   fi
   rm -rf "$dir"
-  tree && timeout 30 adb shell cat /sdcard/ui.xml > "$f.xml"
   echo "screenshot $f.png"
+}
+
+# A screenshot and the screen's UI tree. On a website's player, picture alone: reading the tree there froze the
+# emulator too.
+shot() {
+  picture "$1"
+  tree && timeout 30 adb shell cat /sdcard/ui.xml > "$(printf '%s/%s-%02d-%s' "$OUT" "$NAME" "$n" "$1").xml"
 }
 
 key() {
@@ -66,12 +73,14 @@ PY
   adb shell input tap $at
 }
 
-# In the app's menu: down, until the button whose words match $1 has the remote; then OK on it.
+# In the app's menu: down (then up, from the bottom), until the button whose words match $1 has the remote; then OK
+# on it. A panel starts on its current button (the Websites panel: the website shown), which can be below it.
 choose() {
-  local i
-  for i in $(seq 1 14); do
-    tree
-    if adb shell cat /sdcard/ui.xml | python3 -c '
+  local i way
+  for way in KEYCODE_DPAD_DOWN KEYCODE_DPAD_UP; do
+    for i in $(seq 1 14); do
+      tree
+      if timeout 30 adb shell cat /sdcard/ui.xml | python3 -c '
 import re, sys
 xml = sys.stdin.read()
 for node in re.findall(r"<node [^>]*>", xml):
@@ -79,11 +88,12 @@ for node in re.findall(r"<node [^>]*>", xml):
         words = " ".join(w for w in re.findall(r"(?:text|content-desc)=\"([^\"]*)\"", node) if w)
         sys.exit(0 if re.search(sys.argv[1], words, re.I) else 1)
 sys.exit(1)' "$1"; then
-      echo "choose $1"
-      key KEYCODE_DPAD_CENTER
-      return 0
-    fi
-    key KEYCODE_DPAD_DOWN
+        echo "choose $1"
+        key KEYCODE_DPAD_CENTER
+        return 0
+      fi
+      key "$way"
+    done
   done
   echo "nothing in the menu matches $1"
   return 1

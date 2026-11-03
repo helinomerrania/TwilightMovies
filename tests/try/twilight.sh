@@ -46,9 +46,9 @@ shot row-on
 key KEYCODE_DPAD_CENTER
 sleep 10
 shot film
-key KEYCODE_DPAD_CENTER   # Watch: the website's player, alone on the screen
+key KEYCODE_DPAD_CENTER   # Watch: the website's player, alone on the screen (its picture alone: see adb.sh)
 sleep 25
-shot playing
+picture playing
 key KEYCODE_BACK
 sleep 8
 shot back-to-title
@@ -69,7 +69,7 @@ sleep 4
 shot episodes
 key KEYCODE_DPAD_CENTER   # an episode, its player alone
 sleep 25
-shot episode-playing
+picture episode-playing
 key KEYCODE_BACK
 sleep 8
 key KEYCODE_BACK
