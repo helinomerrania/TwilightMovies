@@ -88,6 +88,10 @@ module.exports = (async () => {
   d = doc([E('div', { attrs: { class: 'relative aspect-backdrop w-full' } }, [start]), E('div', {}, [server])]);
   check('Mars Cinema: its player\'s start pressed (the button in its box), not another', [player.press(d, 'marscinema.net'),
     start.calls, server.calls], [true, [['click']], []]);
+  const marsBox = E('div', { name: 'box', attrs: { class: 'relative aspect-backdrop w-full' } }, [
+    E('iframe', { attrs: { src: 'https://marshost.pages.dev/embed-0lz5i847aaw7.html' }, rect: big })]);
+  d = doc([marsBox, E('div', {}, [E('button', { attrs: { class: 'server' } })])]);
+  check('...then its player: the box its frame came in (what the player shows over it stays)', player.find(d, 'marscinema.net').name, 'box');
 
   const frame = E('iframe', { name: 'frame', attrs: { src: 'https://beenar.uns.bio/' }, rect: big });
   const around = E('div', { name: 'around' }, [frame]);

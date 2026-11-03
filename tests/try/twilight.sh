@@ -81,7 +81,7 @@ shot back-again
 key KEYCODE_DPAD_UP KEYCODE_DPAD_UP KEYCODE_DPAD_UP KEYCODE_DPAD_UP KEYCODE_DPAD_UP KEYCODE_DPAD_UP
 shot top
 tap '^گەڕان$|^Search$' || key KEYCODE_DPAD_LEFT KEYCODE_DPAD_LEFT KEYCODE_DPAD_LEFT KEYCODE_DPAD_LEFT KEYCODE_DPAD_LEFT KEYCODE_DPAD_CENTER
-sleep 3
+sleep 6   # its letters drawn, so the screen's tree has them
 shot search
 tap '^ABC$' && sleep 2 && shot letters
 for ch in s p i d e r; do tap "^$ch\$"; sleep 1; done

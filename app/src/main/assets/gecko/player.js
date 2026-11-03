@@ -16,7 +16,7 @@ var player = {
     'www.kartonikurde.com': {tag: 'IFRAME'},
     'kurdsaz.com': {id: 'player-wrapper'},
     'kurdcinama.com': {},
-    'marscinema.net': {tag: 'IFRAME', press: {tag: 'button', in: 'aspect-backdrop'}},
+    'marscinema.net': {tag: 'IFRAME', box: /(^|\s)aspect-backdrop(\s|$)/, press: {tag: 'button', in: 'aspect-backdrop'}},
   },
   TRAILER: /\/\/(www\.)?(youtube\.com|youtube-nocookie\.com|youtu\.be)\//,
 
