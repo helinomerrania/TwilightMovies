@@ -37,8 +37,10 @@ look() {
   key KEYCODE_DPAD_DOWN KEYCODE_DPAD_DOWN KEYCODE_DPAD_CENTER
   sleep 15
   picture "$1-then"
-  # What the pages asked so far, with the answers, as the app keeps it (web/gecko/StudyFile: its own folder)
-  timeout 30 adb shell cat /sdcard/Android/data/com.twilightcafe.movies/files/study.jsonl > "$OUT/$NAME-data.txt"
+  # What the pages asked so far, with the answers, as the app keeps it (web/gecko/StudyFile: its own folder); not
+  # in place of what came before if the emulator gives nothing (frozen)
+  timeout 30 adb shell cat /sdcard/Android/data/com.twilightcafe.movies/files/study.jsonl > "$OUT/data.new"
+  if [ -s "$OUT/data.new" ]; then mv "$OUT/data.new" "$OUT/$NAME-data.txt"; else rm -f "$OUT/data.new"; fi
 }
 
 look kurdfilm   # the website a new box opens
@@ -53,4 +55,4 @@ done
 kill "$logger" 2> /dev/null
 sleep 1
 grep -E "GeckoConsole|TwilightMovies|AndroidRuntime|FATAL" "$OUT/$NAME-logcat.txt" | tail -n 400 > "$OUT/$NAME-log.txt"
-echo "data: $(wc -l < "$OUT/$NAME-data.txt") requests written down; $(ls "$OUT" | wc -l) files"
+echo "data: $(cat "$OUT/$NAME-data.txt" 2> /dev/null | wc -l) requests written down; $(ls "$OUT" | wc -l) files"

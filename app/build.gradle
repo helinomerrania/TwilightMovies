@@ -36,9 +36,9 @@ android {
         // -Pstudy (the websites' study on GitHub's emulators, study.yml): what the websites' pages ask their data feeds,
         // kept by the app (assets/gecko/study.js, web/gecko/StudyFile). Never on the boxes either
         buildConfigField "boolean", "STUDY", project.hasProperty('study') ? 'true' : 'false'
-        // -Pemulator (the builds for GitHub's emulators, whose screen is drawn in software): pages drawn ten times a
-        // second at most, films don't start by themselves, and Android's own film decoders aren't used. A website's
-        // player readying one froze the emulator (Firefox's engine kept its graphics busy). Never on the boxes
+        // -Pemulator (the builds for GitHub's emulators, whose graphics are emulated): pages drawn by the processor
+        // (the emulator's graphics stopped on some websites' pages), ten times a second at most; films don't start by
+        // themselves, and Android's own film decoders aren't used. Never on the boxes
         buildConfigField "boolean", "EMULATOR", project.hasProperty('emulator') ? 'true' : 'false'
         ndk {
             abiFilters.add(geckoAbi)
