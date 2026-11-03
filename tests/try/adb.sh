@@ -16,8 +16,8 @@ shot() {
   n=$((n + 1))
   local f
   f=$(printf '%s/%s-%02d-%s' "$OUT" "$NAME" "$n" "$1")
-  adb exec-out screencap -p > "$f.png"
-  tree && adb shell cat /sdcard/ui.xml > "$f.xml"
+  timeout 30 adb exec-out screencap -p > "$f.png"
+  tree && timeout 30 adb shell cat /sdcard/ui.xml > "$f.xml"
   echo "screenshot $f.png"
 }
 

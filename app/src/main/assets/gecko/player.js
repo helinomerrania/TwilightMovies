@@ -43,12 +43,14 @@ var player = {
     return best;
   },
 
-  // A website's first server, chosen (the player comes once it is)
+  // A website's first server, chosen (the player comes once it is); not its trailer, which can come first (Kurd
+  // Movie's does: player-option-trailer, data-nume="trailer")
   press: function (doc, host) {
     var site = player.SITES[host] || {};
     if (!site.press) return false;
     var first = Array.prototype.filter.call(doc.querySelectorAll('li'), function (li) {
-      return (' ' + (li.getAttribute('class') || '') + ' ').indexOf(' ' + site.press + ' ') >= 0;
+      return (' ' + (li.getAttribute('class') || '') + ' ').indexOf(' ' + site.press + ' ') >= 0
+        && !/trailer/i.test((li.getAttribute('id') || '') + ' ' + (li.getAttribute('data-nume') || ''));
     })[0];
     if (first) first.click();
     return !!first;
@@ -81,7 +83,7 @@ var player = {
         if (!document.body || (shown && document.contains(shown))) return;
         shown = player.find(document, host);
         if (shown) player.isolate(document, shown);
-        else if (ticks === 8) player.press(document, host);   // four seconds and no player: its first server
+        else if (ticks === 8 || ticks === 30) player.press(document, host);   // four seconds, no player: its first server
       }, 500);
     }, function () {});
   },

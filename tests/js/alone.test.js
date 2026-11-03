@@ -75,10 +75,13 @@ module.exports = (async () => {
   d = doc([E('video', { name: 'small', rect: [0, 0, 400, 300] }), E('video', { name: 'large', rect: big })]);
   check('another website: its biggest video', player.find(d, 'kurdcinama.com').name, 'large');
 
-  const options = [E('li', { name: 'first', attrs: { class: 'dooplay_player_option on' } }), E('li', { attrs: { class: 'dooplay_player_option' } })];
+  // As Kurd Movie's page has them: its trailer first, then its servers
+  const options = [E('li', { attrs: { id: 'player-option-trailer', class: 'dooplay_player_option', 'data-nume': 'trailer' } }),
+    E('li', { attrs: { id: 'player-option-1', class: 'dooplay_player_option', 'data-nume': '1' } }),
+    E('li', { attrs: { id: 'player-option-2', class: 'dooplay_player_option', 'data-nume': '2' } })];
   d = doc([E('ul', {}, options)]);
-  check('no player yet: Kurd Movie\'s first server chosen', [player.find(d, 'www.kurd-movie.com'), player.press(d, 'www.kurd-movie.com'),
-    options[0].calls, options[1].calls], [null, true, [['click']], []]);
+  check('no player yet: Kurd Movie\'s first server chosen, not its trailer', [player.find(d, 'www.kurd-movie.com'),
+    player.press(d, 'www.kurd-movie.com'), options.map((o) => o.calls)], [null, true, [[], [['click']], []]]);
   check('...nothing pressed where there\'s nothing to press', player.press(d, 'beenar.net'), false);
 
   const frame = E('iframe', { name: 'frame', attrs: { src: 'https://beenar.uns.bio/' }, rect: big });

@@ -54,8 +54,8 @@ jobs:
           gh release download filters -p filters.bin -D app/src/main/assets --clobber
           chmod +x gradlew
           # Firefox's engine for the emulators' processor (the boxes get the one for ARM), with the pages' own
-          # messages in Android's log (never on the boxes)
-          ./gradlew --no-daemon assembleRelease -Pgeckoabi=x86_64 -Ppagelog -Pstudy
+          # messages in Android's log, and as the emulators can take it (-Pemulator; never on the boxes)
+          ./gradlew --no-daemon assembleRelease -Pgeckoabi=x86_64 -Ppagelog -Pemulator -Pstudy
           cp app/build/outputs/apk/release/app-release.apk twilight-movies.apk
           ls -l twilight-movies.apk
       - name: Let the emulator use the processor's virtualization
@@ -64,12 +64,14 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - name: The app, step by step
+        timeout-minutes: 30   # it takes about 18; more is a freeze, and what it saw is published all the same
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api }}
           target: google_apis   # 64-bit, as Firefox's engine is (Android TV's own emulators are 32-bit)
           arch: x86_64
           profile: tv_1080p
+          ram-size: 4096M   # Firefox's engine runs a part of itself for each website on a page: 1.5 GB ran out
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-boot-anim
           script: bash tests/try/study.sh twilight-movies.apk out ${{ matrix.name }}

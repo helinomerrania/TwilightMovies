@@ -44,8 +44,11 @@ public final class GeckoEngine {
         }
     }
 
-    /** The engine, started once for the app; pageLog: the pages' own messages in Android's log (try builds only). */
-    static GeckoRuntime runtime(Context c, boolean pageLog) {
+    /**
+     * The engine, started once for the app; pageLog: the pages' own messages in Android's log; emulator: as GitHub's
+     * emulators can take it (both try builds only).
+     */
+    static GeckoRuntime runtime(Context c, boolean pageLog, boolean emulator) {
         if (runtime == null) {
             Context app = c.getApplicationContext();
             GeckoRuntimeSettings.Builder s = new GeckoRuntimeSettings.Builder()
@@ -58,7 +61,7 @@ public final class GeckoEngine {
                     .fontSizeFactor(1f)
                     .loginAutofillEnabled(false)
                     .aboutConfigEnabled(false);
-            String config = writeConfig(app);
+            String config = writeConfig(app, emulator);
             if (config != null) s.configFilePath(config);
             runtime = GeckoRuntime.create(app, s.build());
         }
@@ -72,12 +75,19 @@ public final class GeckoEngine {
 
     /**
      * Its settings at the start: a film's picture is never put to sleep, for being out of sight or paused a
-     * while (on TV boxes it can stay frozen when it plays again, while the sound goes on; Twilight TV saw it).
+     * while (on TV boxes it can stay frozen when it plays again, while the sound goes on; Twilight TV saw it). On
+     * GitHub's emulators (their screen drawn in software): pages drawn ten times a second at most, and films not
+     * started by themselves (more kept the emulator's graphics so busy that it froze).
      */
-    private static String writeConfig(Context c) {
+    private static String writeConfig(Context c, boolean emulator) {
         String yaml = "prefs:\n"
                 + "  media.suspend-background-video.enabled: false\n"
                 + "  media.dormant-on-pause-timeout-ms: -1\n";
+        if (emulator) {
+            yaml += "  layout.frame_rate: 10\n"
+                    + "  media.autoplay.default: 5\n"
+                    + "  media.geckoview.autoplay.request: false\n";
+        }
         File f = new File(c.getFilesDir(), "gecko-config.yaml");
         FileOutputStream out = null;
         try {

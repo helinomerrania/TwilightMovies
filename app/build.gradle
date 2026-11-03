@@ -36,6 +36,10 @@ android {
         // -Pstudy (the websites' study on GitHub's emulators, study.yml): what the websites' pages ask their data feeds,
         // kept by the app (assets/gecko/study.js, web/gecko/StudyFile). Never on the boxes either
         buildConfigField "boolean", "STUDY", project.hasProperty('study') ? 'true' : 'false'
+        // -Pemulator (the builds for GitHub's emulators, whose screen is drawn in software): pages drawn ten times a
+        // second at most, and films don't start by themselves. With more, Firefox's engine kept the emulator's
+        // graphics so busy that it froze. Never on the boxes
+        buildConfigField "boolean", "EMULATOR", project.hasProperty('emulator') ? 'true' : 'false'
         ndk {
             abiFilters.add(geckoAbi)
         }
