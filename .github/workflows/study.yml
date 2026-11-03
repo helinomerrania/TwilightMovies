@@ -51,7 +51,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p app/src/main/assets
-          gh release download filters -p filters.bin -D app/src/main/assets --clobber
+          # the ad blocker's filters as this branch makes them (its own rules too); else the ones published last
+          if tools/filters/build.sh "$RUNNER_TEMP/filters" > filters.log 2>&1; then
+            cp "$RUNNER_TEMP/filters/filters.bin" app/src/main/assets/filters.bin
+          else
+            tail -n 20 filters.log
+            gh release download filters -p filters.bin -D app/src/main/assets --clobber
+          fi
           chmod +x gradlew
           # Firefox's engine for the emulators' processor (the boxes get the one for ARM), with the pages' own
           # messages in Android's log, and as the emulators can take it (-Pemulator; never on the boxes)
