@@ -22,10 +22,11 @@ var ALONE_STYLE = 'html[data-tm-alone], html[data-tm-alone] body { overflow: hid
   'html[data-tm-alone] [data-tm-servers], html[data-tm-alone] [data-tm-servers] * { visibility: visible !important; }\n' +
   'html[data-tm-alone] [data-tm-servers] { position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important;' +
   ' height: 7vh !important; margin: 0 !important; padding: 0 2vh !important; box-sizing: border-box !important;' +
-  ' display: flex !important; align-items: center !important; justify-content: center !important; gap: 1vh !important;' +
-  ' overflow: hidden !important; background: #000 !important; z-index: 2147483647 !important; }\n' +
+  ' display: flex !important; align-items: center !important; justify-content: safe center !important; gap: 1vh !important;' +
+  ' overflow-x: auto !important; overflow-y: hidden !important; scrollbar-width: none !important;' +   // many: it scrolls
+  ' background: #000 !important; z-index: 2147483647 !important; }\n' +
   'html[data-tm-alone] [data-tm-servers] button { -moz-appearance: none !important; appearance: none !important;' +   // not Android's own look
-  ' margin: 0 !important; padding: 0.9vh 2.2vh !important; border: 0 !important;' +
+  ' flex: none !important; margin: 0 !important; padding: 0.9vh 2.2vh !important; border: 0 !important;' +
   ' border-radius: 999px !important; background: transparent !important; color: #8c8c8c !important; font: inherit !important;' +
   ' font-size: 2.6vh !important; line-height: 1.2 !important; white-space: nowrap !important; }\n' +
   'html[data-tm-alone] [data-tm-servers] button[data-tm-on] { color: #fff !important; background: rgba(255, 255, 255, 0.14) !important; }\n';

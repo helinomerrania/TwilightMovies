@@ -100,6 +100,7 @@ function page(body, o) {
   const doc = {
     documentElement: html, body: html.children[0], scrollingElement: html, fullscreenElement: null,
     querySelectorAll: (s) => [html].concat(all(html, [])).filter((x) => matches(x, s)),
+    querySelector: (s) => [html].concat(all(html, [])).find((x) => matches(x, s)) || null,
     elementFromPoint: (x, y) => {
       let best = null;
       all(html, []).forEach((e) => {

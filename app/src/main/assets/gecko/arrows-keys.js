@@ -1,7 +1,7 @@
 // The remote's arrows (arrows.js says how they work): the keys. An arrow after the website's own listeners (unless
 // the website used it, or it moves a field's caret); OK before them on a field, for the on-screen keyboard (or a
-// list's picker); and OK on what the page only clicks on, a click when it comes up. Up in a player's frame, with
-// the website's servers over the player (lift): before them, out to the servers.
+// list's picker); and OK on what the page only clicks on, a click when it comes up. Up in the player, with the
+// website's servers over it (lift): before them, to the servers (a player of the page's own takes every key).
 'use strict';
 (function (a) {
   var WAYS = {ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right'};
@@ -122,10 +122,9 @@
   // Before the website's own: OK on a field opens the keyboard (or a list's picker), and the page doesn't see it
   window.addEventListener('keydown', function (e) {
     if (!e.isTrusted || (!wayOf(e) && !isOk(e))) return;
-    if (a.lift && !a.top && wayOf(e) === 'up' && plain(e)) {   // up to the website's servers, over its player
+    if (wayOf(e) === 'up' && plain(e) && a.lifting()) {   // up to the website's servers, over its player
       e.preventDefault();
       e.stopImmediatePropagation();
-      a.out('up');
       return;
     }
     last('keydown', afterKeyDown);

@@ -16,10 +16,14 @@ var player = {
       servers: {tag: 'button', cls: 'server-item', name: 'server-item-name', on: 'server-item--active'}},
     'www.kurd-movie.com': {tag: 'IFRAME', press: {tag: 'li', cls: 'dooplay_player_option'},
       servers: {tag: 'li', cls: 'dooplay_player_option', name: 'title', on: 'on'}},
-    'www.kartonikurde.com': {tag: 'IFRAME'},
-    'kurdsaz.com': {id: 'player-wrapper'},
-    'kurdcinama.com': {},
-    'marscinema.net': {tag: 'IFRAME', box: /(^|\s)aspect-backdrop(\s|$)/, press: {tag: 'button', in: 'aspect-backdrop'}},
+    'www.kartonikurde.com': {tag: 'IFRAME', servers: {tag: 'button', attr: ['wire:click', /^selectServer\(/],
+      notAttr: ['wire:click', /"requires_vip":\s*true/], on: 'theme-primary-bg'}},
+    'kurdsaz.com': {id: 'player-wrapper', servers: {tag: 'button', cls: 'server-btn', on: 'active'}},
+    'kurdcinama.com': {servers: {tag: 'option', in: ['quality-select', 'server-select']}},   // its list of servers
+    // its own server's start; once its free hour of the day is over, the free servers it offers instead
+    'marscinema.net': {tag: 'IFRAME', box: /(^|\s)aspect-backdrop(\s|$)/,
+      press: [{tag: 'button', in: 'aspect-backdrop'}, {tag: 'button', words: 'سەیرکردن بە سێرڤەرە ئاساییەکان'}],
+      servers: {tag: 'button', cls: 'group/server', name: 'truncate', reveal: 'بینینی سێرڤەرە ئاساییەکان'}},
     'kurdsubtitle.net': {id: 'player-frame', box: /(^|\s)rounded-2xl(\s|$)/, steps: true,   // its presses: player-steps.js
       servers: {tag: 'button', cls: 'text-right', in: 'basis-[25%]'}},
   },
@@ -52,13 +56,18 @@ var player = {
     return best;
   },
 
-  // A website's first server, or its player's start, pressed (the player comes once it is); not a trailer, which can
-  // come first (Kurd Movie's does: player-option-trailer, data-nume="trailer")
+  // A website's first server, or its player's start, pressed (the player comes once it is): the first of its recipes
+  // there is something for; not a trailer, which can come first (Kurd Movie's does: data-nume="trailer")
   press: function (doc, host) {
-    var how = (player.SITES[host] || {}).press;
-    var first = how ? playerServers.list(doc, how)[0] : null;   // as its servers are found
-    if (first) first.click();
-    return !!first;
+    var hows = [].concat((player.SITES[host] || {}).press || []);
+    for (var i = 0; i < hows.length; i++) {
+      var first = playerServers.list(doc, hows[i])[0];   // as its servers are found
+      if (first) {
+        first.click();
+        return true;
+      }
+    }
+    return false;
   },
 
   // The player alone: it (and what's in it) marked, the boxes around it too (so it can fill the screen), the page

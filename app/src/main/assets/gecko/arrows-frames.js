@@ -96,6 +96,16 @@
     });
   }
 
+  // Up to the website's servers over its player (lift): out of the player's frame to the page around; in the page,
+  // from the player (or from nothing) to the row above it. True if the remote goes there.
+  a.lifting = function () {
+    if (!a.lift) return false;
+    if (!a.top) return a.out('up');
+    var player = document.querySelector('[data-tm-player]'), f = a.focused();
+    if (!player || (f && !player.contains(f))) return false;
+    return a.go('up', a.box(player), f, f ? [f] : []);
+  };
+
   // The remote comes out of a frame of this page, that way: on from the frame, to the nearest past it
   function comeOut(way) {
     var f = a.focused();
