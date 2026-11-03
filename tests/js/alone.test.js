@@ -151,6 +151,6 @@ module.exports = (async () => {
   [['scrollIntoView', { block: 'center' }, false], true, true, true, true, 'focus']);
   timed.splice(0).forEach(([f]) => f());
   timed.splice(0).forEach(([f]) => f());
-  check('...and the page scrolled a little and back, three times (a frame is told it\'s in sight when the page scrolls)',
-    scrolled, [899, 899, 899, 900, 900, 900]);
+  check('...and the page scrolled a little and back, four times (a frame is told it\'s in sight when the page scrolls)',
+    scrolled, [899, 899, 899, 899, 900, 900, 900, 900]);
 })();

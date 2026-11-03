@@ -86,7 +86,13 @@ var player = {
     try {
       into.focus({preventScroll: true});
     } catch (e) { /* not yet */ }
-    [300, 3000, 8000].forEach(function (ms) {   // its player may start later
+    player.nudge();
+  },
+
+  // The page scrolled a pixel and back, now and then in the next seconds (its player may come later): its frames told
+  // they're in sight
+  nudge: function () {
+    [300, 3000, 8000, 15000].forEach(function (ms) {
       setTimeout(function () {
         var y = window.scrollY;
         window.scrollTo(0, y > 0 ? y - 1 : y + 1);
@@ -124,10 +130,11 @@ var player = {
       var snapshot = function (step) {
         if (study) browser.runtime.sendMessage({snapshot: {url: location.href, step: step, html: document.documentElement.outerHTML}});
       };
-      var again = function () {
+      var again = function () {   // another server pressed in the row: its player in sight too
         chosen = true;
         ticks = 0;
         if (!timer) timer = setInterval(tick, 500);
+        player.nudge();
       };
       var tick = function () {
         if (++ticks > 240) {   // two minutes

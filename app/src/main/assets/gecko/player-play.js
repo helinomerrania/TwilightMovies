@@ -90,13 +90,14 @@ var playerPlay = {
       var r = v.play();
       if (r && r.catch) r.catch(function (e) { console.info('Twilight Movies, play: ' + location.host + ' ' + e.name); });
     } else if (p.tries % 3 === 1 && p.presses < 4 && doc.readyState === 'complete') {   // once its player is drawn
-      p.presses++;
       if (!top && p.own(window)) {
+        p.presses++;
         console.info('Twilight Movies, play: ' + location.host + ' started its player');
         return false;
       }
       var b = p.start(doc, scope, top);
-      if (b) {
+      if (b) {   // a press counted only when there was something to press (a player that comes late gets its own)
+        p.presses++;
         console.info('Twilight Movies, play: ' + location.host + ' pressed ' + String(b.tagName).toLowerCase() + '.' +
           String(b.getAttribute('class') || '').split(' ')[0]);
         b.click();

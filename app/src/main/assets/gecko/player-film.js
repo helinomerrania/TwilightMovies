@@ -44,10 +44,14 @@ var playerFilm = {
   },
 
   // A series' episode ended (player-ends.js): the next, in this one's place in the page's history (BACK goes back to
-  // the Twilight screens still); its address only differs after # (Kurd Subtitle's): the page loaded again for it
+  // the Twilight screens still); its address only differs after # (Kurd Subtitle's): the page loaded again for it.
+  // The background page told first: the next one's page is the Watch's too (its player alone, its film started).
   episode: function (url) {
     var same = url.split('#')[0] === location.href.split('#')[0];
-    location.replace(url);
-    if (same) location.reload();
+    var go = function () {
+      location.replace(url);
+      if (same) location.reload();
+    };
+    browser.runtime.sendMessage({going: url}).then(go, go);
   },
 };

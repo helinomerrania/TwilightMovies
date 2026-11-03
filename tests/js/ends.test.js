@@ -43,7 +43,9 @@ f.fire('ended', f.doc.querySelectorAll('video')[0]);
 check('...in the page itself, not a video outside its player alone', f.sent, []);
 
 // The page: the next server in the row pressed, each once; the next episode, in this one's place
-const P = vm.createContext({ Array, String, location: { href: 'https://kurdsubtitle.net/tvshows/1-Lupin#tm-play=2-3' } });
+const toldBg = [];
+const P = vm.createContext({ Array, String, location: { href: 'https://kurdsubtitle.net/tvshows/1-Lupin#tm-play=2-3' },
+  browser: { runtime: { sendMessage: (m) => { toldBg.push(m); return { then: (f) => f() }; } } } });
 vm.runInContext(read('player-film.js'), P);
 const film2 = vm.runInContext('playerFilm', P);
 const names = ['Vidmoly', 'YourUpload', 'SendVid'].map((n, i) => E('button', { name: n, attrs: i === 0 ? { 'data-tm-on': '' } : {} }));
@@ -55,8 +57,10 @@ P.location.replace = (u) => went.push(['replace', u]);
 P.location.reload = () => went.push(['reload']);
 film2.episode('https://kurdsubtitle.net/tvshows/1-Lupin#tm-play=2-4');
 film2.episode('https://marscinema.net/watch/barry?ep=281');
-check('the next episode, in this one\'s place in the history; one only its address\'s end differs for, loaded again',
-  went, [['replace', 'https://kurdsubtitle.net/tvshows/1-Lupin#tm-play=2-4'], ['reload'], ['replace', 'https://marscinema.net/watch/barry?ep=281']]);
+check('the next episode, in this one\'s place in the history; one only its address\'s end differs for, loaded again; the background '
+  + 'page told first (its page is the Watch\'s too)', [went, toldBg], [[['replace', 'https://kurdsubtitle.net/tvshows/1-Lupin#tm-play=2-4'],
+  ['reload'], ['replace', 'https://marscinema.net/watch/barry?ep=281']], [{ going: 'https://kurdsubtitle.net/tvshows/1-Lupin#tm-play=2-4' },
+  { going: 'https://marscinema.net/watch/barry?ep=281' }]]);
 
 // The background page
 const told = [];
@@ -111,6 +115,10 @@ module.exports = (async () => {
   check('the background page: the episode ended, the page told to play the next', told, [[2, { nextEpisode: 'https://marscinema.net/watch/barry?ep=279' }, 0]]);
   await asks(2, { ended: 1 });
   check('...none after the season\'s last', told.length, 1);
+  await asks(2, { going: 'https://kurdsubtitle.net/tvshows/1-Lupin#tm-play=2-4' });
+  vm.runInContext('aloneFor', bg)({ type: 'main_frame', tabId: 2, url: 'https://kurdsubtitle.net/tvshows/1-Lupin' });
+  check('...the page goes on to the next episode itself (loaded again, from no page the engine names): the Watch\'s still',
+    await asks(2, { alone: 'kurdsubtitle.net' }), true);
   const a = await asks(2, { advanced: 1 });
   check('...the screens asked where it went on to: told once', [a.key, a.ep.n, await asks(2, { advanced: 1 })], ['marscinema|series/barry', 2, null]);
   await asks(2, { failed: 1 });

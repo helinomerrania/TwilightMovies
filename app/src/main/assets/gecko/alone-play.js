@@ -41,6 +41,10 @@ browser.runtime.onMessage.addListener(function (m, sender) {
     delete advanced[tab];
     return Promise.resolve(true);
   }
+  if (typeof m.going === 'string' && tab >= 0 && alone[tab]) {   // the page goes on to the next episode itself
+    going[tab] = m.going;
+    return Promise.resolve(true);
+  }
   if (m.advanced && tab >= 0) {
     var went = advanced[tab] || null;
     delete advanced[tab];

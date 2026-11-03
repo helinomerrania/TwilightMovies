@@ -10,6 +10,7 @@ var lifted = {};   // a tab's number: its page shows its servers' row over the p
 var plays = {};    // a tab's number: the frames its player alone is in, where its film starts by itself (alone-play.js)
 var next = {};     // a tab's number: a series' episodes after the one playing, from the Twilight screens (alone-play.js)
 var advanced = {}; // a tab's number: the episode it went on to by itself, for the screens to keep (alone-play.js)
+var going = {};    // a tab's number: the next episode's address its page goes to by itself (alone-play.js): the Watch's still
 
 var ALONE_STYLE = 'html[data-tm-alone], html[data-tm-alone] body { overflow: hidden !important; background: #000 !important; }\n' +
   'html[data-tm-alone] body * { visibility: hidden !important; }\n' +
@@ -54,7 +55,9 @@ function aloneFor(d) {
   delete lifted[d.tabId];
   delete plays[d.tabId];
   var from = String(d.originUrl || '');
-  if (from.indexOf(OWN) === 0) alone[d.tabId] = hostOf(d.url);
+  var next1 = !!going[d.tabId] && String(d.url).split('#')[0] === going[d.tabId].split('#')[0];
+  delete going[d.tabId];
+  if (from.indexOf(OWN) === 0 || next1) alone[d.tabId] = hostOf(d.url);
   else if (alone[d.tabId] && !sameSite(hostOf(from), alone[d.tabId])) delete alone[d.tabId];
   if (!alone[d.tabId]) delete next[d.tabId];
   watching(d.tabId);
