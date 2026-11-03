@@ -85,7 +85,8 @@ TM.readers.marscinema = (function () {
   }
 
   return {
-    id: 'marscinema', name: 'Mars Cinema', home: SITE + '/', hosts: ['marscinema.net'],
+    // its Kurdish name, as the website writes it itself
+    id: 'marscinema', name: 'Mars Cinema', nameKu: 'مارس سینەما', home: SITE + '/', hosts: ['marscinema.net'],
 
     async rows(web) {
       const home = await web.text(SITE + '/');

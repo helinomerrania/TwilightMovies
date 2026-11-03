@@ -130,12 +130,24 @@ TM.catalog = (function () {
     return Object.assign({ season }, ep || { n: last && last.season === season ? last.episode : 1 });
   }
 
-  /** Plays it, on the website (the box keeps what was watched first, and the title with all its websites). */
+  /** A series' episodes after this one in its season, for the Watch to play by itself when one ends: where each
+   * plays (watch); not one that plays on this one's page (Kartoni Kurdi's are chosen on it). */
+  async function after(item, ep, url) {
+    const eps = await episodes(item, ep.season).catch(() => []);
+    const list = eps.filter((e) => e.n > ep.n).sort((a, b) => a.n - b.n).map((e) => ({ season: ep.season, n: e.n, id: e.id, url: e.url,
+      watch: TM.readers[item.site].watch(item.ref, Object.assign({ season: ep.season }, e)) })).filter((e) => e.watch !== url);
+    return { key: item.site + '|' + item.ref, list };
+  }
+
+  /** Plays it, on the website (the box keeps what was watched first, and the title with all its websites); a series'
+   * next episodes after it, by themselves. */
   async function play(entry, item, ep) {
     const episode = entry.kind === 'series' ? ep || await next(entry, item) : null;
     TM.saved.watch(entry, item, episode);
     TM.saved.keep(entry);
-    TM.app.leave(TM.readers[item.site].watch(item.ref, episode || undefined));
+    const url = TM.readers[item.site].watch(item.ref, episode || undefined);
+    await TM.app.queue(episode ? await after(item, episode, url) : null);
+    TM.app.leave(url);
   }
 
   return { health, homeKept, homeFresh, lists, search, title, episodes, next, play };

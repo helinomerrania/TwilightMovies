@@ -80,11 +80,15 @@ up() {
   key KEYCODE_DPAD_UP
   picture "$1-up"
 }
-visit kartonikurde 'https://www.kartonikurde.com/movie/frozen#tm-alone' && up kartonikurde
-visit kurdcinama 'https://kurdcinama.com/online.aspx?movieid=19786#tm-alone' && up kurdcinama
-visit marscinema 'https://marscinema.net/watch/barry?ep=279#tm-alone' && up marscinema
-visit kurd-movie 'https://www.kurd-movie.com/movies/fall-2-deadpoint/#tm-alone' && up kurd-movie
-visit kurdsaz 'https://kurdsaz.com/watch.php?slug=100-Days-of-Deception&ep=899#tm-alone' && up kurdsaz
+# A server that fails is passed over by itself (player-ends.js; here every film fails: this emulator plays none)
+visit kurdcinama 'https://kurdcinama.com/online.aspx?movieid=19786#tm-alone'
+sleep 30
+picture kurdcinama-later
+sleep 30
+picture kurdcinama-last
+visit kurd-movie 'https://www.kurd-movie.com/movies/fall-2-deadpoint/#tm-alone'
+sleep 30
+picture kurd-movie-later
 save
 
 kill "$logger" 2> /dev/null

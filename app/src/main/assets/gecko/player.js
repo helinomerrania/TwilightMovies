@@ -70,28 +70,6 @@ var player = {
     return false;
   },
 
-  // Its film started by itself (player-play.js, through alone-play.js): in the frames in the player alone, or by its
-  // own video in the page; each told once (a frame that comes after, another server's player, asks)
-  told: [],
-  play: function (el) {
-    var tell = function (id) {
-      if (player.told.indexOf(id) >= 0) return;
-      player.told.push(id);
-      browser.runtime.sendMessage({play: id});
-    };
-    if (el.tagName === 'VIDEO' || el.querySelector('video')) tell(0);
-    var frames = el.tagName === 'IFRAME' ? [el] : Array.prototype.slice.call(el.querySelectorAll('iframe'));
-    frames.forEach(function (f) {
-      var id = -1;
-      try {
-        id = browser.runtime.getFrameId(f);
-      } catch (e) {
-        // not one the engine knows yet: the next time
-      }
-      if (id > 0) tell(id);
-    });
-  },
-
   // The player alone: it (and what's in it) marked, the boxes around it too (so it can fill the screen), the page
   // marked; the background script's style (alone.js) does the rest
   isolate: function (doc, el) {
@@ -122,6 +100,11 @@ var player = {
     browser.runtime.sendMessage({alone: host}).then(function (yes) {
       if (!yes) return;
       browser.runtime.sendMessage({aloneStyle: 1});
+      browser.runtime.onMessage.addListener(function (m) {   // how its film ended (alone-play.js)
+        if (m && m.serverFailed) playerFilm.next(document);
+        if (m && typeof m.nextEpisode === 'string') playerFilm.episode(m.nextEpisode);
+        return undefined;
+      });
       var ticks = 0, shown = null, timer = null, lifted = false, chosen = false;
       var study = false;   // the study build (study.js): the page as drawn, now and then
       browser.runtime.sendMessage({studying: 1}).then(function (yes) { study = !!yes; }, function () {});
@@ -141,7 +124,7 @@ var player = {
         if (ticks === 20 || ticks === 60 || ticks === 120 || ticks === 240) snapshot('after ' + ticks / 2 + ' seconds');
         if (!document.body) return;
         if (shown && document.contains(shown)) {
-          player.play(shown);
+          playerFilm.play(shown);
           if (site.servers && playerServers.show(document, site.servers, again) && !lifted) {
             lifted = true;
             browser.runtime.sendMessage({lift: 1});

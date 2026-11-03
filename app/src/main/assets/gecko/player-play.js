@@ -4,7 +4,8 @@
 // frame of the page (a trailer's). Its film: the biggest video there, played; or, while it has nothing to play yet
 // (a player that loads its film only once it's started), the player started by its own scripts (JW Player's,
 // Video.js's), else its own start pressed, else what's in the middle of the player (often a veil over it that takes
-// the first press). Once its film plays, it's never started again by itself: the viewer may pause it.
+// the first press). Once its film plays, it's never started again by itself: the viewer may pause it. How it ends
+// (its server failed, or it played to its end): player-ends.js.
 'use strict';
 var playerPlay = {
   // The big start of the players the websites use (JW Player, Video.js, Plyr, Flowplayer, Fluid, MediaElement,
@@ -84,6 +85,7 @@ var playerPlay = {
       return true;
     }
     p.tries++;
+    if (p.tries > 2 && playerEnds.fails(scope, v)) return true;   // its server failed: the next one (player-ends.js)
     if (v && (v.currentSrc || v.getAttribute('src')) && p.tries % 2 === 1) {
       var r = v.play();
       if (r && r.catch) r.catch(function (e) { console.info('Twilight Movies, play: ' + location.host + ' ' + e.name); });
@@ -107,6 +109,7 @@ var playerPlay = {
     var p = playerPlay;
     if (p.on || p.done) return;
     p.on = true;
+    playerEnds.watch(document, function () { return p.scope(document, window.top === window); });   // its end
     var timer = setInterval(function () {
       if (document.body && p.tick(document, window.top === window)) clearInterval(timer);
     }, 1000);

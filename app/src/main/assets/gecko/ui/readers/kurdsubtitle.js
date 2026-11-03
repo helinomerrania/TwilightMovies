@@ -28,7 +28,8 @@ TM.readers.kurdsubtitle = (function () {
   const docs = (r) => ((r && r.docs) || []).filter((x) => x && x.slug && (x.type === 'movie' || x.type === 'tvshow'));
 
   return {
-    id: 'kurdsubtitle', name: 'Kurd Subtitle', home: SITE + '/', hosts: ['kurdsubtitle.net'],
+    // its Kurdish name, as the website writes it itself
+    id: 'kurdsubtitle', name: 'Kurd Subtitle', nameKu: 'کوردسەبتایتڵ', home: SITE + '/', hosts: ['kurdsubtitle.net'],
 
     async rows(web) {
       const [films, shows] = await Promise.all([web.json(API + '/movies?page=1'), web.json(API + '/tvshows?page=1')]);

@@ -63,6 +63,16 @@ TM.saved = (function () {
         ep: ep ? TM.item({ season, n: episode, url: ep.url, id: ep.id }) : null }), KEPT);
     },
     lastOf: (entry) => TM.store.get('watched', []).find((w) => same(w, entry)) || null,
+    /** An episode the Watch went on to by itself (the next, when one ended): its title's line says it, first. */
+    advance(key, ep) {
+      const line = TM.store.get('watched', []).find((w) => (w.refs || []).includes(key));
+      if (!line) return false;
+      const season = Number(ep.season) || 1;
+      const episode = Number(ep.n) || 1;
+      put('watched', Object.assign({}, line, { at: Date.now(), season, episode,
+        ep: TM.item({ season, n: episode, url: ep.url, id: ep.id }) }), KEPT);
+      return true;
+    },
 
     /** My list: newest first. */
     mine: () => TM.store.get('mine', []),

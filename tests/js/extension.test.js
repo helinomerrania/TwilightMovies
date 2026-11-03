@@ -69,7 +69,7 @@ check('...its background scripts: the app\'s side, (in the app\'s own try only) 
   + 'its film started by itself', manifest.background.scripts, ['background.js', 'study.js', 'alone.js', 'alone-play.js']);
 const cs = manifest.content_scripts[0];
 check('...its page scripts: in the page itself (its top frame), from the very start; the player alone', [cs.js, cs.run_at, cs.all_frames],
-  [['page.js', 'player-steps.js', 'player-servers.js', 'player.js'], 'document_start', false]);
+  [['page.js', 'player-steps.js', 'player-servers.js', 'player-film.js', 'player.js'], 'document_start', false]);
 ok('...and an id of its own', /^[\w.-]+@[\w.-]+$/.test(manifest.browser_specific_settings.gecko.id));
 const keys = manifest.content_scripts[1] || {};
 check('...the remote\'s arrows: in every frame of the page, from the very start, with their ring',
@@ -78,7 +78,7 @@ check('...the remote\'s arrows: in every frame of the page, from the very start,
 ok('...and it may follow a page\'s frames, to pass the remote between them', manifest.permissions.includes('webNavigation'));
 const plays = manifest.content_scripts[2] || {};
 check('...the Watch\'s film started by itself: in every frame of the page (its player\'s are told), from the very start',
-  [plays.js, plays.run_at, plays.all_frames], [['player-play.js'], 'document_start', true]);
+  [plays.js, plays.run_at, plays.all_frames], [['player-ends.js', 'player-play.js'], 'document_start', true]);
 
 const java = fs.readFileSync(path.join(ROOT, 'app', 'src', 'main', 'java', 'com', 'twilightcafe', 'movies', 'web', 'gecko',
   'Extension.java'), 'utf8');

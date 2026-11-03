@@ -65,7 +65,24 @@ TM.app = (function () {
     location.href = url;
   }
 
+  /** What the Watch plays by itself when this episode ends (the background page keeps it): the next ones, or none. */
+  function queue(next) {
+    if (typeof browser === 'undefined') return Promise.resolve();
+    return browser.runtime.sendMessage({ episodes: next }).then(() => {}, () => {});
+  }
+
+  // The episode the Watch went on to by itself, after the one played from here: kept as watched, so Continue is it
+  function advanced() {
+    if (typeof browser === 'undefined') return;
+    browser.runtime.sendMessage({ advanced: 1 }).then((a) => {
+      if (a && a.key && a.ep && TM.saved.advance(a.key, a.ep)) render();
+    }, () => {});
+  }
+
   window.addEventListener('hashchange', render);
-  document.addEventListener('DOMContentLoaded', render);
-  return { go, swap, back, leave, state, remember, was, render, version: params.get('v') || '' };
+  document.addEventListener('DOMContentLoaded', () => {
+    advanced();
+    render();
+  });
+  return { go, swap, back, leave, queue, state, remember, was, render, version: params.get('v') || '' };
 })();

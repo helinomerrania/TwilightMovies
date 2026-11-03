@@ -22,7 +22,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["page.js", "player-steps.js", "player-servers.js", "player.js"],
+      "js": ["page.js", "player-steps.js", "player-servers.js", "player-film.js", "player.js"],
       "run_at": "document_start",
       "all_frames": false
     },
@@ -35,7 +35,7 @@
     },
     {
       "matches": ["<all_urls>"],
-      "js": ["player-play.js"],
+      "js": ["player-ends.js", "player-play.js"],
       "run_at": "document_start",
       "all_frames": true
     }
