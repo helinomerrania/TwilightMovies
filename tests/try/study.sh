@@ -56,7 +56,7 @@ visit() {
   adb shell input keyevent KEYCODE_MOVE_END
   # shellcheck disable=SC2046  # one key each
   adb shell input keyevent $(for i in $(seq 1 120); do printf 'KEYCODE_DEL '; done)
-  adb shell input text "$2"
+  adb shell "input text '$2'"   # in quotes there: its & and ? are the address's, not the shell's
   sleep 2
   # the on-screen keyboard covers the panel (it takes the whole screen on a TV, and comes a moment late): it goes,
   # and Open is chosen
@@ -80,18 +80,11 @@ up() {
   key KEYCODE_DPAD_UP
   picture "$1-up"
 }
-visit subtitle-episode 'https://kurdsubtitle.net/tvshows/467300-Lupin#tm-play=2-3' && up subtitle-episode
-visit beenar 'https://beenar.net/detail-cowatching/3057?series=false#tm-alone' && up beenar
-key KEYCODE_DPAD_LEFT
-picture beenar-next
-key KEYCODE_DPAD_CENTER
-sleep 20
-picture beenar-pressed
-visit kurd-movie 'https://www.kurd-movie.com/movies/onslaught/#tm-alone' && up kurd-movie
-visit kurdsaz 'https://kurdsaz.com/watch.php?slug=100-Days-of-Deception&ep=899#tm-alone' && up kurdsaz
 visit kartonikurde 'https://www.kartonikurde.com/movie/frozen#tm-alone' && up kartonikurde
 visit kurdcinama 'https://kurdcinama.com/online.aspx?movieid=19786#tm-alone' && up kurdcinama
 visit marscinema 'https://marscinema.net/watch/barry?ep=279#tm-alone' && up marscinema
+visit kurd-movie 'https://www.kurd-movie.com/movies/fall-2-deadpoint/#tm-alone' && up kurd-movie
+visit kurdsaz 'https://kurdsaz.com/watch.php?slug=100-Days-of-Deception&ep=899#tm-alone' && up kurdsaz
 save
 
 kill "$logger" 2> /dev/null

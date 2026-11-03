@@ -8,9 +8,10 @@
 'use strict';
 var playerPlay = {
   // The big start of the players the websites use (JW Player, Video.js, Plyr, Flowplayer, Fluid, MediaElement,
-  // DPlayer, ArtPlayer), and the ones that say so
+  // DPlayer, ArtPlayer; Beenar's own, OK.ru's), and the ones that say so
   STARTS: '.jw-icon-display, .vjs-big-play-button, .plyr__control--overlaid, .fp-play, .fluid_initial_play, ' +
-    '.mejs__overlay-button, .dplayer-mobile-play, .art-state, [aria-label="Play"], [aria-label="play"], [title="Play"]',
+    '.mejs__overlay-button, .dplayer-mobile-play, .art-state, .netflix-play-button, .vp_video_stub, ' +
+    '[aria-label="Play"], [aria-label="play"], [title="Play"]',
   on: false,      // told to start the film here
   done: false,    // its film played: never started again by itself
   tries: 0,       // seconds tried
