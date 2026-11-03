@@ -1,0 +1,66 @@
+{
+ "docs": [
+  {
+   "_id": "6ae1fdf3f6b5595873461bdc",
+   "title": "Final Table",
+   "year": "2026",
+   "runtime": 70,
+   "poster": "https://images.kurdsubtitle.net/file/kurdsubtitle/1793193903654-x26aap.jpeg",
+   "genres": [
+    {
+     "_id": "5eb88f3dead70b126c6c0f97",
+     "name": "دراما",
+     "input": "Drama"
+    }
+   ],
+   "ratings": [
+    {
+     "source": "Internet Movie Database",
+     "value": 8.4
+    },
+    {
+     "source": "Rotten Tomatoes",
+     "value": 0
+    },
+    {
+     "source": "Metacritic",
+     "value": 0
+    }
+   ],
+   "slug": "277497-Final-Table",
+   "type": "tvshow"
+  },
+  {
+   "_id": "6ae76e2ef6b5595873497714",
+   "title": "Your Personal Taxi",
+   "year": "2026",
+   "runtime": 0,
+   "poster": "https://images.kurdsubtitle.net/file/kurdsubtitle/1793551855243-fabkk.jpeg",
+   "genres": [
+    {
+     "_id": "5eb88f3dead70b126c6c0f97",
+     "name": "دراما",
+     "input": "Drama"
+    }
+   ],
+   "ratings": [
+    {
+     "source": "Internet Movie Database",
+     "value": 7
+    },
+    {
+     "source": "Rotten Tomatoes",
+     "value": 0
+    },
+    {
+     "source": "Metacritic",
+     "value": 0
+    }
+   ],
+   "slug": "551802-Your-Personal-Taxi",
+   "type": "tvshow"
+  }
+ ],
+ "totalDocs": 1036,
+ "page": 1
+}

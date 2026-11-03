@@ -1,0 +1,23 @@
+[
+ {
+  "_id": "67cd3ee27de2442d81eca9e6",
+  "number": "1",
+  "name": "Chapter 1",
+  "releaseDate": "2021/06/11",
+  "hidden": false
+ },
+ {
+  "_id": "67cd3ee27de2442d81eca9f0",
+  "number": "2",
+  "name": "Chapter 2",
+  "releaseDate": "2021/06/11",
+  "hidden": false
+ },
+ {
+  "_id": "67cd3ee27de2442d81eca9fa",
+  "number": "3",
+  "name": "Chapter 3",
+  "releaseDate": "2021/06/11",
+  "hidden": false
+ }
+]

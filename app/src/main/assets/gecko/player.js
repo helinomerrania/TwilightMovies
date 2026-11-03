@@ -17,6 +17,7 @@ var player = {
     'kurdsaz.com': {id: 'player-wrapper'},
     'kurdcinama.com': {},
     'marscinema.net': {tag: 'IFRAME', box: /(^|\s)aspect-backdrop(\s|$)/, press: {tag: 'button', in: 'aspect-backdrop'}},
+    'kurdsubtitle.net': {id: 'player-frame', box: /(^|\s)rounded-2xl(\s|$)/, steps: true},   // its presses: player-steps.js
   },
   TRAILER: /\/\/(www\.)?(youtube\.com|youtube-nocookie\.com|youtu\.be)\//,
 
@@ -25,12 +26,13 @@ var player = {
     return Math.max(0, r.right - r.left) * Math.max(0, r.bottom - r.top);
   },
 
-  // The player on this page by its website's recipe, or the biggest video or frame (not a trailer, not a speck)
+  // The player on this page by its website's recipe (its own name, or what it is), else the biggest video or frame
+  // (not a trailer, not a speck); in the box its website shows over it in, if it has one
   find: function (doc, host) {
     var site = player.SITES[host] || {};
-    if (site.id) return doc.getElementById ? doc.getElementById(site.id) : null;
     var best = null;
-    Array.prototype.forEach.call(doc.querySelectorAll('video, iframe'), function (el) {
+    if (site.id) best = doc.getElementById ? doc.getElementById(site.id) : null;
+    else Array.prototype.forEach.call(doc.querySelectorAll('video, iframe'), function (el) {
       var src = el.getAttribute('src') || '';
       if (site.tag && el.tagName !== site.tag) return;
       if (site.src && !site.src.test(src)) return;
@@ -73,19 +75,34 @@ var player = {
     } catch (e) { /* not yet */ }
   },
 
+  // The episode the address asks for (#tm-play=<season>-<episode>), for a website where it's chosen on the page
+  want: function (hash) {
+    var m = /tm-play=(\d+)-(\d+)/.exec(hash || '');
+    return m ? {season: Number(m[1]), n: Number(m[2])} : null;
+  },
+
   // From the page's start: asked whether it's the Twilight screens'; then looked for twice a second for two minutes
-  // (players come late), and again whenever the website puts another in its place
+  // (players come late), and again whenever the website puts another in its place. A website with steps of its own
+  // (player-steps.js): those first, every two seconds, until they say its player is there.
   start: function () {
     if (window.top !== window || typeof browser === 'undefined') return;
     var host = location.host;
+    var site = player.SITES[host] || {};
     browser.runtime.sendMessage({alone: host}).then(function (yes) {
       if (!yes) return;
       browser.runtime.sendMessage({aloneStyle: 1});
       var ticks = 0;
       var shown = null;
+      var study = false;   // the study build (study.js): the page as drawn, now and then
+      browser.runtime.sendMessage({studying: 1}).then(function (yes) { study = !!yes; }, function () {});
+      var snapshot = function (step) {
+        if (study) browser.runtime.sendMessage({snapshot: {url: location.href, step: step, html: document.documentElement.outerHTML}});
+      };
       var timer = setInterval(function () {
         if (++ticks > 240) clearInterval(timer);   // two minutes
+        if (ticks === 20 || ticks === 60 || ticks === 120 || ticks === 240) snapshot('after ' + ticks / 2 + ' seconds');
         if (!document.body || (shown && document.contains(shown))) return;
+        if (site.steps && !(ticks % 4 === 0 && playerSteps[host](document, player.want(location.hash)))) return;
         shown = player.find(document, host);
         if (shown) player.isolate(document, shown);
         else if (ticks === 8 || ticks === 30) player.press(document, host);   // four seconds, no player: its first server

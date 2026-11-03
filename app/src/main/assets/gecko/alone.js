@@ -41,6 +41,10 @@ function aloneFor(d) {
 
 browser.runtime.onMessage.addListener(function (m, sender) {
   var tab = sender.tab ? sender.tab.id : -1;
+  if (typeof m.alone === 'string' && tab >= 0 && typeof studying !== 'undefined' && studying
+      && /#tm-(play|alone)\b/.test(String(sender.url || ''))) {
+    alone[tab] = m.alone;   // the study build (study.js): an address as the screens open one, opened by the study
+  }
   if (typeof m.alone === 'string') return Promise.resolve(tab >= 0 && sameSite(m.alone, alone[tab]));
   if (m.aloneStyle && tab >= 0 && alone[tab]) {
     return browser.tabs.insertCSS(tab, {code: ALONE_STYLE, cssOrigin: 'user', frameId: 0}).then(function () {

@@ -64,3 +64,14 @@ function studied(d) {
   };
   return {};
 }
+
+// A page as it's drawn at a moment (player.js sends it, in this build only, on a page whose player shows alone): kept
+// as a record of its own, for the steps that choose a website's player there (player-steps.js)
+browser.runtime.onMessage.addListener(function (m) {
+  if (m.studying) return Promise.resolve(studying);
+  if (m.snapshot && studying && port) {
+    port.postMessage({studied: {page: m.snapshot.url, type: 'dom', method: 'DOM', url: m.snapshot.url, sent: m.snapshot.step,
+      answer: String(m.snapshot.html || '').slice(0, 400000)}});
+  }
+  return undefined;
+});

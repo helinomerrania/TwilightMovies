@@ -1,0 +1,86 @@
+{
+ "docs": [
+  {
+   "_id": "6ae8babbf6b559587349d7f9",
+   "title": "The Lodger: A Story of the London Fog",
+   "year": "1927",
+   "runtime": 91,
+   "poster": "https://images.kurdsubtitle.net/file/kurdsubtitle/1793637034723-feuum6.jpeg",
+   "genres": [
+    {
+     "_id": "5eb88f3dead70b126c6c0f9d",
+     "name": "تاوانکاری",
+     "input": "Crime"
+    },
+    {
+     "_id": "5eb88f3dead70b126c6c0f9b",
+     "name": "هەستبزوێن",
+     "input": "Thriller"
+    },
+    {
+     "_id": "5eb88f3dead70b126c6c0f9a",
+     "name": "نهێنی",
+     "input": "Mystery"
+    }
+   ],
+   "ratings": [
+    {
+     "source": "Internet Movie Database",
+     "value": 7.3
+    },
+    {
+     "source": "Rotten Tomatoes",
+     "value": 96
+    },
+    {
+     "source": "Metacritic",
+     "value": 82
+    }
+   ],
+   "slug": "211530-The-Lodger-A-Story-of-the-London-Fog",
+   "type": "movie"
+  },
+  {
+   "_id": "6ae8f16af6b55958734a2347",
+   "title": "Sense and Sensibility",
+   "year": "2026",
+   "runtime": 132,
+   "poster": "https://images.kurdsubtitle.net/file/kurdsubtitle/1793656406485-mh0aef.jpeg",
+   "genres": [
+    {
+     "_id": "5eb88f3dead70b126c6c0f99",
+     "name": "ڕۆمانسی",
+     "input": "Romance"
+    },
+    {
+     "_id": "5eb88f3dead70b126c6c0f97",
+     "name": "دراما",
+     "input": "Drama"
+    },
+    {
+     "_id": "5eb88f3dead70b126c6c0f98",
+     "name": "مێژووی",
+     "input": "History"
+    }
+   ],
+   "ratings": [
+    {
+     "source": "Internet Movie Database",
+     "value": 7.2
+    },
+    {
+     "source": "Rotten Tomatoes",
+     "value": 79
+    },
+    {
+     "source": "Metacritic",
+     "value": 72
+    }
+   ],
+   "slug": "299810-Sense-and-Sensibility",
+   "type": "movie"
+  }
+ ],
+ "totalDocs": 6655,
+ "page": 1
+}

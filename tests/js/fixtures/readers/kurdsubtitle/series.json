@@ -1,0 +1,77 @@
+{
+ "movie": {
+  "_id": "60005e7b64d2e47956145ba7",
+  "title": "Lupin",
+  "kurdishTitle": "لوپین",
+  "year": "2021",
+  "runtime": 0,
+  "poster": "https://images.kurdsubtitle.net/file/kurdsubtitle/1792825178336-r84st9.jpeg",
+  "genres": [
+   {
+    "_id": "5eb88f3dead70b126c6c0f97",
+    "name": "دراما",
+    "input": "Drama"
+   },
+   {
+    "_id": "5eb88f3dead70b126c6c0f96",
+    "name": "ئەكشن",
+    "input": "Action"
+   },
+   {
+    "_id": "5eb88f3dead70b126c6c0f9d",
+    "name": "تاوانکاری",
+    "input": "Crime"
+   },
+   {
+    "_id": "5eb88f3dead70b126c6c0f9a",
+    "name": "نهێنی",
+    "input": "Mystery"
+   }
+  ],
+  "ratings": [
+   {
+    "source": "Internet Movie Database",
+    "value": 7.5
+   },
+   {
+    "source": "Rotten Tomatoes",
+    "value": 98
+   },
+   {
+    "source": "Metacritic",
+    "value": 0
+   }
+  ],
+  "slug": "467300-Lupin",
+  "type": "tvshow",
+  "plot": "(ئاسان دیۆپ)، پیاوێکی زیرەکە و شارەزایی لە فێڵ و خۆگۆڕیندا هەیە، دەکەوێتە ژێر کاریگەریی چیرۆکەکانی (ئەرسن لوپا)، دزە خانەدانەکەوە. دەست دەکات بە داڕشتنی پلانی ورد بۆ تۆڵەکردنەوە لە خێزانێکی دەوڵەمەند کە ژیانی باوکی وێران کردووە، بە بەکارهێنانی زیرەکی و فێڵەکانی هەوڵ دەدات نهێنییەکانی ڕابردوو ئاشکرا بکات و ناوی باوکی پاک بکاتەوە، بەڵام هەر هەنگاوێک مەترسییەکی نوێی بۆ دروست دەکات.",
+  "tmdbID": "65494",
+  "rated": "TV-MA",
+  "seasons": [
+   {
+    "_id": "67cd3ee27de2442d81eca9ba",
+    "number": "1",
+    "hidden": false,
+    "episodeCount": 5
+   },
+   {
+    "_id": "67cd3ee27de2442d81eca9e4",
+    "number": "2",
+    "hidden": false,
+    "episodeCount": 5
+   },
+   {
+    "_id": "67cd3ee27de2442d81ecaa19",
+    "number": "3",
+    "hidden": false,
+    "episodeCount": 7
+   },
+   {
+    "_id": "6adc5718f6b5595873434ff5",
+    "number": "4",
+    "hidden": false,
+    "episodeCount": 8
+   }
+  ]
+ }
+}

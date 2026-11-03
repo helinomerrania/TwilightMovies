@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Studies the websites the Twilight screens can't read from GitHub's own machines yet (Mars Cinema, Kurd
-# Subtitle), in the app's own engine on an emulator with a TV's screen (by .github/workflows/study.yml): each one
-# opened from the Websites panel, its first page given time for Cloudflare's check, then down and OK twice; then
-# their pages for a film, a series, and where one plays, by address. A screenshot at each step (not the UI tree:
+# Studies the websites the Twilight screens can't read from GitHub's own machines yet, in the app's own engine on an
+# emulator with a TV's screen (by .github/workflows/study.yml): a website opened from the Websites panel, its first
+# page given time for Cloudflare's check, then down and OK twice (look); a page by its address (visit). Now: Kurd
+# Subtitle's Watch, as the Twilight screens open it. A screenshot at each step (not the UI tree:
 # reading it on a website's page froze the emulator). What their pages asked their data feeds, with the answers
 # (assets/gecko/study.js, in this try build only, kept by the app), goes to NAME-data.txt after each page (if the
 # emulator freezes on one, what came before stays). Kurdbin, Awena Film, Beenama, ShaFilm and Kurd Doblazh aren't
@@ -73,19 +73,18 @@ visit() {
 }
 
 look kurdfilm   # the website a new box opens
-for site in 'marscinema:^Mars Cinema' 'kurdsubtitle:^Kurd Subtitle'; do
-  key KEYCODE_MENU
-  sleep 3
-  choose '^ماڵپەڕەکان|^Websites' || { key KEYCODE_BACK; continue; }
-  sleep 2
-  if choose "${site#*:}"; then look "${site%%:*}"; else key KEYCODE_BACK; fi
-done
-# Their pages for a film, a series, and where a series plays (the addresses their home pages link to)
-visit mars-film https://marscinema.net/movie/dark-city
-visit mars-series https://marscinema.net/series/barry
-visit mars-watch https://marscinema.net/watch/barry
-visit subtitle-film https://kurdsubtitle.net/movies/779410-The-Paradise
-visit subtitle-series https://kurdsubtitle.net/tvshows/467300-Lupin
+# Kurd Subtitle's Watch as the Twilight screens open it (this build takes these addresses as theirs): a film, then a
+# series' episode (season 2, episode 3), its season and episode chosen on its page, then a free server (player-steps.js);
+# a picture of each as it goes, and the page as drawn (player.js sends it, in this build)
+visit subtitle-film 'https://kurdsubtitle.net/movies/779410-The-Paradise#tm-alone'
+sleep 30
+picture subtitle-film-later
+visit subtitle-episode 'https://kurdsubtitle.net/tvshows/467300-Lupin#tm-play=2-3'
+sleep 30
+picture subtitle-episode-later
+sleep 30
+picture subtitle-episode-last
+save
 
 kill "$logger" 2> /dev/null
 sleep 1

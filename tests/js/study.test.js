@@ -14,7 +14,9 @@ const passed = [];
 let listener = null;
 let options = null;
 const filters = {};
+let asked = null;   // what the page scripts ask the background page (study.js's own listener)
 const browser = {
+  runtime: { onMessage: { addListener: (f) => { asked = f; } } },
   webRequest: {
     onBeforeRequest: { addListener: (f, filter, extra) => { listener = f; options = [filter, extra]; } },
     filterResponseData: (id) => (filters[id] = { write: (d) => passed.push(d), close() { this.closed = true; },
@@ -27,6 +29,9 @@ const ctx = vm.createContext({ browser, TextDecoder, JSON, String, OWN: 'moz-ext
 vm.runInContext(fs.readFileSync(path.join(DIR, 'study.js'), 'utf8'), ctx);
 
 check('nothing written down until the app says it\'s its own try', listener, null);
+const page = { url: 'https://films.example/tvshows/1#tm-play=2-3', step: 'after 10 seconds', html: '<html><body><button>2</button></body></html>' };
+asked({ snapshot: page });
+const wasStudying = asked({ studying: 1 });
 vm.runInContext('studyOn(); studyOn();', ctx);
 check('...then every data request the pages make, held to read its answer, with what it sends', options,
   [{ urls: ['<all_urls>'], types: ['xmlhttprequest', 'main_frame'] }, ['blocking', 'requestBody']]);
@@ -51,3 +56,13 @@ check('never the app\'s own pages\' requests, nor the engine\'s own', [
   listener({ requestId: 8, tabId: 2, url: 'https://films.example/api', originUrl: 'moz-extension://the-app/ui/index.html' }),
   listener({ requestId: 9, tabId: -1, url: 'https://films.example/api' })], [{}, {}]);
 ok('...nothing held for them', !filters[8] && !filters[9]);
+
+module.exports = (async () => {
+  check('...nor a page as drawn, and the page is told it isn\'t the study', [kept.filter((k) => k.studied.type === 'dom').length,
+    await wasStudying], [0, false]);
+  check('in it: the page is told so', await asked({ studying: 1 }), true);
+  asked({ snapshot: page });
+  check('...and a page as drawn (player.js sends it, where its player shows alone) is kept as a record of its own',
+    kept[kept.length - 1], { studied: { page: page.url, type: 'dom', method: 'DOM', url: page.url, sent: 'after 10 seconds', answer: page.html } });
+  check('...the rest of what the pages ask isn\'t its', asked({ alone: 'films.example' }), undefined);
+})();

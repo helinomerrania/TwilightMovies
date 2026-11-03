@@ -1,0 +1,114 @@
+[
+ {
+  "name": "فیلم",
+  "type": "movie",
+  "priority": 1,
+  "data": {
+   "docs": [
+    {
+     "_id": "5ed10e06d6a63726384a5122",
+     "title": "Spider-Man 2002",
+     "year": "2002",
+     "runtime": 121,
+     "poster": "https://images.kurdsubtitle.net/file/kurdsubtitle/5ed10e06d6a63726384a5122_hightQuality.webp",
+     "slug": "198476-Spider-Man-2002",
+     "type": "movie",
+     "plot": "پاش ئەوەی لەلایەن جاڵجاڵۆکەیەکەوە گازی لێدەگیرێت، خوێندکارێکی دواناوەندی بەناوی (پیتەر پارکەر) توانایەکی سەرسوڕهێنەری بۆ دورست دەبێت و سەرکێشیەکانی دەست پێدەکات"
+    },
+    {
+     "_id": "61bf61c5cce17f0bee6b336e",
+     "title": "Spider-Man: No Way Home",
+     "year": "2021",
+     "runtime": 148,
+     "poster": "https://images.kurdsubtitle.net/file/kurdsubtitle/61bf61c5cce17f0bee6b336e_hightQuality.webp",
+     "slug": "217011-Spider-Man-No-Way-Home",
+     "type": "movie",
+     "plot": "دوای ئاشکرابوونس ناسنامەی \"سپایدرەمان\"\nپیتەر داوای له دکتۆر \"سترەینج\" دەکات یارمەتی بدات تا بگەڕێتەوە ژیانە ئاسایییەکەی. بەڵام هەڵەیەک لە جادووەکەی دکتۆر \"سترەینج\" دەبێتە هۆی شێواندنی فرە گەردوونی"
+    }
+   ]
+  }
+ },
+ {
+  "name": "زنجیرە",
+  "type": "tvshow",
+  "priority": 2,
+  "data": {
+   "docs": [
+    {
+     "_id": "6a1ae83d4a2a971d44b62efb",
+     "title": "Spider-Noir",
+     "year": "2026",
+     "runtime": 0,
+     "poster": "https://images.kurdsubtitle.net/file/kurdsubtitle/1780148194486-k4ck0e.jpeg",
+     "slug": "482869-Spider-Noir",
+     "type": "tvshow",
+     "plot": "(بێن ڕایڵی)، لێکۆڵەرێکی تایبەتی بەئەزموون و بەخت خراپە لە ساڵانی ١٩٣٠ـکان لە \"نیویۆڕک\"، ناچارە مامەڵە لەگەڵ ژیانی ڕابردوویدا بکات دوای ئەوەی کارەساتێکی بەسەردا هات وەک تاکە پاڵەوانی سەرەکی شارەکە"
+    },
+    {
+     "_id": "68010a5348671c5229233e83",
+     "title": "Your Friendly Neighborhood Spider-Man",
+     "year": "2025",
+     "runtime": 0,
+     "poster": "https://images.kurdsubtitle.net/file/kurdsubtitle/1744898591490-g3k8ea.jpeg",
+     "slug": "441537-Your-Friendly-Neighborhood-Spider-Man",
+     "type": "tvshow",
+     "plot": "زنجیرە ئەنیمەیشنەکە چیرۆکی (پیتەر پارکەر) دەگێڕێتەوە لە ڕێگەی گۆڕانی بۆ (سپایدەرمان) لە جیهانی سینەمایی مارڤڵ'ـدا، بە گەشتێکی تایبەت و جیاواز کە پێشتر وێنەی نەبیندراوە و بە شێوازێک کە شکۆ و ڕەسەنایەتی تایبەتمەندیەکانی ئەم کەسایەتییە لە کۆمیکە سەرەتاییەکانیدا دەپارێزێت"
+    }
+   ]
+  }
+ },
+ {
+  "name": "زنجیرە فیلم",
+  "type": "movie-series",
+  "priority": 3,
+  "data": {
+   "docs": [
+    {
+     "_id": "67cd3e617de2442d81ec0107",
+     "slug": "132768-spider-man",
+     "name": "سپایدەرمان",
+     "englishName": "Spider-Man",
+     "image": "https://images.kurdsubtitle.net/file/kurdsubtitle/609059dc5b7b8c1937d8fd59_backdrop.webp",
+     "id": "67cd3e617de2442d81ec0107"
+    }
+   ]
+  }
+ },
+ {
+  "name": "ئەندام",
+  "type": "user",
+  "priority": 6,
+  "data": {
+   "docs": [
+    {
+     "_id": "6ab460c4b5ac3978c8af17ef",
+     "name": "Spider",
+     "username": "spider1",
+     "picture": "https://lh3.googleusercontent.com/a/ACg8ocLLHOMBPTVCE_IGl9KxDNdShPSoqqTD2gpJfEkycYUdBuXzX1U=s96-c",
+     "id": "6ab460c4b5ac3978c8af17ef"
+    }
+   ]
+  }
+ },
+ {
+  "name": "TMDB",
+  "type": "tmdb",
+  "priority": 7,
+  "data": {
+   "docs": [
+    {
+     "id": 888,
+     "title": "Spider-Man",
+     "overview": "Bitten by a neogenetic spider, Peter Parker develops spider-like superpowers. He uses these to fight crime while trying to balance it with the struggles of his personal life.",
+     "posterPath": "/1BX1HZZqDoLDx9Ry4oET6dA9293.jpg",
+     "backdropPath": "/tszlsbfyTOPSZe2z6K4mwHtcnmI.jpg",
+     "releaseDate": "1994-11-19",
+     "mediaType": "tv",
+     "voteAverage": 8.313,
+     "numberOfSeasons": 5,
+     "numberOfEpisodes": 65
+    }
+   ]
+  }
+ }
+]

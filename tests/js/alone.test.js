@@ -41,10 +41,21 @@ module.exports = (async () => {
   check('...a website\'s hosts are one (www. or not)', await asks(5, { alone: 'kurd-movie.com' }), true);
   opening(5, 'https://ads.example/landing', 'https://www.kurd-movie.com/movies/onslaught/');
   check('...a page of another website: no longer', await asks(5, { alone: 'ads.example' }), false);
+  const tried = (tab, url) => listener({ alone: 'kurdsubtitle.net' }, { tab: { id: tab }, url });
+  check('...nor an address that says #tm-play= by itself', await tried(7, 'https://kurdsubtitle.net/tvshows/x#tm-play=2-3'), false);
+  let studyListener = null;
+  const study = vm.createContext({ URL, Promise, OWN: 'moz-extension://the-app/', studying: true,
+    browser: { runtime: { onMessage: { addListener: (f) => { studyListener = f; } } }, tabs: browser.tabs } });
+  vm.runInContext(read('alone.js'), study);
+  check('the study build (study.js): an address as the screens open one (#tm-play=, #tm-alone) shows its player alone, for the study',
+    [await studyListener({ alone: 'kurdsubtitle.net' }, { tab: { id: 7 }, url: 'https://kurdsubtitle.net/tvshows/x#tm-play=2-3' }),
+      await studyListener({ alone: 'kurdsubtitle.net' }, { tab: { id: 8 }, url: 'https://kurdsubtitle.net/movies/y#tm-alone' }),
+      await studyListener({ alone: 'kurdsubtitle.net' }, { tab: { id: 9 }, url: 'https://kurdsubtitle.net/movies/y' })], [true, true, false]);
 
   // The page's side, on stand-in pages
   const P = vm.createContext({ window: {}, location: { host: '' }, Array, setInterval, clearInterval });
   P.window.top = P.window;
+  vm.runInContext(read('player-steps.js'), P);
   vm.runInContext(read('player.js'), P);
   const player = vm.runInContext('player', P);
   function doc(body) {
@@ -92,6 +103,34 @@ module.exports = (async () => {
     E('iframe', { attrs: { src: 'https://marshost.pages.dev/embed-0lz5i847aaw7.html' }, rect: big })]);
   d = doc([marsBox, E('div', {}, [E('button', { attrs: { class: 'server' } })])]);
   check('...then its player: the box its frame came in (what the player shows over it stays)', player.find(d, 'marscinema.net').name, 'box');
+
+  // Kurd Subtitle: a series' episode chosen on its page (its season opened, then the episode), then a free server
+  const steps = vm.runInContext('playerSteps', P)['kurdsubtitle.net'];
+  check('the episode the address asks for, where it\'s chosen on the page', [player.want('#tm-play=2-3'), player.want('')],
+    [{ season: 2, n: 3 }, null]);
+  const seasonTwo = E('button', { text: '2 وەرزی دوو 5 ئەڵقە' }, [E('div', { text: '2' }), E('div', { text: 'وەرزی دوو 5 ئەڵقە' })]);
+  const seasonOne = E('button', { text: '1 وەرزی یەک 5 ئەڵقە' }, [E('div', { text: '1' }), E('div', { text: 'وەرزی یەک 5 ئەڵقە' })]);
+  const block = E('div', { attrs: { class: 'rounded-xl overflow-hidden border' } }, [seasonTwo]);
+  d = doc([E('div', {}, [seasonOne]), block]);
+  const want = { season: 2, n: 3 };
+  check('Kurd Subtitle: its episode\'s season opened first, not another', [steps(d, want), seasonTwo.calls, seasonOne.calls],
+    [false, [['click']], []]);
+  const epTwo = E('button', { text: '2-2 Chapter 2', attrs: { class: 'border-b px-2 hover:bg-primary/5' } }, [E('div', { text: '2-2' })]);
+  const epThree = E('button', { text: '2-3 Chapter 3', attrs: { class: 'border-b px-2 hover:bg-primary/5' } }, [E('div', { text: '2-3' })]);
+  [epTwo, epThree].forEach((x) => { block.children.push(x); x.parentElement = block; });
+  check('...then its episode, once there', [steps(d, want), epThree.calls, epTwo.calls, seasonTwo.calls.length], [false, [['click']], [], 1]);
+  epThree.attrs.class = 'border-b px-2 bg-primary/5 text-primary';
+  const later = E('button', { text: 'بینینی سێرڤەرە ئاساییەکان (7)', disabled: true });
+  const free = E('button', { text: 'سێرڤەری Vstreamer', attrs: { class: 'md:w-full md:border-b py-4 text-right px-6 shrink-0' } });
+  block.children.push(later, free);
+  later.parentElement = free.parentElement = block;
+  check('...chosen: a free server (its own needs signing in), not a button that can\'t be pressed yet', [steps(d, want), later.calls,
+    free.calls], [false, [], [['click']]]);
+  const area = E('div', { name: 'area', attrs: { class: 'grow bg-white/10 rounded-2xl overflow-hidden border relative' } }, [
+    E('iframe', { name: 'frame', attrs: { id: 'player-frame', src: 'https://streamer.vstreamer.store/stream/17674' }, rect: big })]);
+  d = doc([area]);
+  check('...its player there: said so, and the box it\'s in is the player alone', [steps(d, null), player.find(d, 'kurdsubtitle.net').name],
+    [true, 'area']);
 
   const frame = E('iframe', { name: 'frame', attrs: { src: 'https://beenar.uns.bio/' }, rect: big });
   const around = E('div', { name: 'around' }, [frame]);

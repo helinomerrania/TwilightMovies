@@ -1,0 +1,41 @@
+{
+ "movie": {
+  "_id": "6add2afef6b55958734415d1",
+  "title": "The Paradise",
+  "kurdishTitle": "بەهەشت",
+  "year": "2026",
+  "runtime": 170,
+  "poster": "https://images.kurdsubtitle.net/file/kurdsubtitle/1792879419116-j5orai.jpeg",
+  "genres": [
+   {
+    "_id": "5eb88f3dead70b126c6c0f96",
+    "name": "ئەكشن",
+    "input": "Action"
+   },
+   {
+    "_id": "5eb88f3dead70b126c6c0f97",
+    "name": "دراما",
+    "input": "Drama"
+   }
+  ],
+  "ratings": [
+   {
+    "source": "Internet Movie Database",
+    "value": 8
+   },
+   {
+    "source": "Rotten Tomatoes",
+    "value": 0
+   },
+   {
+    "source": "Metacritic",
+    "value": 0
+   }
+  ],
+  "slug": "779410-The-Paradise",
+  "type": "movie",
+  "plot": "لە ساڵانی ١٩٨٠دا، هۆزێک کە مافەکانیان پێشێل دەکرێت بۆ ڕزگاربوون لە جیاکاری و بەدەستهێنانی مافی هاووڵاتیبوونیان خەبات دەکەن بە ڕێبەرایەتیی کەسێک کە کەس چاوەڕوانی نەدەکرد",
+  "tmdbID": "1376856",
+  "rated": "N/A"
+ }
+}
