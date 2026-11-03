@@ -3,21 +3,25 @@
 // screens opened (the background script knows: alone.js), in this extension's own part of the page, its top frame.
 // Each website's player: its frame, or its own video in the box that shows what goes over the film (subtitles);
 // else the biggest video or frame there is that isn't a trailer. A website that loads its player only once one of
-// its servers is chosen: the first one, chosen.
+// its servers is chosen: the first one, chosen. A website with more than one server: their names over the player
+// (player-servers.js), to choose another.
 'use strict';
 var player = {
-  // host: what its player is (tag; src: its address; id; box: the class of the box around its video), what to press
-  // first if it isn't there yet (press: its tag, with a class of its own or in a box with a class: the website's
-  // first server, its player's start)
+  // host: what its player is (tag; src: its address; in: the class of the box it's in; id; box: the class of the box
+  // around its video), what to press first if it isn't there yet (press: its tag, with a class of its own or in a box
+  // with a class: the website's first server, its player's start), its servers (player-servers.js says how)
   SITES: {
     'krd.watch': {tag: 'VIDEO', box: /(^|\s)fixed(\s|$)/},
-    'beenar.net': {tag: 'IFRAME', src: /\.uns\.bio\//},
-    'www.kurd-movie.com': {tag: 'IFRAME', press: {tag: 'li', cls: 'dooplay_player_option'}},
+    'beenar.net': {tag: 'IFRAME', in: 'iframe-container',
+      servers: {tag: 'button', cls: 'server-item', name: 'server-item-name', on: 'server-item--active'}},
+    'www.kurd-movie.com': {tag: 'IFRAME', press: {tag: 'li', cls: 'dooplay_player_option'},
+      servers: {tag: 'li', cls: 'dooplay_player_option', name: 'title', on: 'on'}},
     'www.kartonikurde.com': {tag: 'IFRAME'},
     'kurdsaz.com': {id: 'player-wrapper'},
     'kurdcinama.com': {},
     'marscinema.net': {tag: 'IFRAME', box: /(^|\s)aspect-backdrop(\s|$)/, press: {tag: 'button', in: 'aspect-backdrop'}},
-    'kurdsubtitle.net': {id: 'player-frame', box: /(^|\s)rounded-2xl(\s|$)/, steps: true},   // its presses: player-steps.js
+    'kurdsubtitle.net': {id: 'player-frame', box: /(^|\s)rounded-2xl(\s|$)/, steps: true,   // its presses: player-steps.js
+      servers: {tag: 'button', cls: 'text-right', in: 'basis-[25%]'}},
   },
   TRAILER: /\/\/(www\.)?(youtube\.com|youtube-nocookie\.com|youtu\.be)\//,
 
@@ -36,6 +40,7 @@ var player = {
       var src = el.getAttribute('src') || '';
       if (site.tag && el.tagName !== site.tag) return;
       if (site.src && !site.src.test(src)) return;
+      if (site.in && !playerServers.has(el.parentElement, site.in)) return;
       if (el.tagName === 'IFRAME' && (player.TRAILER.test(src) || !/^(https?:)?\/\//.test(src))) return;
       if (player.area(el) < 320 * 180 && !(el.tagName === 'VIDEO' && site.tag === 'VIDEO')) return;
       if (!best || player.area(el) > player.area(best)) best = el;
@@ -51,14 +56,7 @@ var player = {
   // come first (Kurd Movie's does: player-option-trailer, data-nume="trailer")
   press: function (doc, host) {
     var how = (player.SITES[host] || {}).press;
-    if (!how) return false;
-    var has = function (el, cls) {
-      return !!el && (' ' + (el.getAttribute('class') || '') + ' ').indexOf(' ' + cls + ' ') >= 0;
-    };
-    var first = Array.prototype.filter.call(doc.querySelectorAll(how.tag), function (el) {
-      return (!how.cls || has(el, how.cls)) && (!how.in || has(el.parentElement, how.in))
-        && !/trailer/i.test((el.getAttribute('id') || '') + ' ' + (el.getAttribute('data-nume') || ''));
-    })[0];
+    var first = how ? playerServers.list(doc, how)[0] : null;   // as its servers are found
     if (first) first.click();
     return !!first;
   },
@@ -83,7 +81,9 @@ var player = {
 
   // From the page's start: asked whether it's the Twilight screens'; then looked for twice a second for two minutes
   // (players come late), and again whenever the website puts another in its place. A website with steps of its own
-  // (player-steps.js): those first, every two seconds, until they say its player is there.
+  // (player-steps.js): those first, every two seconds, until they say its player is there. Once it shows, its
+  // servers' row (player-servers.js), and the player's frames told the remote goes up to it (lift). Another server
+  // pressed there: its player looked for two minutes more, and nothing pressed for it.
   start: function () {
     if (window.top !== window || typeof browser === 'undefined') return;
     var host = location.host;
@@ -91,22 +91,37 @@ var player = {
     browser.runtime.sendMessage({alone: host}).then(function (yes) {
       if (!yes) return;
       browser.runtime.sendMessage({aloneStyle: 1});
-      var ticks = 0;
-      var shown = null;
+      var ticks = 0, shown = null, timer = null, lifted = false, chosen = false;
       var study = false;   // the study build (study.js): the page as drawn, now and then
       browser.runtime.sendMessage({studying: 1}).then(function (yes) { study = !!yes; }, function () {});
       var snapshot = function (step) {
         if (study) browser.runtime.sendMessage({snapshot: {url: location.href, step: step, html: document.documentElement.outerHTML}});
       };
-      var timer = setInterval(function () {
-        if (++ticks > 240) clearInterval(timer);   // two minutes
+      var again = function () {
+        chosen = true;
+        ticks = 0;
+        if (!timer) timer = setInterval(tick, 500);
+      };
+      var tick = function () {
+        if (++ticks > 240) {   // two minutes
+          clearInterval(timer);
+          timer = null;
+        }
         if (ticks === 20 || ticks === 60 || ticks === 120 || ticks === 240) snapshot('after ' + ticks / 2 + ' seconds');
-        if (!document.body || (shown && document.contains(shown))) return;
-        if (site.steps && !(ticks % 4 === 0 && playerSteps[host](document, player.want(location.hash)))) return;
+        if (!document.body) return;
+        if (shown && document.contains(shown)) {
+          if (site.servers && playerServers.show(document, site.servers, again) && !lifted) {
+            lifted = true;
+            browser.runtime.sendMessage({lift: 1});
+          }
+          return;
+        }
+        if (site.steps && !chosen && !(ticks % 4 === 0 && playerSteps[host](document, player.want(location.hash)))) return;
         shown = player.find(document, host);
         if (shown) player.isolate(document, shown);
-        else if (ticks === 8 || ticks === 30) player.press(document, host);   // four seconds, no player: its first server
-      }, 500);
+        else if (!chosen && (ticks === 8 || ticks === 30)) player.press(document, host);   // four seconds, no player: its first server
+      };
+      timer = setInterval(tick, 500);
     }, function () {});
   },
 };

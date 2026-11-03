@@ -2,7 +2,8 @@
 // .github/workflows/readers.yml): each one's home lists, a search, a film and a series in full, a season's
 // episodes and the addresses that play them, as the app's screens would ask. What each gave goes to
 // <site>.json, every address asked (with its answer's start) to asked.txt, the pages (HTML) whole to <site>-page-NN.html,
-// and what went wrong to readers.log.
+// and what went wrong to readers.log (CHECK, not FAIL: the website showed GitHub's machines Cloudflare's check, which
+// says nothing of the reader).
 // Usage: node tests/try/readers.js OUT_DIR [site-id ...]
 'use strict';
 const fs = require('fs');
@@ -45,6 +46,9 @@ const web = {
     }
     asked.push(['=== ' + (o.method || 'GET'), res.status, url, (Date.now() - started) + ' ms', text.length + ' characters'].join(' | ')
       + (o.body ? '\n--- sent: ' + String(o.body).slice(0, 500) : '') + '\n' + text.slice(0, 1500) + '\n');
+    if (res.status === 403 && /<title>Just a moment\.\.\.<\/title>/.test(text)) {   // not the reader's doing: a box isn't asked
+      throw Object.assign(new Error(url + ' showed GitHub\'s machines Cloudflare\'s check'), { check: true });
+    }
     if (!res.ok) throw new Error(url + ' answered ' + res.status);
     return o.json ? JSON.parse(text) : text;
   },
@@ -59,7 +63,7 @@ async function step(out, name, f) {
     note('ok  ', out.site, name, (Date.now() - started) + ' ms', JSON.stringify(out[name]).length + ' characters');
   } catch (e) {
     out[name] = { error: String(e && e.message || e) };
-    note('FAIL', out.site, name, out[name].error);
+    note(e && e.check ? 'CHECK' : 'FAIL', out.site, name, out[name].error);
   }
   return out[name];
 }

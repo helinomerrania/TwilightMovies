@@ -3,6 +3,7 @@
 'use strict';
 (function (a) {
   a.waiting = false;   // a frame is being asked whether it takes the remote: the arrows wait
+  a.lift = false;      // the page around shows its servers over its player (player-servers.js): up goes out to them
 
   // The frame (which has the remote already), asked through the background script whether it has something for the
   // remote coming in that way: {ok, rect} (where it is, in the frame's own page), or null: no answer within wait
@@ -99,6 +100,7 @@
   function comeOut(way) {
     var f = a.focused();
     if (!f || !a.isFrame(f)) return;
+    if (a.lift && way === 'up' && a.out(way)) return;   // on out, to the servers, not to the player's own parts
     if (!a.go(way, a.box(f), f, [f]) && !a.scroll(way, f)) a.out(way);
   }
 
@@ -106,9 +108,15 @@
   browser.runtime.onMessage.addListener(function (m) {
     if (!m || typeof m.arrows !== 'string') return undefined;
     if (m.arrows === 'in') return comeIn(m.way, Math.max(300, m.wait || 1200));
+    if (m.arrows === 'lift') a.lift = true;
     var f = a.focused();
     if (m.arrows === 'out') comeOut(m.way);
     else if (m.arrows === 'shown' && f && a.isFrame(f) && m.rect) a.shown(inHere(f, m.rect));
     return Promise.resolve(true);
   });
+  if (!a.top) {   // a frame that comes once the servers show (another server's player) asks
+    a.send({lifted: 1}).then(function (r) {
+      if (r && r.lift === true) a.lift = true;
+    });
+  }
 })(arrows);

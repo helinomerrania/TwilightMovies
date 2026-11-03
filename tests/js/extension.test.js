@@ -69,7 +69,7 @@ check('...its background scripts: the app\'s side, (in the app\'s own try only) 
   manifest.background.scripts, ['background.js', 'study.js', 'alone.js']);
 const cs = manifest.content_scripts[0];
 check('...its page scripts: in the page itself (its top frame), from the very start; the player alone', [cs.js, cs.run_at, cs.all_frames],
-  [['page.js', 'player-steps.js', 'player.js'], 'document_start', false]);
+  [['page.js', 'player-steps.js', 'player-servers.js', 'player.js'], 'document_start', false]);
 ok('...and an id of its own', /^[\w.-]+@[\w.-]+$/.test(manifest.browser_specific_settings.gecko.id));
 const keys = manifest.content_scripts[1] || {};
 check('...the remote\'s arrows: in every frame of the page, from the very start, with their ring',

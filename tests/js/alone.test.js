@@ -56,6 +56,7 @@ module.exports = (async () => {
   const P = vm.createContext({ window: {}, location: { host: '' }, Array, setInterval, clearInterval });
   P.window.top = P.window;
   vm.runInContext(read('player-steps.js'), P);
+  vm.runInContext(read('player-servers.js'), P);
   vm.runInContext(read('player.js'), P);
   const player = vm.runInContext('player', P);
   function doc(body) {
@@ -70,9 +71,12 @@ module.exports = (async () => {
     return d;
   }
   const big = [100, 100, 1060, 640];
-  let d = doc([E('iframe', { name: 'tracker', attrs: { src: 'https://ads.example/t' }, rect: [0, 0, 1, 1] }),
-    E('div', {}, [E('iframe', { name: 'player', attrs: { src: 'https://beenar.uns.bio/#edltgq' }, rect: big })])]);
-  check('Beenar: its player\'s frame', player.find(d, 'beenar.net').name, 'player');
+  const beenar = (src) => doc([E('iframe', { name: 'tracker', attrs: { src: 'https://ads.example/t' }, rect: [0, 0, 1, 1] }),
+    E('iframe', { name: 'banner', attrs: { src: 'https://ads.example/b' }, rect: [0, 0, 1920, 1080] }),
+    E('div', { attrs: { class: 'w-full h-full relative bg-black iframe-container' } }, [E('iframe', { name: 'player', attrs: { src }, rect: big })])]);
+  let d = beenar('https://beenar.uns.bio/#edltgq');
+  check('Beenar: its player\'s frame (in its box), whichever of its servers plays', [player.find(d, 'beenar.net').name,
+    player.find(beenar('https://vidmoly.net/embed-x.html'), 'beenar.net').name], ['player', 'player']);
   d = doc([E('iframe', { name: 'trailer', attrs: { src: 'https://www.youtube.com/embed/x8UAUAuKNcU' }, rect: [0, 0, 1920, 1080] }),
     E('iframe', { name: 'speck', attrs: { src: 'https://pxdrop.lijit.com/a' }, rect: [0, 0, 0, 0] }),
     E('iframe', { name: 'player', attrs: { src: 'https://cdnwish.com/e/0azfw2ac7y26' }, rect: big })]);

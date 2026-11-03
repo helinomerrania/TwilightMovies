@@ -91,7 +91,8 @@ function E(tag, o, kids) {
 }
 
 // A page with these in its body: the window, the document, what the background script is sent (answer(message):
-// its answer, or NEVER), the timers, Android's log, the page's scrolls; frame: it's a frame in another page
+// its answer, or NEVER; a frame's ask whether the servers show over the player apart, in asks), the timers, Android's
+// log, the page's scrolls; frame: it's a frame in another page
 function page(body, o) {
   o = o || {};
   const listeners = [];
@@ -114,7 +115,7 @@ function page(body, o) {
   html.scrollWidth = html.scrollWidth || 1920;
   [html].concat(all(html, [])).forEach((e) => { e.doc = doc; });
   doc.activeElement = doc.body;
-  const p = { doc, html, sent: [], timers: [], notes: [], scrolled: [], own: [], listeners, fromBackground: null };
+  const p = { doc, html, sent: [], asks: [], timers: [], notes: [], scrolled: [], own: [], listeners, fromBackground: null };
   const win = {
     innerWidth: 1920, innerHeight: 1080,
     getComputedStyle: (e) => Object.assign({}, STYLE, e.css),
@@ -148,7 +149,7 @@ function page(body, o) {
   const browser = {
     runtime: {
       sendMessage: (m) => {
-        p.sent.push(m);
+        (m.lifted ? p.asks : p.sent).push(m);   // a frame's ask whether the servers show over the player: apart
         const a = o.answer ? o.answer(m) : true;
         return a === NEVER ? never() : now(a);
       },
