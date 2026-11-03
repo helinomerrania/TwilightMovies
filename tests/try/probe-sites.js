@@ -4,11 +4,12 @@
 'use strict';
 const SITES = {
   // A film's player in a frame of the website's page (referer: the page's own), with what an ad blocker stops
-  // stopped (abort): what it shows then
+  // stopped (abort): what it shows then. Not Google's ad id, which it asks to see whether ads are blocked (the
+  // app lets it through there: tools/filters/twilight.txt)
   vidmoly: {
     players: 15000,
     referer: 'https://kurdsubtitle.net/',
-    abort: ['**/adblockDetector.js', '**/adsbygoogle.js*', '**/deskadimete.php*', '**/pagead/id*'],
+    abort: ['**/adblockDetector.js', '**/adsbygoogle.js*', '**/deskadimete.php*'],
     start: 'https://vidmoly.biz/embed-gfrlqfqstxp4.html',
     pages: [],
     ask: [],
