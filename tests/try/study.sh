@@ -57,11 +57,16 @@ visit() {
   # shellcheck disable=SC2046  # one key each
   adb shell input keyevent $(for i in $(seq 1 120); do printf 'KEYCODE_DEL '; done)
   adb shell input text "$2"
-  sleep 1
-  # the on-screen keyboard covers the panel: it goes, and Open (under the address) is chosen
-  if adb shell dumpsys input_method | grep -q "mInputShown=true"; then key KEYCODE_BACK; fi
   sleep 2
-  key KEYCODE_DPAD_DOWN KEYCODE_DPAD_CENTER
+  # the on-screen keyboard covers the panel (it takes the whole screen on a TV, and comes a moment late): it goes,
+  # and Open is chosen
+  for i in 1 2 3; do
+    timeout 20 adb shell dumpsys input_method | grep -q "mInputShown=true" || break
+    key KEYCODE_BACK
+    sleep 1
+  done
+  shot "$1-address"
+  tap '^کردنەوە$|^Open$' || key KEYCODE_DPAD_DOWN KEYCODE_DPAD_CENTER
   sleep 40
   picture "$1"
   save
