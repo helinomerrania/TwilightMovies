@@ -12,125 +12,7 @@ const players = require('./probe-players');
 
 const [OUT, ID] = process.argv.slice(2);
 const UA = 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36';
-// Each website: where to start, the pages to open (their own requests are kept), the addresses to ask for
-// ({nonce}: the one in the start page, which WordPress's search wants)
-const SITES = {
-  'krd-watch': {
-    players: 20000,
-    start: 'https://krd.watch/',
-    pages: ['https://krd.watch/movie/634649', 'https://krd.watch/tv/259909', 'https://krd.watch/movies',
-      'https://krd.watch/shows', 'https://krd.watch/watch/634649', 'https://krd.watch/watch/tv/259909?s=1&e=1'],
-    ask: ['/api/title/movie/634649', '/api/title/tv/259909', '/api/season/259909/1', '/api/discover',
-      '/api/discover?kind=movie', '/api/discover?kind=tv', '/api/facets?kind=movie', '/api/lists', '/api/feed',
-      '/api/random?kind=movie', '/api/collections?q=spider', '/api/search?q=%D8%B3%D9%BE%D8%A7%DB%8C%D8%AF%DB%95%D8%B1'],
-  },
-  beenar: {
-    players: 20000,
-    start: 'https://beenar.net/',
-    pages: ['https://beenar.net/title-detail/3057?series=false', 'https://beenar.net/title-detail/697?series=true',
-      'https://beenar.net/title/1?page=1&type&lang', 'https://beenar.net/title/2?page=1&type&lang',
-      'https://beenar.net/detail-cowatching/3057?series=false'],
-    ask: ['/api/client/main', '/api/client/lists', '/api/client/title-show/3057', '/api/client/series-show/697?part=1'],
-  },
-  'kurd-movie': {
-    start: 'https://www.kurd-movie.com/',
-    pages: ['https://www.kurd-movie.com/movies/', 'https://www.kurd-movie.com/tvshows/',
-      'https://www.kurd-movie.com/movies/spider-man-no-way-home/',
-      'https://www.kurd-movie.com/tvshows/the-lord-of-the-rings-the-rings-of-power/', 'https://www.kurd-movie.com/episodes/1x1/'],
-    ask: ['/wp-json/', '/wp-json/wp/v2/types', '/wp-json/wp/v2/movies?per_page=3', '/wp-json/wp/v2/tvshows?per_page=3',
-      '/wp-json/wp/v2/episodes?per_page=3', '/wp-json/wp/v2/seasons?per_page=3',
-      '/wp-json/dooplay/search/?keyword=spider&nonce={nonce}', '/wp-json/dooplay/glossary/?term=a&nonce={nonce}&type=all'],
-  },
-  kurdcinama: {
-    start: 'https://kurdcinama.com/',
-    pages: ['https://kurdcinama.com/movies.aspx', 'https://kurdcinama.com/drama.aspx',
-      'https://kurdcinama.com/moves-details.aspx?movieid=18470', 'https://kurdcinama.com/episodes.aspx?type=12',
-      'https://kurdcinama.com/Search.aspx'],
-    ask: ['/', '/movies.aspx', '/drama.aspx', '/moves-details.aspx?movieid=18470', '/episodes.aspx?type=12',
-      '/api/TMDBCache.aspx?action=popular&limit=20', '/api/TMDBCache.aspx?action=movie&id=18470', '/Search.aspx'],
-  },
-  kurdsaz: {
-    start: 'https://kurdsaz.com/',
-    pages: ['https://kurdsaz.com/browse?type=movie', 'https://kurdsaz.com/browse?type=series',
-      'https://kurdsaz.com/details?slug=Crystal-Lake', 'https://kurdsaz.com/details?slug=100-Days-of-Deception',
-      'https://kurdsaz.com/watch?slug=100-Days-of-Deception&ep=899', 'https://kurdsaz.com/search'],
-    ask: ['/', '/browse?type=movie', '/browse?type=series', '/details?slug=Crystal-Lake', '/details?slug=100-Days-of-Deception',
-      '/watch?slug=100-Days-of-Deception&ep=899', '/search?q=spider'],
-  },
-  kartonikurde: {
-    start: 'https://www.kartonikurde.com/',
-    pages: ['https://www.kartonikurde.com/movies', 'https://www.kartonikurde.com/series',
-      'https://www.kartonikurde.com/movie/frozen', 'https://www.kartonikurde.com/serie/grendizer'],
-    ask: ['/', '/movies', '/series', '/movie/frozen', '/serie/grendizer', '/search?q=frozen'],
-  },
-  // The study on the emulator saw these two ask /api/titles/... (Mars Cinema) and api.kurdsubtitle.net/api/v1/...
-  // (Kurd Subtitle); their pages' own requests and scripts say the rest
-  marscinema: {
-    start: 'https://marscinema.net/',
-    pages: ['https://marscinema.net/movies', 'https://marscinema.net/series', 'https://marscinema.net/search?q=spider'],
-    ask: ['/api/titles/live-top', '/api/titles', '/api/titles?type=movie', '/api/titles?type=series',
-      '/api/titles/latest', '/api/search?q=spider'],
-  },
-  kurdsubtitle: {
-    whole: ['/_next/static/chunks/5408-c071d2a30b437863.js', '/_next/static/chunks/3371-1d9f9eeeb6e18d17.js'],
-    // a series' episodes (Lupin's, by its own id and by its address's name), its lists and its search
-    direct: ['https://api.kurdsubtitle.net/api/v1/search?query=spider', 'https://api.kurdsubtitle.net/api/v1/search?query=lupin',
-      'https://api.kurdsubtitle.net/api/v1/movies/779410-The-Paradise', 'https://api.kurdsubtitle.net/api/v1/tvshows/467300-Lupin',
-      'https://api.kurdsubtitle.net/api/v1/tvshows/60005e7b64d2e47956145ba7/seasons/2/episodes',
-      'https://kurdsubtitle.net/movies/779410-The-Paradise', 'https://kurdsubtitle.net/tvshows', 'https://kurdsubtitle.net/'],
-    // its series page's scripts: its episodes come in the viewer's browser, from where they say
-    scripts: ['/_next/static/chunks/0e5ce63c-c8c4232ec35b660a.js',
-      '/_next/static/chunks/1055-295a9ec4eb73d2b7.js',
-      '/_next/static/chunks/1255-a64e6a44d24cb2f6.js',
-      '/_next/static/chunks/1351-eda1d500cabc9c13.js',
-      '/_next/static/chunks/1514-7104fc1d6cd8efb2.js',
-      '/_next/static/chunks/1691-0d641d4ab66863e7.js',
-      '/_next/static/chunks/16dc9863-4a50cf98c2b27890.js',
-      '/_next/static/chunks/1812-508a629d53460619.js',
-      '/_next/static/chunks/191-7bfb387751127963.js',
-      '/_next/static/chunks/2619-df0b05096f172bf7.js',
-      '/_next/static/chunks/2650-46e93507e53e4a62.js',
-      '/_next/static/chunks/2660-2f745528300eb612.js',
-      '/_next/static/chunks/30a37ab2-9b8acb2a07381dd6.js',
-      '/_next/static/chunks/3371-1d9f9eeeb6e18d17.js',
-      '/_next/static/chunks/4347-ae6358066554b45c.js',
-      '/_next/static/chunks/4457-f04e96331eb7917f.js',
-      '/_next/static/chunks/4577-fe0275c9c3d71273.js',
-      '/_next/static/chunks/4628-425c7d358f61801c.js',
-      '/_next/static/chunks/4823-73e9a41fb7720cce.js',
-      '/_next/static/chunks/4988-6de9b8b3c72e8d34.js',
-      '/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js',
-      '/_next/static/chunks/5059-30ebec42879984ef.js',
-      '/_next/static/chunks/5125-6dea62ec41269dc1.js',
-      '/_next/static/chunks/5408-c071d2a30b437863.js',
-      '/_next/static/chunks/5414-5ed60d3ea0e4df99.js',
-      '/_next/static/chunks/5667-030dacfc3b0a8eb9.js',
-      '/_next/static/chunks/5682-f1a55780f73119e2.js',
-      '/_next/static/chunks/5907-cb4bd7186620bc0d.js',
-      '/_next/static/chunks/7913-27c6b82f80a5284c.js',
-      '/_next/static/chunks/8657-5a46d0d1371917b1.js',
-      '/_next/static/chunks/8720-620d52e50cfa914f.js',
-      '/_next/static/chunks/9138-f5ca7413fbbbd050.js',
-      '/_next/static/chunks/94730671-fa9ac1cf0535af1a.js',
-      '/_next/static/chunks/9601-7c72b8044ae1bfe3.js',
-      '/_next/static/chunks/9825-09a8479b7b5c5cec.js',
-      '/_next/static/chunks/a4634e51-c4bd651267baabfd.js',
-      '/_next/static/chunks/app/error-f18ab9f02ef7d458.js',
-      '/_next/static/chunks/app/global-error-d74b955f20861b49.js',
-      '/_next/static/chunks/app/layout-84c9689e2779c953.js',
-      '/_next/static/chunks/app/tvshows/%5Bslug%5D/page-1139efafe0247f5c.js',
-      '/_next/static/chunks/ed9f2dc4-fb9c3f5325ea0485.js',
-      '/_next/static/chunks/f97e080b-a536e50d7fa9f157.js',
-      '/_next/static/chunks/main-app-49958bbb287c729c.js',
-      '/_next/static/chunks/polyfills-42372ed130431b0a.js',
-      '/_next/static/chunks/webpack-37d64f41ae614ed1.js'],
-    start: 'https://kurdsubtitle.net/',
-    pages: ['https://kurdsubtitle.net/movies', 'https://kurdsubtitle.net/series', 'https://kurdsubtitle.net/search?q=spider'],
-    ask: ['https://api.kurdsubtitle.net/api/v1/genres?excludeManga=true',
-      'https://api.kurdsubtitle.net/api/v1/watching/most-watched?limit=3', 'https://api.kurdsubtitle.net/api/v1/movies?limit=3',
-      'https://api.kurdsubtitle.net/api/v1/series?limit=3', 'https://api.kurdsubtitle.net/api/v1/search?q=spider'],
-  },
-};
+const SITES = require('./probe-sites');
 const SITE = SITES[ID];
 const API = /\/(api|wp-json|wp-admin\/admin-ajax|ajax|livewire|graphql|feeds)\b/;
 const KEEP_HEADERS = /^(accept|content-type|x-[\w-]+|authorization|referer)$/i;
@@ -166,7 +48,8 @@ function listen(page) {
 
 async function open(page, name, address) {
   step = name;
-  await page.goto(address, { waitUntil: 'domcontentloaded', timeout: 45000 }).catch((e) => note('goto', e.message.split('\n')[0]));
+  await page.goto(address, { waitUntil: 'domcontentloaded', timeout: 45000, referer: SITE.referer })
+    .catch((e) => note('goto', e.message.split('\n')[0]));
   await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
   await page.waitForTimeout(2500);
   const html = await page.content().catch(() => '');
@@ -185,6 +68,7 @@ async function open(page, name, address) {
   const browser = await chromium.launch();
   const context = await browser.newContext({ viewport: { width: 1280, height: 720 }, userAgent: UA, locale: 'ckb-IQ' });
   const page = await context.newPage();
+  for (const a of SITE.abort || []) await page.route(a, (r) => r.abort());
   listen(page);
   const home = await open(page, '00-start', SITE.start);
   const nonce = (/"nonce"\s*:\s*"(\w+)"/.exec(home) || [])[1] || '';

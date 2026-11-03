@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        site: [krd-watch]
+        site: [vidmoly]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
