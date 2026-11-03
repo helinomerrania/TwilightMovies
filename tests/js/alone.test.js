@@ -53,7 +53,10 @@ module.exports = (async () => {
       await studyListener({ alone: 'kurdsubtitle.net' }, { tab: { id: 9 }, url: 'https://kurdsubtitle.net/movies/y' })], [true, true, false]);
 
   // The page's side, on stand-in pages
-  const P = vm.createContext({ window: {}, location: { host: '' }, Array, setInterval, clearInterval });
+  const timed = [];
+  const scrolled = [];
+  const P = vm.createContext({ window: { scrollY: 900, scrollTo: (x, y) => scrolled.push(y) }, location: { host: '' }, Array,
+    setInterval, clearInterval, setTimeout: (f, ms) => timed.push([f, ms]) });
   P.window.top = P.window;
   vm.runInContext(read('player-steps.js'), P);
   vm.runInContext(read('player-servers.js'), P);
@@ -140,8 +143,14 @@ module.exports = (async () => {
   const frame = E('iframe', { name: 'frame', attrs: { src: 'https://beenar.uns.bio/' }, rect: big });
   const around = E('div', { name: 'around' }, [frame]);
   d = doc([around]);
+  frame.scrollIntoView = (o) => frame.calls.push(['scrollIntoView', o, d.documentElement.hasAttribute('data-tm-alone')]);
   player.isolate(d, frame);
-  check('the player alone: the page, the player and the boxes around it marked; the remote in the player',
-    [d.documentElement.hasAttribute('data-tm-alone'), frame.hasAttribute('data-tm-player'), around.hasAttribute('data-tm-keep'),
-      d.body.hasAttribute('data-tm-keep'), frame.calls[0][0]], [true, true, true, true, 'focus']);
+  check('the player alone: first scrolled into sight where it is (a player may wait till it\'s seen), then the page, the player '
+    + 'and the boxes around it marked; the remote in the player', [frame.calls[0], d.documentElement.hasAttribute('data-tm-alone'),
+    frame.hasAttribute('data-tm-player'), around.hasAttribute('data-tm-keep'), d.body.hasAttribute('data-tm-keep'), frame.calls[1][0]],
+  [['scrollIntoView', { block: 'center' }, false], true, true, true, true, 'focus']);
+  timed.splice(0).forEach(([f]) => f());
+  timed.splice(0).forEach(([f]) => f());
+  check('...and the page scrolled a little and back, three times (a frame is told it\'s in sight when the page scrolls)',
+    scrolled, [899, 899, 899, 900, 900, 900]);
 })();

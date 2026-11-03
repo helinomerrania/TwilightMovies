@@ -80,15 +80,10 @@ up() {
   key KEYCODE_DPAD_UP
   picture "$1-up"
 }
-# A server that fails is passed over by itself (player-ends.js; here every film fails: this emulator plays none)
-visit kurdcinama 'https://kurdcinama.com/online.aspx?movieid=19786#tm-alone'
-sleep 30
-picture kurdcinama-later
-sleep 30
-picture kurdcinama-last
-visit kurd-movie 'https://www.kurd-movie.com/movies/fall-2-deadpoint/#tm-alone'
-sleep 30
-picture kurd-movie-later
+# The player scrolled into sight before it shows alone (a player may wait till it's seen): Kurd Movie's and Kurd
+# Subtitle's are far down their pages. What the players did: in the log.
+visit kurd-movie 'https://www.kurd-movie.com/movies/fall-2-deadpoint/#tm-alone' && up kurd-movie
+visit subtitle-film 'https://kurdsubtitle.net/movies/779410-The-Paradise#tm-alone' && up subtitle-film
 save
 
 kill "$logger" 2> /dev/null

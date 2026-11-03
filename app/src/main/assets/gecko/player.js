@@ -70,9 +70,15 @@ var player = {
     return false;
   },
 
-  // The player alone: it (and what's in it) marked, the boxes around it too (so it can fill the screen), the page
-  // marked; the background script's style (alone.js) does the rest
+  // The player alone: first scrolled into sight where it is on the page (a player in a frame may wait till it's seen
+  // there to play: JW Player's; on Kurd Movie's and Kurd Subtitle's pages it's far down); then it (and what's in it)
+  // marked, the boxes around it too (so it can fill the screen), the page marked: the background script's style
+  // (alone.js) does the rest; and the page scrolled a little and back, now and then (the engine tells a frame it's
+  // in sight when the page scrolls)
   isolate: function (doc, el) {
+    try {
+      el.scrollIntoView({block: 'center'});
+    } catch (e) { /* it stays where it is */ }
     doc.documentElement.setAttribute('data-tm-alone', '');
     el.setAttribute('data-tm-player', '');
     for (var p = el.parentElement; p; p = p.parentElement) p.setAttribute('data-tm-keep', '');
@@ -80,6 +86,13 @@ var player = {
     try {
       into.focus({preventScroll: true});
     } catch (e) { /* not yet */ }
+    [300, 3000, 8000].forEach(function (ms) {   // its player may start later
+      setTimeout(function () {
+        var y = window.scrollY;
+        window.scrollTo(0, y > 0 ? y - 1 : y + 1);
+        setTimeout(function () { window.scrollTo(0, y); }, 150);
+      }, ms);
+    });
   },
 
   // The episode the address asks for (#tm-play=<season>-<episode>), for a website where it's chosen on the page
