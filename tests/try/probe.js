@@ -60,6 +60,21 @@ const SITES = {
       'https://www.kartonikurde.com/movie/frozen', 'https://www.kartonikurde.com/serie/grendizer'],
     ask: ['/', '/movies', '/series', '/movie/frozen', '/serie/grendizer', '/search?q=frozen'],
   },
+  // The study on the emulator saw these two ask /api/titles/... (Mars Cinema) and api.kurdsubtitle.net/api/v1/...
+  // (Kurd Subtitle); their pages' own requests and scripts say the rest
+  marscinema: {
+    start: 'https://marscinema.net/',
+    pages: ['https://marscinema.net/movies', 'https://marscinema.net/series', 'https://marscinema.net/search?q=spider'],
+    ask: ['/api/titles/live-top', '/api/titles', '/api/titles?type=movie', '/api/titles?type=series',
+      '/api/titles/latest', '/api/search?q=spider'],
+  },
+  kurdsubtitle: {
+    start: 'https://kurdsubtitle.net/',
+    pages: ['https://kurdsubtitle.net/movies', 'https://kurdsubtitle.net/series', 'https://kurdsubtitle.net/search?q=spider'],
+    ask: ['https://api.kurdsubtitle.net/api/v1/genres?excludeManga=true',
+      'https://api.kurdsubtitle.net/api/v1/watching/most-watched?limit=3', 'https://api.kurdsubtitle.net/api/v1/movies?limit=3',
+      'https://api.kurdsubtitle.net/api/v1/series?limit=3', 'https://api.kurdsubtitle.net/api/v1/search?q=spider'],
+  },
 };
 const SITE = SITES[ID];
 const API = /\/(api|wp-json|wp-admin\/admin-ajax|ajax|livewire|graphql|feeds)\b/;
