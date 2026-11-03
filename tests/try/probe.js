@@ -70,11 +70,10 @@ const SITES = {
   },
   kurdsubtitle: {
     // a series' episodes (Lupin's, by its own id and by its address's name), its lists and its search
-    direct: ['https://api.kurdsubtitle.net/api/v1/tvshows/60005e7b64d2e47956145ba7/seasons/1/episodes',
-      'https://api.kurdsubtitle.net/api/v1/tvshows/467300-Lupin/seasons/1/episodes',
-      'https://api.kurdsubtitle.net/api/v1/tvshows/60005e7b64d2e47956145ba7', 'https://api.kurdsubtitle.net/api/v1/movies?page=1',
-      'https://api.kurdsubtitle.net/api/v1/tvshows?page=1', 'https://api.kurdsubtitle.net/api/v1/search?q=spider',
-      'https://kurdsubtitle.net/movies', 'https://kurdsubtitle.net/tvshows/467300-Lupin'],
+    direct: ['https://api.kurdsubtitle.net/api/v1/search?query=spider', 'https://api.kurdsubtitle.net/api/v1/search?query=lupin',
+      'https://api.kurdsubtitle.net/api/v1/movies/779410-The-Paradise', 'https://api.kurdsubtitle.net/api/v1/tvshows/467300-Lupin',
+      'https://api.kurdsubtitle.net/api/v1/tvshows/60005e7b64d2e47956145ba7/seasons/2/episodes',
+      'https://kurdsubtitle.net/movies/779410-The-Paradise', 'https://kurdsubtitle.net/tvshows', 'https://kurdsubtitle.net/'],
     // its series page's scripts: its episodes come in the viewer's browser, from where they say
     scripts: ['/_next/static/chunks/0e5ce63c-c8c4232ec35b660a.js',
       '/_next/static/chunks/1055-295a9ec4eb73d2b7.js',
