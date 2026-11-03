@@ -12,11 +12,21 @@ tree() {
   return 1
 }
 
+# A screenshot from the emulator itself (what its screen shows), not from Android: Android making one while
+# Firefox's engine drew a website's player froze the emulator. Android's own only if the emulator gave none.
 shot() {
   n=$((n + 1))
-  local f
+  local f dir
   f=$(printf '%s/%s-%02d-%s' "$OUT" "$NAME" "$n" "$1")
-  timeout 30 adb exec-out screencap -p > "$f.png"
+  dir=$(mktemp -d)
+  timeout 30 adb emu screenrecord screenshot "$dir" > /dev/null 2>&1
+  if ls "$dir"/*.png > /dev/null 2>&1; then
+    mv "$(ls "$dir"/*.png | head -1)" "$f.png"
+  else
+    echo "no screenshot from the emulator: Android's"
+    timeout 30 adb exec-out screencap -p > "$f.png"
+  fi
+  rm -rf "$dir"
   tree && timeout 30 adb shell cat /sdcard/ui.xml > "$f.xml"
   echo "screenshot $f.png"
 }
