@@ -14,6 +14,11 @@ for f in "$DIR"/*; do
   esac
 done
 ls "$STAGE"
-if [ -n "$(ls "$STAGE")" ]; then
-  gh release upload try "$STAGE"/* --clobber
-fi
+[ -n "$(ls "$STAGE")" ] || exit 0
+# GitHub sometimes answers a moment's server error (HTTP 502): the upload is tried again, three times at most
+for attempt in 1 2 3; do
+  gh release upload try "$STAGE"/* --clobber && exit 0
+  echo "the upload didn't go through (try $attempt of 3)"
+  [ "$attempt" -lt 3 ] && sleep 30
+done
+exit 1
