@@ -70,10 +70,10 @@ async function step(out, name, f) {
 
 const short = (list) => (Array.isArray(list) ? { count: list.length, first: list.slice(0, 3) } : list);
 
-// What each website is searched for (one it has); or what's asked when the try is started by hand (SEARCH): then
-// every title found, by its name, year and kind
+// What each website is searched for (one it has); or what's asked when the try is started by hand (SEARCH: words
+// between |, each searched): then every title found for each, as the reader gave it
 const WORD = { kartonikurde: 'frozen', kurdsaz: 'love' };
-const ASKED = process.env.SEARCH || '';
+const ASKED = (process.env.SEARCH || '').split('|').map((w) => w.trim()).filter(Boolean);
 
 async function tryReader(r) {
   site = r.id;
@@ -81,8 +81,13 @@ async function tryReader(r) {
   const rows = await step(out, 'rows', () => r.rows(web));
   if (Array.isArray(rows)) out.rows = rows.map((x) => ({ key: x.key, count: x.items.length, first: x.items.slice(0, 3) }));
   const all = Array.isArray(rows) ? [].concat(...rows.map((x) => x.items)) : [];
-  const found = await step(out, 'search', () => r.search(web, ASKED || WORD[r.id] || 'spider'));
-  out.search = ASKED && Array.isArray(found) ? found.map((x) => [x.title, x.titleKu, x.year, x.kind].filter(Boolean).join(' · ')) : short(found);
+  if (ASKED.length) {
+    out.searched = {};
+    for (const w of ASKED) {
+      out.searched[w] = await step(out, 'search ' + w, () => r.search(web, w));
+      delete out['search ' + w];
+    }
+  } else out.search = short(await step(out, 'search', () => r.search(web, WORD[r.id] || 'spider')));
   const film = all.find((x) => x.kind === 'film');
   const series = all.find((x) => x.kind === 'series');
   if (film) {
