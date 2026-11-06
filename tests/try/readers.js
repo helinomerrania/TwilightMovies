@@ -70,8 +70,10 @@ async function step(out, name, f) {
 
 const short = (list) => (Array.isArray(list) ? { count: list.length, first: list.slice(0, 3) } : list);
 
-// What each website is searched for (one it has)
+// What each website is searched for (one it has); or what's asked when the try is started by hand (SEARCH): then
+// every title found, by its name, year and kind
 const WORD = { kartonikurde: 'frozen', kurdsaz: 'love' };
+const ASKED = process.env.SEARCH || '';
 
 async function tryReader(r) {
   site = r.id;
@@ -79,7 +81,8 @@ async function tryReader(r) {
   const rows = await step(out, 'rows', () => r.rows(web));
   if (Array.isArray(rows)) out.rows = rows.map((x) => ({ key: x.key, count: x.items.length, first: x.items.slice(0, 3) }));
   const all = Array.isArray(rows) ? [].concat(...rows.map((x) => x.items)) : [];
-  out.search = short(await step(out, 'search', () => r.search(web, WORD[r.id] || 'spider')));
+  const found = await step(out, 'search', () => r.search(web, ASKED || WORD[r.id] || 'spider'));
+  out.search = ASKED && Array.isArray(found) ? found.map((x) => [x.title, x.titleKu, x.year, x.kind].filter(Boolean).join(' · ')) : short(found);
   const film = all.find((x) => x.kind === 'film');
   const series = all.find((x) => x.kind === 'series');
   if (film) {
