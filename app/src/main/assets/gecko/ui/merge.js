@@ -1,7 +1,8 @@
 // One title from many websites: the same film or series on two websites is one card, both websites behind it. The
 // same is: TMDB's number, else the name (its letters and numbers, small) and the kind, a year apart at most. What a
-// title shows comes from its websites in their order (the first that has it), in the screens' language; which
-// website plays first, by the viewer's choice (Kurdish subtitles, dubbing or the best picture), then their order.
+// title shows comes from its websites in their order (the first that has it), in the screens' language, its pictures
+// TMDB's first (the original ones); which website plays first, by the viewer's choice (Kurdish subtitles, dubbing or
+// the best picture), then their order.
 'use strict';
 TM.merge = (function () {
   const normal = (t) => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
@@ -57,6 +58,15 @@ TM.merge = (function () {
   const cartoon = (entry) => entry.items.some((x) => (x.genres || []).includes('Animation')
     || (x.genresKu || []).some((g) => /ئەنیم|کارتۆن/.test(g)));
 
+  // A picture of it (the poster, the wide one): TMDB's, the original, as one of its websites gives it (KRD WATCH,
+  // Kurd Movie) or as TMDB itself gave it (pictures.js); else its first website's own
+  const TMDB = /^https:\/\/image\.tmdb\.org\//;
+  function picture(entry, field) {
+    const tmdb = entry.items.map((x) => x[field]).find((v) => TMDB.test(v || ''));
+    const asked = tmdb || !TM.pictures ? null : TM.pictures.known(entry);
+    return tmdb || (asked && asked[field]) || first(entry, field);
+  }
+
   /** What a title shows, in the screens' language L (TM.language). */
   function show(entry, L) {
     const titleKu = first(entry, 'titleKu');
@@ -72,7 +82,7 @@ TM.merge = (function () {
       year: first(entry, 'year'), minutes: first(entry, 'minutes'), rating: first(entry, 'rating'), age: first(entry, 'age'),
       genres: genres.filter((g, i) => genres.indexOf(g) === i).slice(0, 3), overview, tagline: first(entry, 'tagline'),
       overviewDir: /[؀-ۿ]/.test(overview) ? 'rtl' : 'ltr', nameDir: /[؀-ۿ]/.test(name) ? 'rtl' : 'ltr',
-      poster: first(entry, 'poster'), backdrop: first(entry, 'backdrop'), langs,
+      poster: picture(entry, 'poster'), backdrop: picture(entry, 'backdrop'), langs,
       sites: entry.items.map((x) => x.site).filter((s, i, all) => all.indexOf(s) === i).length,
     };
   }

@@ -190,5 +190,7 @@ h1, h2, h3, p { margin: 0; }
 .choice .words span { color: var(--dim); }
 .site .move svg { width: 1.5rem; height: 1.5rem; }
 .choices .brand { font-size: 2.5rem; font-weight: 800; text-align: left; }
+.choices .credit { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; font-size: 1.125rem; color: var(--dim); }
+.choices .credit img { height: 1.25rem; width: auto; }
 [dir="rtl"] .choices .brand, [dir="rtl"] .info .original, [dir="rtl"] .about { text-align: right; }
 [dir="ltr"] .about { text-align: left; }

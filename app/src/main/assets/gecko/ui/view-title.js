@@ -101,8 +101,15 @@ TM.views.title = function (root, site, ref) {
       seen ? h('i', { class: 'seen' }) : null);
   }
 
+  // TMDB's wide picture once it comes (pictures.js: a title none of its websites gives TMDB's for)
+  const original = () => TM.pictures && TM.pictures.want(entry, () => {
+    const b = TM.merge.show(entry, L).backdrop;
+    if (b) pic.style.backgroundImage = 'url(' + JSON.stringify(TM.size(b, 'w1280')) + ')';
+  });
+
   drawInfo();
   drawSeasons();
+  original();
   const last = TM.saved.lastOf(entry);
   TM.focus.want(TM.app.was(), 'watch', last && last.season ? 'ep:' + last.season + ':' + last.episode : '', 'back');
   TM.catalog.title(entry, () => {
@@ -110,5 +117,6 @@ TM.views.title = function (root, site, ref) {
     TM.merge.order(entry, TM.saved.settings());
     drawInfo();
     if (shape() !== drawn) drawSeasons();
+    original();
   }).then(() => TM.saved.keep(entry));
 };

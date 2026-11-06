@@ -19,7 +19,9 @@ TM.views.home = function (root, part) {
     const v = TM.merge.show(e, L);
     const src = TM.merge.sources(e, TM.saved.settings())[0];
     const pic = h('div', { class: 'pic' });
-    pic.style.backgroundImage = 'url(' + JSON.stringify(TM.size(v.backdrop, 'w1280')) + ')';
+    const draw = (b) => { pic.style.backgroundImage = 'url(' + JSON.stringify(TM.size(b, 'w1280')) + ')'; };
+    draw(v.backdrop);
+    if (TM.pictures) TM.pictures.want(e, () => draw(TM.merge.show(e, L).backdrop));   // TMDB's, once it comes
     return h('section', { class: 'hero' }, pic, h('div', { class: 'shade' }),
       h('div', { class: 'info' },
         h('h1', { dir: v.nameDir, text: v.name }),

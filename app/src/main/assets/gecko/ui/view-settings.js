@@ -7,6 +7,7 @@ TM.views.settings = function (root, part) {
   const L = TM.lang;
   const t = L.w;
   const PARTS = ['lang', 'sites', 'first', 'look', 'about'];
+  const TMDB = 'This product uses the TMDB API but is not endorsed or certified by TMDB.';   // in TMDB's words, as it asks
   const COLOURS = { twilight: ['#0C0B1D', '#F4F2FA', '#FFB07A'], midnight: ['#050506', '#F5F5F7', '#FFFFFF'],
     ember: ['#120C09', '#FAF1E8', '#F2B544'] };
   part = PARTS.includes(part) ? part : 'lang';
@@ -51,7 +52,8 @@ TM.views.settings = function (root, part) {
         h('span', { class: 'swatch' }, COLOURS[k].map((c) => { const i = h('i'); i.style.background = c; return i; }))))),
 
     about: () => [h('h2', { dir: 'ltr', class: 'brand', text: 'Twilight Movies' + (TM.app.version ? ' ' + TM.app.version : '') }),
-      h('div', { class: 'note', text: t.adblockOn }), h('div', { class: 'note', text: t.sitesOn(L.num(on.length), L.num(s.order.length)) })],
+      h('div', { class: 'note', text: t.adblockOn }), h('div', { class: 'note', text: t.sitesOn(L.num(on.length), L.num(s.order.length)) }),
+      h('div', { class: 'credit', dir: 'ltr' }, h('img', { src: 'tmdb.svg', alt: 'TMDB' }), h('span', { text: TMDB }))],
   };
 
   const values = { lang: L.ku ? 'کوردی' : 'English', sites: t.onOf(L.num(on.length), L.num(s.order.length)),

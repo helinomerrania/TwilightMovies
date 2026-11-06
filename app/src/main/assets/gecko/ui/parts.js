@@ -54,21 +54,30 @@ TM.parts = (function () {
   const pageOf = (entry) => 'title/' + entry.items[0].site + '/' + encodeURIComponent(entry.items[0].ref);
   const open = (entry) => { TM.saved.keep(entry); TM.app.go(pageOf(entry)); };
 
-  /** A title's card: its poster (wide: its wide picture, its name and a note on it); its name where there's none. */
+  /**
+   * A title's card: its poster (wide: its wide picture, its name and a note on it), TMDB's once it comes
+   * (pictures.js); its name where there's none, or it won't load.
+   */
   function card(entry, k, o) {
     o = o || {};
     const v = TM.merge.show(entry, TM.lang);
-    const src = o.wide ? v.backdrop || v.poster : v.poster;
     const el = h('button', { class: 'card' + (o.wide ? ' wide' : ' tall'), 'data-k': k, 'aria-label': v.name,
       onclick: o.onclick || (() => open(entry)) });
-    const name = h('span', { class: 'name', dir: v.nameDir }, v.name, o.note ? h('span', { class: 'note', text: o.note }) : null);
-    if (src) {
-      const img = h('img', { src: TM.size(src, o.wide ? 'w780' : 'w342'), alt: '', loading: 'lazy', decoding: 'async' });
-      img.addEventListener('error', () => { img.remove(); el.classList.remove('pictured'); });
-      el.classList.add('pictured');
-      el.append(img);
-    }
-    el.append(name);
+    let img = null;
+    const draw = (w) => {
+      const src = o.wide ? w.backdrop || w.poster : w.poster;
+      if (!src) return;
+      if (!img) {
+        const pic = img = h('img', { alt: '', loading: 'lazy', decoding: 'async' });
+        pic.addEventListener('error', () => { pic.remove(); if (img === pic) img = null; el.classList.remove('pictured'); });
+        el.classList.add('pictured');
+        el.prepend(pic);
+      }
+      img.src = TM.size(src, o.wide ? 'w780' : 'w342');
+    };
+    draw(v);
+    el.append(h('span', { class: 'name', dir: v.nameDir }, v.name, o.note ? h('span', { class: 'note', text: o.note }) : null));
+    if (TM.pictures) TM.pictures.want(entry, () => draw(TM.merge.show(entry, TM.lang)));
     return el;
   }
 

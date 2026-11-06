@@ -67,6 +67,23 @@ jobs:
             exit 1
           fi
 
+      - name: Put in the app's keys
+        shell: bash
+        env:
+          TMDB_KEY: ${{ secrets.TMDB_KEY }}
+        run: |
+          # TMDB's key (the project's secret TMDB_KEY: its "API Key", or its "Read Access Token"), for the titles'
+          # original pictures (ui/pictures.js), into ui/keys.js, which is empty in the project
+          key=$(printf '%s' "$TMDB_KEY" | tr -d '[:space:]')
+          if [[ "$key" =~ ^[0-9a-f]{32}$ || "$key" =~ ^eyJ[A-Za-z0-9._-]+$ ]]; then
+            sed -i "s/tmdb: ''/tmdb: '$key'/" app/src/main/assets/gecko/ui/keys.js
+            echo "::notice title=TMDB::TMDB's key is in: every title's poster from TMDB where it has it"
+          elif [ -n "$key" ]; then
+            echo "::warning title=TMDB::The secret TMDB_KEY is neither TMDB's API Key (32 letters and numbers) nor its Read Access Token: not put in"
+          else
+            echo "::notice title=TMDB::No secret TMDB_KEY yet: a title's poster is TMDB's only where one of its websites gives it"
+          fi
+
       - name: Build the APK
         shell: bash
         run: |

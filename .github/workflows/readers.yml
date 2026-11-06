@@ -37,6 +37,11 @@ jobs:
         env:
           SEARCH: ${{ inputs.search }}
         run: node tests/try/readers.js out/readers
+      - name: TMDB's pictures for the websites' titles (with the project's TMDB key)
+        timeout-minutes: 5
+        env:
+          TMDB_KEY: ${{ secrets.TMDB_KEY }}
+        run: node tests/try/pictures.js out/readers
       - name: Every reader read what it should
         run: |
           if grep -q '^FAIL' out/readers/readers.log; then

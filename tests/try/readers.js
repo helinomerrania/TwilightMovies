@@ -1,7 +1,8 @@
 // The app's readers (app/src/main/assets/gecko/ui/readers/) against the live websites, on GitHub's machines (by
 // .github/workflows/readers.yml): each one's home lists, a search, a film and a series in full, a season's
 // episodes and the addresses that play them, as the app's screens would ask. What each gave goes to
-// <site>.json, every address asked (with its answer's start) to asked.txt, the pages (HTML) whole to <site>-page-NN.html,
+// <site>.json (its lists' titles to <site>-titles.json, for tests/try/pictures.js), every address asked (with its
+// answer's start) to asked.txt, the pages (HTML) whole to <site>-page-NN.html,
 // and what went wrong to readers.log (CHECK, not FAIL: the website showed GitHub's machines Cloudflare's check, which
 // says nothing of the reader).
 // Usage: node tests/try/readers.js OUT_DIR [site-id ...]
@@ -81,6 +82,8 @@ async function tryReader(r) {
   const rows = await step(out, 'rows', () => r.rows(web));
   if (Array.isArray(rows)) out.rows = rows.map((x) => ({ key: x.key, count: x.items.length, first: x.items.slice(0, 3) }));
   const all = Array.isArray(rows) ? [].concat(...rows.map((x) => x.items)) : [];
+  fs.writeFileSync(path.join(OUT, r.id + '-titles.json'), JSON.stringify(all.map((x) => TM.item({ site: x.site, ref: x.ref,
+    kind: x.kind, title: x.title, titleKu: x.titleKu, year: x.year, poster: x.poster })), null, 1));   // for pictures.js
   if (ASKED.length) {
     out.searched = {};
     for (const w of ASKED) {
