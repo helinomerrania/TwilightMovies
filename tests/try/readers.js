@@ -19,7 +19,7 @@ const log = [];
       const r = await fetch(u, { headers: { 'User-Agent': UA } });
       const body = Buffer.from(await r.arrayBuffer());
       log.push(r.status + ' ' + body.length + ' ' + u);
-      if (r.ok) fs.writeFileSync(path.join(OUT, 'logo-' + path.basename(u)), body);
+      if (r.ok) fs.writeFileSync(path.join(OUT, 'logo-' + path.basename(u).replace(/-[0-9a-f]{20,}/, '') + '.txt'), body);
     } catch (e) {
       log.push('FAILED ' + u + ' ' + e.message);
     }
